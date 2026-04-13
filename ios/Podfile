@@ -1,0 +1,29 @@
+# Uncomment this line to define a global platform for your project
+platform :ios, '14.0'
+
+# CocoaPods analytics sends network stats synchronously during install.
+# Defaults to false to boost installation speed.
+# For more information, see https://github.com/CocoaPods/CocoaPods/issues/4115
+install! 'cocoapods', :deterministic_uuids => false
+
+# Flutter Pods
+# To learn more about Flutter's Podfile, see https://flutter.dev/to/ios-podfile
+# DO NOT MODIFY THIS TARGET DIRECTLY. Use the 'target' block instead.
+# For more info, see https://guides.cocoapods.org/syntax/podfile.html
+load File.join(File.dirname(__FILE__), 'Flutter', 'podhelper.rb')
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(__FILE__)
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+    end
+  end
+end
