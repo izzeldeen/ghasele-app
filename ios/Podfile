@@ -12,16 +12,25 @@ install! 'cocoapods', :deterministic_uuids => false
 # For more info, see https://guides.cocoapods.org/syntax/podfile.html
 
 def flutter_root
+  # Try environment variable first (standard on build servers like Codemagic)
+  return ENV['FLUTTER_ROOT'] if ENV['FLUTTER_ROOT']
+
+  # Fallback to Generated.xcconfig for local builds
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure \"flutter pub get\" is executed first"
+  if File.exist?(generated_xcode_build_settings_path)
+    File.foreach(generated_xcode_build_settings_path) do |line|
+      matches = line.match(/\AFLUTTER_ROOT=(.*)\z/)
+      return matches[1].strip if matches
+    end
+  end
+  
+  # Final fallback: try to find it via the 'flutter' command
+  flutter_path = `which flutter`.strip
+  if !flutter_path.empty?
+    return File.expand_path(File.join(File.dirname(File.realdirpath(flutter_path)), '..'))
   end
 
-  File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/\AFLUTTER_ROOT=(.*)\z/)
-    return matches[1].strip if matches
-  end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run \"flutter pub get\""
+  raise "FLUTTER_ROOT not found. Please ensure Flutter is in your PATH or set the FLUTTER_ROOT environment variable."
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
