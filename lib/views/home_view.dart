@@ -237,7 +237,7 @@ class HomeViewState extends State<HomeView> {
                   );
                   
                   if (result['success']) {
-                    CustomToast.show(context, message: 'Location saved', type: ToastType.success);
+                    CustomToast.show(context, message: l10n.locationSaved, type: ToastType.success);
                     _fetchUserLocations();
                   } else {
                     CustomToast.show(context, message: 'Failed to save location', type: ToastType.error);

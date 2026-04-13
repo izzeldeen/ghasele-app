@@ -176,5 +176,6 @@
   "both": "غسيل وكوي",
   "promoCode": "كود الخصم",
   "addPromoCode": "إضافة كود خصم",
-  "enterPromoCode": "أدخل الكود هنا"
+  "enterPromoCode": "أدخل الكود هنا",
+  "locationSaved": "تم حفظ الموقع"
 }

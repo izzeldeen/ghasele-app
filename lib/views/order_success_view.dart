@@ -114,7 +114,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   );
 
                   if (result['success']) {
-                    CustomToast.show(context, message: 'Location saved', type: ToastType.success);
+                    CustomToast.show(context, message: l10n.locationSaved, type: ToastType.success);
                     setState(() {
                       _isAlreadySaved = true;
                     });

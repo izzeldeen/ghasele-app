@@ -176,5 +176,6 @@
   "both": "Both",
   "promoCode": "Promo Code",
   "addPromoCode": "Add promo code",
-  "enterPromoCode": "Enter code here"
+  "enterPromoCode": "Enter code here",
+  "locationSaved": "Location saved"
 }
