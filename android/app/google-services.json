@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "343332964757",
+    "project_id": "naqa-7251c",
+    "storage_bucket": "naqa-7251c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343332964757:android:b68841b0047f0bffa64e9c",
+        "android_client_info": {
+          "package_name": "com.kalbouneh.naqa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "343332964757-n4qf31m5b9jphpggg645nivih5m28rf2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalbouneh.naqa",
+            "certificate_hash": "877cf6f9f1361316d6e4d3f9f9145265608a2305"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmnHmhjOPtYwKzVU7JE5aDYYmpgeo_3rM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
