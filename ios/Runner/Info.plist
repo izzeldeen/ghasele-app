@@ -51,5 +51,11 @@
 		<false/>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>We need your location to find the nearest delivery driver and pick up your laundry.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>We need your location to find the nearest delivery driver and pick up your laundry.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>We need your location to find the nearest delivery driver and pick up your laundry.</string>
+		<key>io.flutter.embedded_views_preview</key>
+		<true/>
 	</dict>
 </plist>
