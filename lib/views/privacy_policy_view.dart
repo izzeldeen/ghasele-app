@@ -28,7 +28,7 @@ class PrivacyPolicyView extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryBlue,
+                color: AppTheme.primary,
               ),
             ),
             const SizedBox(height: 16),

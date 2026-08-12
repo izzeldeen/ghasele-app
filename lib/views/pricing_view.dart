@@ -91,12 +91,12 @@ class _PricingViewState extends State<PricingView> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.primaryBlue.withOpacity(0.1),
+                                    color: AppTheme.primary.withOpacity(0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
                                     Icons.dry_cleaning_rounded,
-                                    color: AppTheme.primaryBlue,
+                                    color: AppTheme.primary,
                                     size: 20,
                                   ),
                                 ),
@@ -152,7 +152,7 @@ class _PricingViewState extends State<PricingView> {
           price,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlue,
+            color: AppTheme.primary,
             fontSize: 16,
           ),
         ),

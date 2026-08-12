@@ -544,4 +544,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enterPromoCode => 'أدخل الكود هنا';
+
+  @override
+  String get locationSaved => 'تم حفظ الموقع';
 }

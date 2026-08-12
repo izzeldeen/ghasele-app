@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primaryBlue.withOpacity(0.1)
+              ? AppTheme.primary.withOpacity(0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppTheme.primaryBlue : AppTheme.neutral400,
+              color: isSelected ? AppTheme.primary : AppTheme.neutral400,
               size: 24,
             ),
             const SizedBox(height: 4),
@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? AppTheme.primaryBlue : AppTheme.neutral400,
+                color: isSelected ? AppTheme.primary : AppTheme.neutral400,
               ),
             ),
           ],

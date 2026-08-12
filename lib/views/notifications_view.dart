@@ -140,7 +140,7 @@ class _NotificationsViewState extends State<NotificationsView> {
               onPressed: _markAllRead,
               child: Text(
                 isAr ? 'تحديد الكل كمقروء' : 'Mark all read',
-                style: const TextStyle(color: AppTheme.primaryBlue),
+                style: const TextStyle(color: AppTheme.primary),
               ),
             ),
         ],
@@ -212,24 +212,24 @@ class _NotificationsViewState extends State<NotificationsView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: notification.isRead ? Colors.transparent : AppTheme.primaryBlue.withOpacity(0.1),
+          color: notification.isRead ? Colors.transparent : AppTheme.primary.withOpacity(0.1),
           width: 1,
         ),
       ),
-      color: notification.isRead ? Colors.white : AppTheme.primaryBlue.withOpacity(0.02),
+      color: notification.isRead ? Colors.white : AppTheme.primary.withOpacity(0.02),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: (notification.isRead ? AppTheme.neutral100 : AppTheme.primaryBlue.withOpacity(0.1)),
+            color: (notification.isRead ? AppTheme.neutral100 : AppTheme.primary.withOpacity(0.1)),
             shape: BoxShape.circle,
           ),
           child: Icon(
             notification.title.contains('استلام') || notification.title.contains('Collect')
                 ? Icons.local_shipping_outlined
                 : Icons.inventory_2_outlined,
-            color: notification.isRead ? AppTheme.neutral500 : AppTheme.primaryBlue,
+            color: notification.isRead ? AppTheme.neutral500 : AppTheme.primary,
           ),
         ),
         title: Row(

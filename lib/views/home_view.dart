@@ -17,6 +17,22 @@ class HomeView extends StatefulWidget {
 }
 
 class HomeViewState extends State<HomeView> {
+  /// Hoisted out of build(): the map style is fixed, so rebuilding this JSON
+  /// alongside the GoogleMap widget was pure overhead.
+  static const String _mapStyle = '''
+[
+  {
+    "featureType": "poi",
+    "elementType": "labels.text",
+    "stylers": [{"visibility": "off"}]
+  },
+  {
+    "featureType": "poi.business",
+    "stylers": [{"visibility": "off"}]
+  }
+]
+''';
+
   GoogleMapController? _mapController;
   LatLng _currentPosition = const LatLng(31.9539, 35.9106); // Default: Amman, Jordan
   LatLng _selectedPosition = const LatLng(31.9539, 35.9106);
@@ -99,9 +115,23 @@ class HomeViewState extends State<HomeView> {
       }
 
       // Get current position
+      // Fall back to the last known fix first so the map can render
+      // immediately instead of waiting on the GPS.
+      final Position? lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null && mounted) {
+        final seed = LatLng(lastKnown.latitude, lastKnown.longitude);
+        setState(() {
+          _currentPosition = seed;
+          _selectedPosition = seed;
+        });
+      }
+
+      // timeLimit matters: without it this future never completes when the
+      // device cannot get a fix, leaving the screen stuck on its spinner.
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
         ),
       );
 
@@ -191,8 +221,8 @@ class HomeViewState extends State<HomeView> {
   Future<void> _saveLocation() async {
     final l10n = AppLocalizations.of(context)!;
     final TextEditingController nameController = TextEditingController();
-    
-    showDialog(
+
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.saveLocation),
@@ -250,7 +280,7 @@ class HomeViewState extends State<HomeView> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF025595),
+              backgroundColor: AppTheme.brandGreen,
               foregroundColor: Colors.white,
             ),
             child: Text(l10n.save),
@@ -258,6 +288,10 @@ class HomeViewState extends State<HomeView> {
         ],
       ),
     );
+
+    // Owned by this method rather than the State, so it has to be released
+    // once the dialog closes or every save leaks a controller.
+    nameController.dispose();
   }
 
   Future<void> _getAddressFromLatLng(LatLng position) async {
@@ -314,9 +348,11 @@ class HomeViewState extends State<HomeView> {
   }
 
   void _onCameraMove(CameraPosition position) {
-    setState(() {
-      _selectedPosition = position.target;
-    });
+    // Deliberately not setState: this fires on every camera frame while the
+    // user pans, and nothing in build() reads _selectedPosition. Rebuilding
+    // here re-created the whole map screen ~60 times a second. The visible
+    // address is refreshed from onCameraIdle instead.
+    _selectedPosition = position.target;
   }
 
   void _onCameraIdle() {
@@ -424,7 +460,7 @@ class HomeViewState extends State<HomeView> {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    const Icon(Icons.shopping_cart_checkout_rounded, color: AppTheme.primaryBlue, size: 28),
+                    const Icon(Icons.shopping_cart_checkout_rounded, color: AppTheme.primary, size: 28),
                     const SizedBox(width: 12),
                     Text(
                       l10n.confirmOrder,
@@ -456,12 +492,12 @@ class HomeViewState extends State<HomeView> {
                     },
                     child: Row(
                       children: [
-                        const Icon(Icons.add_circle_outline, color: AppTheme.primaryBlue, size: 20),
+                        const Icon(Icons.add_circle_outline, color: AppTheme.primary, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           l10n.addPromoCode,
                           style: const TextStyle(
-                            color: AppTheme.primaryBlue,
+                            color: AppTheme.primary,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -492,7 +528,7 @@ class HomeViewState extends State<HomeView> {
                         decoration: InputDecoration(
                           hintText: l10n.enterPromoCode,
                           hintStyle: TextStyle(color: AppTheme.neutral400, fontSize: 14),
-                          prefixIcon: const Icon(Icons.sell_outlined, color: AppTheme.primaryBlue, size: 20),
+                          prefixIcon: const Icon(Icons.sell_outlined, color: AppTheme.primary, size: 20),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -504,7 +540,7 @@ class HomeViewState extends State<HomeView> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppTheme.primaryBlue),
+                            borderSide: const BorderSide(color: AppTheme.primary),
                           ),
                         ),
                       ),
@@ -541,7 +577,7 @@ class HomeViewState extends State<HomeView> {
                           _confirmOrder();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryBlue,
+                          backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           elevation: 0,
@@ -589,8 +625,8 @@ class HomeViewState extends State<HomeView> {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppTheme.primaryBlue.withOpacity(0.08),
-                      AppTheme.primaryBlue.withOpacity(0),
+                      AppTheme.primary.withOpacity(0.08),
+                      AppTheme.primary.withOpacity(0),
                     ],
                   ),
                 ),
@@ -606,8 +642,8 @@ class HomeViewState extends State<HomeView> {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppTheme.primaryBlue.withOpacity(0.05),
-                      AppTheme.primaryBlue.withOpacity(0),
+                      AppTheme.primary.withOpacity(0.05),
+                      AppTheme.primary.withOpacity(0),
                     ],
                   ),
                 ),
@@ -623,13 +659,13 @@ class HomeViewState extends State<HomeView> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppTheme.primaryBlue.withOpacity(0.05),
+                        color: AppTheme.primary.withOpacity(0.05),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.location_on_rounded,
                         size: 60,
-                        color: AppTheme.primaryBlue,
+                        color: AppTheme.primary,
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -655,9 +691,9 @@ class HomeViewState extends State<HomeView> {
                       onPressed: _startMap,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 56),
-                        backgroundColor: AppTheme.primaryBlue,
+                        backgroundColor: AppTheme.primary,
                         elevation: 4,
-                        shadowColor: AppTheme.primaryBlue.withOpacity(0.3),
+                        shadowColor: AppTheme.primary.withOpacity(0.3),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -720,13 +756,13 @@ class HomeViewState extends State<HomeView> {
                                         Container(
                                           padding: const EdgeInsets.all(10),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.primaryBlue.withOpacity(0.08),
+                                            color: AppTheme.primary.withOpacity(0.08),
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(
                                             Icons.home_work_rounded,
                                             size: 24,
-                                            color: AppTheme.primaryBlue,
+                                            color: AppTheme.primary,
                                           ),
                                         ),
                                         const SizedBox(width: 16),
@@ -795,19 +831,7 @@ class HomeViewState extends State<HomeView> {
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
             mapToolbarEnabled: false,
-            style: '''
-[
-  {
-    "featureType": "poi",
-    "elementType": "labels.text",
-    "stylers": [{"visibility": "off"}]
-  },
-  {
-    "featureType": "poi.business",
-    "stylers": [{"visibility": "off"}]
-  }
-]
-''',
+            style: _mapStyle,
           ),
 
           // Center Marker
@@ -818,7 +842,7 @@ class HomeViewState extends State<HomeView> {
                 const Icon(
                   Icons.location_on_rounded,
                   size: 48,
-                  color: AppTheme.primaryBlue,
+                  color: AppTheme.primary,
                 ),
                 Container(
                   width: 12,
@@ -866,7 +890,7 @@ class HomeViewState extends State<HomeView> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: l10n.searchLocation,
-                      prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryBlue),
+                      prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
                       suffixIcon: _searchController.text.isNotEmpty 
                         ? IconButton(
                             icon: const Icon(Icons.close_rounded, size: 20),
@@ -906,7 +930,7 @@ class HomeViewState extends State<HomeView> {
                       onPressed: _getCurrentLocation,
                       backgroundColor: Colors.white,
                       elevation: 4,
-                      child: const Icon(Icons.my_location_rounded, color: AppTheme.primaryBlue),
+                      child: const Icon(Icons.my_location_rounded, color: AppTheme.primary),
                     ),
                   ),
                 ),
@@ -933,10 +957,10 @@ class HomeViewState extends State<HomeView> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryBlue.withOpacity(0.08),
+                              color: AppTheme.primary.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.place_rounded, color: AppTheme.primaryBlue),
+                            child: const Icon(Icons.place_rounded, color: AppTheme.primary),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -968,7 +992,7 @@ class HomeViewState extends State<HomeView> {
                           ),
                           IconButton(
                             onPressed: _saveLocation,
-                            icon: const Icon(Icons.bookmark_add_outlined, color: AppTheme.primaryBlue),
+                            icon: const Icon(Icons.bookmark_add_outlined, color: AppTheme.primary),
                           ),
                         ],
                       ),
@@ -977,7 +1001,7 @@ class HomeViewState extends State<HomeView> {
                         onPressed: _hasPendingOrder ? null : _confirmLocation,
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
-                          backgroundColor: AppTheme.primaryBlue,
+                          backgroundColor: AppTheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),

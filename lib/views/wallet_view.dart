@@ -1,3 +1,4 @@
+import 'package:ghasele/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 
@@ -15,7 +16,7 @@ class WalletView extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF025595), Color(0xFF0377C8)],
+              colors: [AppTheme.brandGreen, AppTheme.brandGreenLight],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -50,7 +51,7 @@ class WalletView extends StatelessWidget {
                       label: Text(l10n.addFunds),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF025595),
+                        foregroundColor: AppTheme.brandGreen,
                       ),
                     ),
                   ),
@@ -91,7 +92,7 @@ class WalletView extends StatelessWidget {
         const Divider(),
         _buildTransactionItem(
           icon: Icons.local_laundry_service,
-          iconColor: const Color(0xFF025595),
+          iconColor: AppTheme.brandGreen,
           title: '${l10n.orders} #12345',
           date: '2026-02-05',
           amount: '-45.00 ${l10n.jod}',
@@ -100,7 +101,7 @@ class WalletView extends StatelessWidget {
         const Divider(),
         _buildTransactionItem(
           icon: Icons.local_laundry_service,
-          iconColor: const Color(0xFF025595),
+          iconColor: AppTheme.brandGreen,
           title: '${l10n.orders} #12344',
           date: '2026-02-03',
           amount: '-60.00 ${l10n.jod}',
@@ -118,7 +119,7 @@ class WalletView extends StatelessWidget {
         const Divider(),
         _buildTransactionItem(
           icon: Icons.local_laundry_service,
-          iconColor: const Color(0xFF025595),
+          iconColor: AppTheme.brandGreen,
           title: '${l10n.orders} #12343',
           date: '2026-02-01',
           amount: '-30.00 ${l10n.jod}',

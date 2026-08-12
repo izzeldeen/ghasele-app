@@ -1,3 +1,4 @@
+import 'package:ghasele/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 import 'package:ghasele/services/api_service.dart';
@@ -69,7 +70,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
     final l10n = AppLocalizations.of(context)!;
     final TextEditingController nameController = TextEditingController();
 
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.saveLocation),
@@ -129,7 +130,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF025595),
+              backgroundColor: AppTheme.brandGreen,
               foregroundColor: Colors.white,
             ),
             child: Text(l10n.save),
@@ -137,6 +138,10 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
         ],
       ),
     );
+
+    // Owned by this method rather than the State, so it has to be released
+    // once the dialog closes or every save leaks a controller.
+    nameController.dispose();
   }
 
   @override
@@ -171,7 +176,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF025595),
+                    color: AppTheme.brandGreen,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -191,9 +196,9 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF025595).withOpacity(0.05),
+                      color: AppTheme.brandGreen.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF025595).withOpacity(0.1)),
+                      border: Border.all(color: AppTheme.brandGreen.withOpacity(0.1)),
                     ),
                     child: Column(
                       children: [
@@ -202,7 +207,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: const BoxDecoration(
-                                color: Color(0xFF025595),
+                                color: AppTheme.brandGreen,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.bookmark_add_rounded, color: Colors.white, size: 24),
@@ -217,7 +222,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
-                                      color: Color(0xFF025595),
+                                      color: AppTheme.brandGreen,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -239,7 +244,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                           child: OutlinedButton(
                             onPressed: _isSaving ? null : _saveLocation,
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFF025595)),
+                              side: const BorderSide(color: AppTheme.brandGreen),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
@@ -259,7 +264,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/main', (route) => false, arguments: 0), // Index 0 is Orders
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF025595),
+                      backgroundColor: AppTheme.brandGreen,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -274,7 +279,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   child: Text(
                     l10n.backToHome,
                     style: const TextStyle(
-                      color: Color(0xFF025595),
+                      color: AppTheme.brandGreen,
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),

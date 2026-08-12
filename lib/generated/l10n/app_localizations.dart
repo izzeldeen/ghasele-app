@@ -1159,6 +1159,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter code here'**
   String get enterPromoCode;
+
+  /// No description provided for @locationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Location saved'**
+  String get locationSaved;
 }
 
 class _AppLocalizationsDelegate

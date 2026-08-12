@@ -25,7 +25,7 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryBlue,
+          backgroundColor: AppTheme.primary,
           disabledBackgroundColor: AppTheme.neutral300,
         ),
         child: isLoading
@@ -184,13 +184,13 @@ class EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primaryBlue.withOpacity(0.1),
+                color: AppTheme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 64,
-                color: AppTheme.primaryBlue,
+                color: AppTheme.primary,
               ),
             ),
             const SizedBox(height: 24),
@@ -254,7 +254,7 @@ class IconBox extends StatelessWidget {
   const IconBox({
     super.key,
     required this.icon,
-    this.color = AppTheme.primaryBlue,
+    this.color = AppTheme.primary,
     this.size = 24,
   });
 

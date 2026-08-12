@@ -1,3 +1,4 @@
+import 'package:ghasele/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 
@@ -54,7 +55,7 @@ class OrderFailureView extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF025595),
+                    backgroundColor: AppTheme.brandGreen,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

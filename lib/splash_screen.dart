@@ -1,8 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'theme/app_theme.dart';
+
+/// Cleanyjo splash screen.
+///
+/// Mirrors the brand banner: a soft white field on the left, the signature
+/// green crescent sweeping in from the bottom-right, and drifting bubbles -
+/// with the Cleanyjo logo centred on top.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -10,18 +17,184 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController _ambient;
+  late final AnimationController _intro;
+
+  late final Animation<double> _logoScale;
+  late final Animation<double> _logoFade;
+  late final Animation<double> _taglineFade;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+
+    // Slow, continuously looping motion for the bubbles and crescent.
+    _ambient = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 12),
     )..repeat();
-    _navigateToLogin();
+
+    // One-shot entrance for the logo and tagline.
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+
+    _logoFade = CurvedAnimation(
+      parent: _intro,
+      curve: const Interval(0.0, 0.55, curve: Curves.easeOut),
+    );
+    _logoScale = Tween<double>(begin: 0.82, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _intro,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
+      ),
+    );
+    _taglineFade = CurvedAnimation(
+      parent: _intro,
+      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+    );
+
+    _intro.forward();
+    _navigateNext();
   }
+
+  @override
+  void dispose() {
+    _ambient.dispose();
+    _intro.dispose();
+    super.dispose();
+  }
+
+  Future<void> _navigateNext() async {
+    await Future<void>.delayed(const Duration(seconds: 4));
+    if (!mounted) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (!mounted) return;
+
+    Navigator.pushReplacementNamed(
+      context,
+      (token != null && token.isNotEmpty) ? '/main' : '/login',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Base wash. The centre stays pure white so the transparent logo
+          // blends in seamlessly; the green tint only appears out at the
+          // corners.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 1.0,
+                colors: [Colors.white, Colors.white, AppTheme.brandGreenSurface],
+                stops: [0.0, 0.55, 1.0],
+              ),
+            ),
+          ),
+
+          // Brand crescent + drifting bubbles.
+          AnimatedBuilder(
+            animation: _ambient,
+            builder: (context, _) => CustomPaint(
+              painter: _BrandBackdropPainter(progress: _ambient.value),
+            ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const Spacer(flex: 3),
+
+                // Logo
+                FadeTransition(
+                  opacity: _logoFade,
+                  child: ScaleTransition(
+                    scale: _logoScale,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Image.asset(
+                        'assets/logo/logo-trans.png',
+                        width: 280,
+                        fit: BoxFit.contain,
+                        // Decoding the full 1024x1024 source here competed with
+                        // the entrance animation on the very first frames.
+                        cacheWidth: 896,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Tagline, straight from the brand banner.
+                FadeTransition(
+                  opacity: _taglineFade,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Fresh Clothes, Better Every Day',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(color: AppTheme.brandSlate),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'خدمة غسيل احترافية من باب بيتك لباب بيتك',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: AppTheme.neutral500),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Spacer(flex: 3),
+
+                // Loading indicator
+                FadeTransition(
+                  opacity: _taglineFade,
+                  child: const _BubbleLoader(),
+                ),
+
+                const SizedBox(height: 48),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Three bubbles that rise and fade in sequence - a laundry-native loader.
+class _BubbleLoader extends StatefulWidget {
+  const _BubbleLoader();
+
+  @override
+  State<_BubbleLoader> createState() => _BubbleLoaderState();
+}
+
+class _BubbleLoaderState extends State<_BubbleLoader>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat();
 
   @override
   void dispose() {
@@ -29,146 +202,99 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.dispose();
   }
 
-  _navigateToLogin() async {
-    await Future.delayed(const Duration(seconds: 4), () {});
-    if (mounted) {
-      final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('auth_token');
-      
-      if (token != null && token.isNotEmpty) {
-        Navigator.pushReplacementNamed(context, '/main');
-      } else {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(3, (i) {
+          // Stagger each bubble by a third of the cycle.
+          final t = (_controller.value - (i * 0.2)) % 1.0;
+          final lift = math.sin(t * math.pi);
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Transform.translate(
+              offset: Offset(0, -8 * lift),
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.brandGreen
+                      .withOpacity(0.35 + (0.65 * lift)),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+/// Paints the Cleanyjo crescent and a field of slow-drifting bubbles.
+class _BrandBackdropPainter extends CustomPainter {
+  const _BrandBackdropPainter({required this.progress});
+
+  /// 0..1, loops continuously.
+  final double progress;
+
+  // Relative positions/sizes so the layout holds on any screen.
+  static const _bubbles = <({double dx, double dy, double r, double phase})>[
+    // Kept out toward the edges so none sit mid-bubble under the logo.
+    (dx: 0.10, dy: 0.14, r: 26.0, phase: 0.0),
+    (dx: 0.88, dy: 0.10, r: 16.0, phase: 0.35),
+    (dx: 0.91, dy: 0.72, r: 30.0, phase: 0.6),
+    (dx: 0.07, dy: 0.78, r: 20.0, phase: 0.15),
+    (dx: 0.78, dy: 0.90, r: 13.0, phase: 0.8),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final wave = math.sin(progress * 2 * math.pi);
+
+    // Large green crescent anchored off the bottom-right corner, echoing the
+    // circular green panel in the brand banner.
+    final crescent = Paint()..color = AppTheme.brandGreen.withOpacity(0.10);
+    canvas.drawCircle(
+      Offset(size.width * 1.05, size.height * 0.92 + (10 * wave)),
+      size.width * 0.72,
+      crescent,
+    );
+
+    // Softer slate arc top-left for balance.
+    final slateArc = Paint()..color = AppTheme.brandSlate.withOpacity(0.045);
+    canvas.drawCircle(
+      Offset(-size.width * 0.18, size.height * 0.08 - (12 * wave)),
+      size.width * 0.48,
+      slateArc,
+    );
+
+    // Drifting bubbles.
+    for (final b in _bubbles) {
+      final t = (progress + b.phase) % 1.0;
+      final drift = math.sin(t * 2 * math.pi);
+      final center = Offset(
+        size.width * b.dx + (6 * drift),
+        size.height * b.dy - (14 * drift),
+      );
+
+      canvas.drawCircle(
+        center,
+        b.r,
+        Paint()..color = AppTheme.brandGreen.withOpacity(0.13),
+      );
+      // Highlight dot, mimicking the glossy bubbles in the logo.
+      canvas.drawCircle(
+        center.translate(-b.r * 0.28, -b.r * 0.28),
+        b.r * 0.22,
+        Paint()..color = Colors.white.withOpacity(0.55),
+      );
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    const primaryBlue = Color(0xFF005293);
-    const accentBlue = Color(0xFF00A3FF);
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Modern Abstract Background
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.white, Color(0xFFF0F7FF)],
-                ),
-              ),
-            ),
-          ),
-          
-          // Animated Abstract Circles
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Stack(
-                children: [
-                   _buildAbstractCircle(
-                    top: -100 + (20 * math.sin(_controller.value * 2 * math.pi)),
-                    right: -50,
-                    size: 300,
-                    color: primaryBlue.withOpacity(0.05),
-                  ),
-                  _buildAbstractCircle(
-                    bottom: -150 + (30 * math.cos(_controller.value * 2 * math.pi)),
-                    left: -100,
-                    size: 400,
-                    color: accentBlue.withOpacity(0.03),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo with subtle zoom-in animation
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.8, end: 1.0),
-                  duration: const Duration(milliseconds: 1500),
-                  curve: Curves.easeOutBack,
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: child,
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryBlue.withOpacity(0.1),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/logo/Cleane.png',
-                      height: 160,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 60),
-                
-                // Minimal loading
-                LoadingAnimationWidget.staggeredDotsWave(
-                  color: primaryBlue,
-                  size: 50,
-                ),
-              ],
-            ),
-          ),
-          
-          // Footer branding or version
-          Positioned(
-            bottom: 40,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                "خدمة غسيل احترافية من باب بيتك لباب بيتك",
-                style: TextStyle(
-                  letterSpacing: 1,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: primaryBlue.withOpacity(0.6),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAbstractCircle({double? top, double? bottom, double? left, double? right, required double size, required Color color}) {
-    return Positioned(
-      top: top,
-      bottom: bottom,
-      left: left,
-      right: right,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-        ),
-      ),
-    );
-  }
+  bool shouldRepaint(_BrandBackdropPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

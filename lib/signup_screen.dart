@@ -73,7 +73,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         final fullPhone = '+962$phone';
         
-        debugPrint('SIGNUP REQUEST: phone=$fullPhone, name=${_nameController.text.trim()}, password=${_passwordController.text}');
+        // Never log the password: debugPrint is not stripped from release
+        // builds, so this would write live credentials to the device log.
+        debugPrint('SIGNUP REQUEST: phone=$fullPhone, name=${_nameController.text.trim()}');
 
         final result = await ApiService.signup(
           phoneNumber: fullPhone,
@@ -126,11 +128,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const primaryColor = Color(0xFF005293);
-    const accentColor = Color(0xFF00A3FF);
+    const primaryColor = AppTheme.brandGreen;
+    const accentColor = AppTheme.brandGreenLight;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFDFF),
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           // Abstract Background
@@ -175,9 +177,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // Logo Section
                     Center(
                       child: Image.asset(
-                        'assets/logo/Login-Logo.png',
-                        height: 100, // Balanced size for signup
+                        'assets/logo/logo-trans.png',
+                        height: 120, // Balanced size for signup
                         fit: BoxFit.contain,
+                        // Source is 1024x1024 (~4MB decoded); cap the decode to
+                        // what a 3x screen actually needs at this size.
+                        cacheWidth: 512,
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -360,7 +365,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _buildInputLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF111827)),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.neutral900),
     );
   }
 
@@ -382,7 +387,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         isPassword: isPassword,
         obscure: obscure,
         onToggleVisibility: onToggleVisibility,
-        primaryColor: const Color(0xFF005293),
+        primaryColor: AppTheme.brandGreen,
       ),
       validator: validator,
     );
@@ -417,7 +422,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  OutlineInputBorder _buildBorder({Color color = const Color(0xFFE5E7EB)}) {
+  OutlineInputBorder _buildBorder({Color color = AppTheme.neutral200}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: color, width: 1.5),

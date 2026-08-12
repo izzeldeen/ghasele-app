@@ -28,11 +28,12 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
+		<!-- Portrait only: the login, map and order-flow layouts are designed
+		     for portrait, and shipping an untested landscape layout invites a
+		     Guideline 4.0 (Design) rejection. -->
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
-			<string>UIInterfaceOrientationLandscapeLeft</string>
-			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
@@ -49,13 +50,15 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<!-- When-In-Use only. The app reads location solely while the user is
+		     choosing a pickup point on the map; there is no background location,
+		     geofencing or continuous tracking, so requesting "Always" would be
+		     broader than the feature justifies. -->
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>We need your location to find the nearest delivery driver and pick up your laundry.</string>
-		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>We need your location to find the nearest delivery driver and pick up your laundry.</string>
-		<key>NSLocationAlwaysUsageDescription</key>
-		<string>We need your location to find the nearest delivery driver and pick up your laundry.</string>
-		<key>io.flutter.embedded_views_preview</key>
-		<true/>
+		<string>Cleanyjo uses your location to set your laundry pickup and delivery address on the map.</string>
+		<!-- Standard HTTPS only: no proprietary or non-exempt encryption. Set
+		     here so App Store Connect stops asking on every upload. -->
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 	</dict>
 </plist>

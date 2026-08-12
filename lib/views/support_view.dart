@@ -81,14 +81,14 @@ class _SupportViewState extends State<SupportView> {
       body: _isLoadingTickets
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
               ),
             )
           : _myTickets.isEmpty
               ? _buildEmptyState(l10n)
               : RefreshIndicator(
                   onRefresh: _loadMyTickets,
-                  color: AppTheme.primaryBlue,
+                  color: AppTheme.primary,
                   child: ListView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
                     physics: const BouncingScrollPhysics(),
@@ -125,7 +125,7 @@ class _SupportViewState extends State<SupportView> {
                 ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateToCreateTicket,
-        backgroundColor: AppTheme.primaryBlue,
+        backgroundColor: AppTheme.primary,
         icon: const Icon(Icons.add_rounded),
         label: Text(l10n.newTicket, style: const TextStyle(fontWeight: FontWeight.bold)),
         elevation: 6,
@@ -141,13 +141,13 @@ class _SupportViewState extends State<SupportView> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: AppTheme.primaryBlue.withOpacity(0.05),
+              color: AppTheme.primary.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.support_agent_rounded,
               size: 64,
-              color: AppTheme.primaryBlue,
+              color: AppTheme.primary,
             ),
           ),
           const SizedBox(height: 24),
@@ -442,14 +442,14 @@ class _SupportViewState extends State<SupportView> {
       children: [
         Row(
           children: [
-            const Icon(Icons.reply_rounded, color: AppTheme.primaryBlue, size: 18),
+            const Icon(Icons.reply_rounded, color: AppTheme.primary, size: 18),
             const SizedBox(width: 8),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: AppTheme.primaryBlue,
+                color: AppTheme.primary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -460,9 +460,9 @@ class _SupportViewState extends State<SupportView> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.04),
+            color: AppTheme.primary.withOpacity(0.04),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+            border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
           ),
           child: Text(
             content,
@@ -637,7 +637,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         child: DropdownButton<String>(
                           value: _selectedCategory,
                           isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primaryBlue),
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primary),
                           dropdownColor: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           items: categories.map((cat) {
@@ -648,10 +648,10 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.primaryBlue.withOpacity(0.08),
+                                      color: AppTheme.primary.withOpacity(0.08),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(cat['icon'] as IconData, size: 18, color: AppTheme.primaryBlue),
+                                    child: Icon(cat['icon'] as IconData, size: 18, color: AppTheme.primary),
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
@@ -736,7 +736,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
         child: ElevatedButton(
           onPressed: _isSubmitting ? null : () => _submitTicket(l10n),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primaryBlue,
+            backgroundColor: AppTheme.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 6,
           ),
@@ -772,7 +772,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
+        borderSide: const BorderSide(color: AppTheme.primary, width: 2),
       ),
     );
   }

@@ -221,7 +221,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppTheme.primaryBlue,
+        color: AppTheme.primary,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),

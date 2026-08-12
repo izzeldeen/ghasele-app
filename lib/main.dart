@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +9,9 @@ import 'home_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'splash_screen.dart';
+import 'forgot_password_screen.dart';
+import 'otp_verification_screen.dart';
+import 'reset_password_screen.dart';
 
 import 'views/order_success_view.dart';
 import 'views/order_failure_view.dart';
@@ -18,13 +24,28 @@ import 'theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:ghasele/services/notification_service.dart';
 
+/// Accepts self-signed certificates so a local dev API can be reached over
+/// HTTPS. This is installed in debug builds ONLY - shipping it would disable
+/// certificate validation for every request in production, making the app
+/// trivially interceptable on hostile networks.
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Firebase (will only work if google-services.json/GoogleService-Info.plist are present)
+  if (kDebugMode) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
+
+  // Firebase itself is a local, fast init and messaging depends on it, so it
+  // stays ahead of the first frame.
   try {
     await Firebase.initializeApp();
-    await NotificationService.initialize();
   } catch (e) {
     debugPrint("Firebase initialization failed: $e. Make sure you have added google-services.json to android/app and GoogleService-Info.plist to ios/Runner.");
   }
@@ -35,6 +56,20 @@ void main() async {
       child: const MyApp(),
     ),
   );
+
+  // Notification setup prompts for permission, fetches an FCM token and syncs
+  // it to the backend - all network-bound. Awaiting it before runApp() held the
+  // splash on screen for the duration of those round-trips, so it now runs
+  // after the first frame.
+  unawaited(_initNotifications());
+}
+
+Future<void> _initNotifications() async {
+  try {
+    await NotificationService.initialize();
+  } catch (e) {
+    debugPrint("Notification initialization failed: $e");
+  }
 }
 
 
@@ -65,6 +100,15 @@ class MyApp extends StatelessWidget {
             '/': (_) => const SplashScreen(),
             '/login': (_) => const LoginScreen(),
             '/signup': (_) => const SignUpScreen(),
+            '/forgot-password': (_) => const ForgotPasswordScreen(),
+            '/verify-otp': (context) {
+              final phone = ModalRoute.of(context)?.settings.arguments as String;
+              return OtpVerificationScreen(phoneNumber: phone);
+            },
+            '/reset-password': (context) {
+              final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+              return ResetPasswordScreen(phoneNumber: args['phone'], otp: args['otp']);
+            },
             '/main': (context) {
               final args = ModalRoute.of(context)?.settings.arguments;
               final index = args is int ? args : 2;

@@ -3,8 +3,19 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Production server URL — HTTPS required for App Store / Play Store
-  static const String baseUrl = 'http://65.109.146.40/drycleane/api';
+  // Defaults to production, so a build that forgets the override still points
+  // somewhere real rather than silently failing against localhost.
+  //
+  // Override for local development:
+  //   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5001/api
+  // (10.0.2.2 is the Android emulator's host loopback; note iOS App Transport
+  // Security blocks cleartext HTTP, so a device needs an HTTPS endpoint.)
+  //
+  // The /api suffix is required - controllers are routed at "api/[controller]".
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.cleanyjo.com/api',
+  );
 
   static Future<Map<String, dynamic>> signup({
     required String phoneNumber,
@@ -53,7 +64,7 @@ class ApiService {
           'PhoneNumber': phoneNumber,
           'Password': password,
         }),
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (kDebugMode) print('API LOGIN RESPONSE: ${response.statusCode}');
       if (response.statusCode == 200) {
@@ -68,6 +79,101 @@ class ApiService {
       }
     } catch (e) {
       if (kDebugMode) print('API LOGIN EXCEPTION: $e');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Sends the Apple identity token to the backend, which verifies it with Apple
+  /// and returns the same auth payload as a normal login. [fullName] and [email]
+  /// are only available on the user's first Apple sign-in.
+  static Future<Map<String, dynamic>> signInWithApple({
+    required String identityToken,
+    String? fullName,
+    String? email,
+  }) async {
+    final url = Uri.parse('$baseUrl/auth/apple');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'IdentityToken': identityToken,
+          'FullName': fullName,
+          'Email': email,
+        }),
+      ).timeout(const Duration(seconds: 15));
+
+      if (kDebugMode) print('API APPLE RESPONSE: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        try {
+          final errorData = jsonDecode(response.body);
+          return {'success': false, 'message': errorData['message'] ?? response.body};
+        } catch (_) {
+          return {'success': false, 'message': response.body};
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print('API APPLE EXCEPTION: $e');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> forgotPassword(String phoneNumber) async {
+    final url = Uri.parse('$baseUrl/auth/forgot-password');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'PhoneNumber': phoneNumber}),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': jsonDecode(response.body)['message']};
+      } else {
+        return {'success': false, 'message': jsonDecode(response.body)['message'] ?? response.body};
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp) async {
+    final url = Uri.parse('$baseUrl/auth/verify-otp');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'PhoneNumber': phoneNumber, 'Otp': otp}),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': jsonDecode(response.body)['message']};
+      } else {
+        return {'success': false, 'message': jsonDecode(response.body)['message'] ?? response.body};
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(String phoneNumber, String otp, String newPassword) async {
+    final url = Uri.parse('$baseUrl/auth/reset-password');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'PhoneNumber': phoneNumber,
+          'Otp': otp,
+          'NewPassword': newPassword,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': jsonDecode(response.body)['message']};
+      } else {
+        return {'success': false, 'message': jsonDecode(response.body)['message'] ?? response.body};
+      }
+    } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
   }

@@ -1,5 +1,7 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
@@ -53,7 +55,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         final fullPhone = '+962$phone';
         
-        debugPrint('LOGIN REQUEST: phone=$fullPhone, password=${_passwordController.text}');
+        // Never log the password: debugPrint is not stripped from release
+        // builds, so this would write live credentials to the device log.
+        debugPrint('LOGIN REQUEST: phone=$fullPhone');
 
         final result = await ApiService.login(
           phoneNumber: fullPhone,
@@ -62,31 +66,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (mounted) {
           if (result['success']) {
-            final data = result['data'];
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('auth_token', data['token']);
-            await prefs.setString('user_id', data['id']);
-            await prefs.setString('user_username', data['username'] ?? '');
-            await prefs.setString('user_email', data['email'] ?? '');
-            await prefs.setString('user_fullname', data['fullName'] ?? '');
-            await prefs.setString('user_phone', data['phoneNumber'] ?? '');
-
-            try {
-              await NotificationService.updateToken();
-            } catch (e) {
-              debugPrint('Failed to update FCM token: $e');
-            }
-
-            if (mounted) {
-              CustomToast.show(context,
-                  message: AppLocalizations.of(context)!.loginSuccess,
-                  type: ToastType.success);
-              Navigator.of(context).pushReplacementNamed('/main');
-            }
+            await _handleAuthSuccess(result['data']);
           } else {
             if (mounted) {
+              // Surface the real reason when we have one. Reporting every
+              // failure as "wrong credentials" hid connectivity errors and sent
+              // people chasing a password problem that did not exist.
+              final serverMessage = result['message']?.toString();
               CustomToast.show(context,
-                  message: l10n.invalidCredentials,
+                  message: (serverMessage == null || serverMessage.isEmpty)
+                      ? l10n.invalidCredentials
+                      : serverMessage,
                   type: ToastType.error);
             }
           }
@@ -102,14 +92,89 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// Persists the auth payload and routes into the app. Shared by password and
+  /// Apple sign-in.
+  Future<void> _handleAuthSuccess(dynamic data) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', data['token']);
+    await prefs.setString('user_id', data['id']);
+    await prefs.setString('user_username', data['username'] ?? '');
+    await prefs.setString('user_email', data['email'] ?? '');
+    await prefs.setString('user_fullname', data['fullName'] ?? '');
+    await prefs.setString('user_phone', data['phoneNumber'] ?? '');
+
+    try {
+      await NotificationService.updateToken();
+    } catch (e) {
+      debugPrint('Failed to update FCM token: $e');
+    }
+
+    if (mounted) {
+      CustomToast.show(context,
+          message: AppLocalizations.of(context)!.loginSuccess,
+          type: ToastType.success);
+      Navigator.of(context).pushReplacementNamed('/main');
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _isLoading = true);
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final identityToken = credential.identityToken;
+      if (identityToken == null) {
+        throw Exception('Apple did not return an identity token.');
+      }
+
+      // Apple only sends the name on the very first authorization; join what we get.
+      final fullName = [credential.givenName, credential.familyName]
+          .where((p) => p != null && p.isNotEmpty)
+          .join(' ')
+          .trim();
+
+      final result = await ApiService.signInWithApple(
+        identityToken: identityToken,
+        fullName: fullName.isEmpty ? null : fullName,
+        email: credential.email,
+      );
+
+      if (!mounted) return;
+      if (result['success']) {
+        await _handleAuthSuccess(result['data']);
+      } else {
+        CustomToast.show(context,
+            message: result['message']?.toString() ?? l10n.invalidCredentials,
+            type: ToastType.error);
+      }
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // User tapping "Cancel" is not an error worth surfacing.
+      if (e.code != AuthorizationErrorCode.canceled && mounted) {
+        CustomToast.show(context, message: 'Apple sign-in failed: ${e.message}', type: ToastType.error);
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const primaryColor = Color(0xFF005293);
-    const accentColor = Color(0xFF00A3FF);
+    const primaryColor = AppTheme.brandGreen;
+    const accentColor = AppTheme.brandGreenLight;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFDFF),
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           // Abstract Background Elements
@@ -141,9 +206,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Logo Section
                     Center(
                       child: Image.asset(
-                        'assets/logo/Login-Logo.png',
-                        height: 120, // Slightly larger since the container is gone
+                        'assets/logo/logo-trans.png',
+                        height: 150, // Square lockup: mark stacked over wordmark
                         fit: BoxFit.contain,
+                        // Source is 1024x1024 (~4MB decoded); cap the decode to
+                        // what a 3x screen actually needs at this size.
+                        cacheWidth: 512,
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -210,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          // Forgot Password logic
+                          Navigator.of(context).pushNamed('/forgot-password');
                         },
                         child: Text(
                           l10n.forgotPassword,
@@ -252,6 +320,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                       ),
                     ),
+                    // Sign in with Apple — required by App Store review when
+                    // other third-party sign-in is offered. iOS/macOS only.
+                    if (Platform.isIOS) ...[
+                      const SizedBox(height: 16),
+                      SignInWithAppleButton(
+                        onPressed: _isLoading ? () {} : _signInWithApple,
+                        height: 56,
+                        style: SignInWithAppleButtonStyle.black,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     Center(
                       child: TextButton(
@@ -300,12 +379,12 @@ class _LoginScreenState extends State<LoginScreen> {
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF111827),
+        color: AppTheme.neutral900,
       ),
     );
   }
 
-  OutlineInputBorder _buildBorder({Color color = const Color(0xFFE5E7EB)}) {
+  OutlineInputBorder _buildBorder({Color color = AppTheme.neutral200}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: color, width: 1.5),

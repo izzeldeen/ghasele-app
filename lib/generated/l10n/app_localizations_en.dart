@@ -545,4 +545,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterPromoCode => 'Enter code here';
+
+  @override
+  String get locationSaved => 'Location saved';
 }

@@ -2,25 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Brand Colors
-  static const primaryBlue = Color(0xFF005293);
-  static const primaryLight = Color(0xFF1E7DC1);
-  static const primaryDark = Color(0xFF013A63);
-  static const accentGreen = Color(0xFF73C045);
-  static const accentGreenLight = Color(0xFF8DD855);
-  
-  // Neutral Colors
-  static const neutral50 = Color(0xFFFAFAFA);
-  static const neutral100 = Color(0xFFF5F5F5);
-  static const neutral200 = Color(0xFFE5E5E5);
-  static const neutral300 = Color(0xFFD4D4D4);
-  static const neutral400 = Color(0xFFA3A3A3);
-  static const neutral500 = Color(0xFF737373);
-  static const neutral600 = Color(0xFF525252);
-  static const neutral700 = Color(0xFF404040);
-  static const neutral800 = Color(0xFF262626);
-  static const neutral900 = Color(0xFF171717);
-  
+  // ---------------------------------------------------------------------------
+  // Cleanyjo Brand Colors
+  // Sampled directly from the Cleanyjo logo:
+  //   slate  #414953 - wordmark "Cleany", hanger/shirt mark
+  //   green  #43AD82 - leaf, bubbles, "jo" and the crescent sweep
+  // ---------------------------------------------------------------------------
+  static const brandGreen = Color(0xFF43AD82);
+  static const brandGreenLight = Color(0xFF5EC79B);
+  static const brandGreenDark = Color(0xFF2F8C66);
+  static const brandGreenSurface = Color(0xFFEAF7F1);
+
+  static const brandSlate = Color(0xFF414953);
+  static const brandSlateLight = Color(0xFF5A6472);
+  static const brandSlateDark = Color(0xFF2C333C);
+
+  /// Primary action colour across the app (buttons, active states, links).
+  static const primary = brandGreen;
+  static const primaryLight = brandGreenLight;
+  static const primaryDark = brandGreenDark;
+
+  /// Secondary/contrast colour - headlines, dark surfaces, icons.
+  static const secondary = brandSlate;
+  static const secondaryLight = brandSlateLight;
+  static const secondaryDark = brandSlateDark;
+
+  /// The signature Cleanyjo gradient (used on hero cards and the splash).
+  static const brandGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [brandGreen, brandGreenDark],
+  );
+
+  // Neutral Colors - subtly tinted toward the brand slate so greys sit
+  // naturally next to the logo instead of reading as flat cold grey.
+  static const neutral50 = Color(0xFFF8FAF9);
+  static const neutral100 = Color(0xFFF1F4F3);
+  static const neutral200 = Color(0xFFE3E7E9);
+  static const neutral300 = Color(0xFFCBD2D6);
+  static const neutral400 = Color(0xFF9AA3AC);
+  static const neutral500 = Color(0xFF6E7781);
+  static const neutral600 = Color(0xFF565F69);
+  static const neutral700 = Color(0xFF414953);
+  static const neutral800 = Color(0xFF2C333C);
+  static const neutral900 = Color(0xFF1B2027);
+
   // Semantic Colors
   static const success = Color(0xFF10B981);
   static const warning = Color(0xFFF59E0B);
@@ -28,7 +54,7 @@ class AppTheme {
   static const info = Color(0xFF3B82F6);
   
   // Background
-  static const scaffoldBackground = Color(0xFFFAFAFA);
+  static const scaffoldBackground = neutral50;
   static const cardBackground = Colors.white;
   
   // Text Styles
@@ -141,10 +167,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.light(
-        primary: primaryBlue,
-        primaryContainer: primaryLight,
-        secondary: accentGreen,
-        secondaryContainer: accentGreenLight,
+        primary: AppTheme.primary,
+        primaryContainer: brandGreenSurface,
+        secondary: AppTheme.secondary,
+        secondaryContainer: neutral100,
         surface: cardBackground,
         background: scaffoldBackground,
         error: error,
@@ -185,7 +211,7 @@ class AppTheme {
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryBlue,
+          backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -201,8 +227,8 @@ class AppTheme {
       
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primaryBlue,
-          side: const BorderSide(color: primaryBlue, width: 1.5),
+          foregroundColor: AppTheme.primary,
+          side: const BorderSide(color: AppTheme.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -216,7 +242,7 @@ class AppTheme {
       
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primaryBlue,
+          foregroundColor: AppTheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           textStyle: GoogleFonts.inter(
             fontSize: 14,
@@ -240,7 +266,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryBlue, width: 2),
+          borderSide: const BorderSide(color: AppTheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -268,7 +294,7 @@ class AppTheme {
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
-        selectedItemColor: primaryBlue,
+        selectedItemColor: AppTheme.primary,
         unselectedItemColor: neutral400,
         selectedLabelStyle: GoogleFonts.inter(
           fontSize: 12,
@@ -285,7 +311,7 @@ class AppTheme {
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: neutral100,
-        selectedColor: primaryBlue.withOpacity(0.1),
+        selectedColor: AppTheme.primary.withOpacity(0.1),
         labelStyle: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w500,

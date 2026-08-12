@@ -82,9 +82,9 @@ class OrdersViewState extends State<OrdersView> {
       case 'pending':
         return AppTheme.info;
       case 'assigned':
-        return AppTheme.primaryBlue;
+        return AppTheme.primary;
       case 'collected':
-        return AppTheme.primaryBlue;
+        return AppTheme.primary;
       case 'cleaning':
       case 'inprogress':
         return AppTheme.warning;
@@ -92,7 +92,7 @@ class OrdersViewState extends State<OrdersView> {
       case 'completed':
         return AppTheme.success;
       case 'outfordelivery':
-        return AppTheme.primaryBlue;
+        return AppTheme.primary;
       case 'delivered':
         return AppTheme.success;
       case 'cancelled':
@@ -109,7 +109,7 @@ class OrdersViewState extends State<OrdersView> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
         ),
       );
     }
@@ -120,7 +120,7 @@ class OrdersViewState extends State<OrdersView> {
 
     return RefreshIndicator(
       onRefresh: fetchOrders,
-      color: AppTheme.primaryBlue,
+      color: AppTheme.primary,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         physics: const BouncingScrollPhysics(),
@@ -176,13 +176,13 @@ class OrdersViewState extends State<OrdersView> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: AppTheme.primaryBlue.withOpacity(0.05),
+              color: AppTheme.primary.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.shopping_basket_outlined,
               size: 64,
-              color: AppTheme.primaryBlue,
+              color: AppTheme.primary,
             ),
           ),
           const SizedBox(height: 24),
@@ -306,7 +306,7 @@ class OrdersViewState extends State<OrdersView> {
                     'x${item['quantity']}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryBlue,
+                      color: AppTheme.primary,
                     ),
                   ),
                 ],
@@ -316,7 +316,7 @@ class OrdersViewState extends State<OrdersView> {
               const SizedBox(height: 32),
               Row(
                 children: [
-                  const Icon(Icons.delivery_dining_outlined, size: 20, color: AppTheme.primaryBlue),
+                  const Icon(Icons.delivery_dining_outlined, size: 20, color: AppTheme.primary),
                   const SizedBox(width: 8),
                   Text(
                     l10n.driverName,
@@ -332,14 +332,14 @@ class OrdersViewState extends State<OrdersView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withOpacity(0.05),
+                  color: AppTheme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
-                      child: const Icon(Icons.person, color: AppTheme.primaryBlue),
+                      backgroundColor: AppTheme.primary.withOpacity(0.1),
+                      child: const Icon(Icons.person, color: AppTheme.primary),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -368,7 +368,7 @@ class OrdersViewState extends State<OrdersView> {
                     ),
                     if (order['driverPhoneNumber'] != null)
                       IconButton(
-                        icon: const Icon(Icons.phone_forwarded_outlined, color: AppTheme.primaryBlue),
+                        icon: const Icon(Icons.phone_forwarded_outlined, color: AppTheme.primary),
                         onPressed: () {
                           // Note: url_launcher would be needed here for real calls
                         },
@@ -436,7 +436,7 @@ class OrdersViewState extends State<OrdersView> {
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
-                    color: AppTheme.primaryBlue,
+                    color: AppTheme.primary,
                   ),
                 ),
               ],
@@ -447,7 +447,7 @@ class OrdersViewState extends State<OrdersView> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
+                  backgroundColor: AppTheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -559,7 +559,7 @@ class OrdersViewState extends State<OrdersView> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.delivery_dining_outlined, size: 16, color: AppTheme.primaryBlue),
+                        const Icon(Icons.delivery_dining_outlined, size: 16, color: AppTheme.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -613,7 +613,7 @@ class OrdersViewState extends State<OrdersView> {
                         style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
-                          color: AppTheme.primaryBlue,
+                          color: AppTheme.primary,
                         ),
                       ),
                     ],
