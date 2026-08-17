@@ -17,6 +17,21 @@ class ApiService {
     defaultValue: 'https://api.cleanyjo.com/api',
   );
 
+  /// Language sent to the API as `Accept-Language`, so the backend returns its
+  /// error messages in the user's language. Kept in sync by LocaleProvider;
+  /// defaults to Arabic to match the app's own default locale.
+  static String language = 'ar';
+
+  /// Standard headers for an API call. Pass [token] for authenticated requests,
+  /// and set [json] to false for requests that carry no JSON body.
+  static Map<String, String> _headers({String? token, bool json = true}) {
+    return {
+      if (json) 'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+      'Accept-Language': language,
+    };
+  }
+
   static Future<Map<String, dynamic>> signup({
     required String phoneNumber,
     required String password,
@@ -26,7 +41,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(),
         body: jsonEncode({
           'PhoneNumber': phoneNumber,
           'Password': password,
@@ -59,7 +74,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(),
         body: jsonEncode({
           'PhoneNumber': phoneNumber,
           'Password': password,
@@ -95,7 +110,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(),
         body: jsonEncode({
           'IdentityToken': identityToken,
           'FullName': fullName,
@@ -125,7 +140,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(),
         body: jsonEncode({'PhoneNumber': phoneNumber}),
       );
       if (response.statusCode == 200) {
@@ -143,7 +158,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(),
         body: jsonEncode({'PhoneNumber': phoneNumber, 'Otp': otp}),
       );
       if (response.statusCode == 200) {
@@ -161,7 +176,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(),
         body: jsonEncode({
           'PhoneNumber': phoneNumber,
           'Otp': otp,
@@ -189,10 +204,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
         body: jsonEncode({
           'lat': lat,
           'long': lng,
@@ -223,9 +235,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       if (response.statusCode == 200) {
@@ -246,9 +256,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       if (response.statusCode == 200) {
@@ -272,10 +280,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
         body: jsonEncode({
           'userId': userId,
           'name': name,
@@ -302,9 +307,7 @@ class ApiService {
     try {
       final response = await http.delete(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       if (response.statusCode == 200) {
@@ -329,10 +332,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
         body: jsonEncode({
           'userId': userId,
           'subject': subject,
@@ -360,9 +360,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       if (response.statusCode == 200) {
@@ -382,9 +380,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       if (response.statusCode == 200) {
@@ -414,10 +410,7 @@ class ApiService {
 
       final httpResponse = await http.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
         body: jsonEncode(body),
       );
 
@@ -440,10 +433,7 @@ class ApiService {
     try {
       final response = await http.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
         body: jsonEncode({
           'userId': userId,
           'token': fcmToken,
@@ -465,10 +455,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
       );
 
       if (response.statusCode == 200) {
@@ -486,10 +473,7 @@ class ApiService {
     try {
       final response = await http.patch(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
       );
 
       return {'success': response.statusCode == 200};
@@ -503,10 +487,7 @@ class ApiService {
     try {
       final response = await http.patch(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
       );
 
       return {'success': response.statusCode == 200};
@@ -520,10 +501,7 @@ class ApiService {
     try {
       final response = await http.delete(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
       );
 
       return {'success': response.statusCode == 200};
@@ -537,9 +515,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: _headers(),
       );
 
       if (response.statusCode == 200) {
@@ -558,9 +534,7 @@ class ApiService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       if (response.statusCode == 200) {
@@ -584,10 +558,7 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
         body: jsonEncode({
           'code': code,
           'discountPercentage': discountPercentage,
@@ -611,9 +582,7 @@ class ApiService {
     try {
       final response = await http.delete(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token, json: false),
       );
 
       return {'success': response.statusCode == 200};
@@ -630,10 +599,7 @@ class ApiService {
     try {
       final response = await http.delete(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _headers(token: token),
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
