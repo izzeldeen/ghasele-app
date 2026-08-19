@@ -1165,6 +1165,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location saved'**
   String get locationSaved;
+
+  /// No description provided for @locationOutsideAmman.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a location within Amman, Jordan.'**
+  String get locationOutsideAmman;
 }
 
 class _AppLocalizationsDelegate

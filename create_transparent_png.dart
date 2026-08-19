@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 void main() {
   // 1x1 transparent PNG

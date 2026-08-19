@@ -311,7 +311,7 @@ class OrdersViewState extends State<OrdersView> {
                   ),
                 ],
               ),
-            )).toList(),
+            )),
             if (order['driverName'] != null) ...[
               const SizedBox(height: 32),
               Row(

@@ -177,5 +177,6 @@
   "promoCode": "كود الخصم",
   "addPromoCode": "إضافة كود خصم",
   "enterPromoCode": "أدخل الكود هنا",
-  "locationSaved": "تم حفظ الموقع"
+  "locationSaved": "تم حفظ الموقع",
+  "locationOutsideAmman": "الرجاء اختيار موقع داخل عمّان، الأردن."
 }

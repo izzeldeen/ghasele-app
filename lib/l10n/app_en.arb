@@ -177,5 +177,6 @@
   "promoCode": "Promo Code",
   "addPromoCode": "Add promo code",
   "enterPromoCode": "Enter code here",
-  "locationSaved": "Location saved"
+  "locationSaved": "Location saved",
+  "locationOutsideAmman": "Please select a location within Amman, Jordan."
 }

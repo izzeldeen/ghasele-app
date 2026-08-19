@@ -4,7 +4,7 @@ import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
 
 class PricingView extends StatefulWidget {
-  const PricingView({Key? key}) : super(key: key);
+  const PricingView({super.key});
 
   @override
   State<PricingView> createState() => _PricingViewState();

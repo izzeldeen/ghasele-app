@@ -4,13 +4,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
+import 'package:ghasele/services/amman_boundary_service.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
 import 'package:ghasele/widgets/custom_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   State<HomeView> createState() => HomeViewState();
@@ -34,9 +35,14 @@ class HomeViewState extends State<HomeView> {
 ''';
 
   GoogleMapController? _mapController;
-  LatLng _currentPosition = const LatLng(31.9539, 35.9106); // Default: Amman, Jordan
-  LatLng _selectedPosition = const LatLng(31.9539, 35.9106);
+  LatLng _currentPosition = AmmanBoundaryService.ammanCenter;
+  LatLng _selectedPosition = AmmanBoundaryService.ammanCenter;
   String _selectedAddress = '';
+
+  /// Set while we animate the camera back inside Amman. The correction itself
+  /// fires onCameraIdle again, so without this the handler re-enters and the
+  /// user gets a stutter of repeated nudges and toasts.
+  bool _isCorrectingCamera = false;
   bool _showWelcomeDialog = true;
   bool _isLoading = false; 
   bool _hasPendingOrder = false;
@@ -120,10 +126,15 @@ class HomeViewState extends State<HomeView> {
       final Position? lastKnown = await Geolocator.getLastKnownPosition();
       if (lastKnown != null && mounted) {
         final seed = LatLng(lastKnown.latitude, lastKnown.longitude);
-        setState(() {
-          _currentPosition = seed;
-          _selectedPosition = seed;
-        });
+        // A stale fix from outside the service area would seed the map on a
+        // location the user can never order from, so ignore it and stay on
+        // Amman instead.
+        if (AmmanBoundaryService.isLocationInsideAmman(seed)) {
+          setState(() {
+            _currentPosition = seed;
+            _selectedPosition = seed;
+          });
+        }
       }
 
       // timeLimit matters: without it this future never completes when the
@@ -135,8 +146,15 @@ class HomeViewState extends State<HomeView> {
         ),
       );
 
-      final newPosition = LatLng(position.latitude, position.longitude);
-      
+      final gpsPosition = LatLng(position.latitude, position.longitude);
+
+      // Users outside Amman - travelling, or just over the boundary - still get
+      // a usable map, centred on the service area rather than on a spot that
+      // would be rejected at checkout.
+      final bool isServed =
+          AmmanBoundaryService.isLocationInsideAmman(gpsPosition);
+      final newPosition = isServed ? gpsPosition : AmmanBoundaryService.ammanCenter;
+
       setState(() {
         _currentPosition = newPosition;
         _selectedPosition = newPosition;
@@ -145,8 +163,16 @@ class HomeViewState extends State<HomeView> {
 
       // Animate camera to current location
       _mapController?.animateCamera(
-        CameraUpdate.newLatLngZoom(newPosition, 15),
+        CameraUpdate.newLatLngZoom(newPosition, AmmanBoundaryService.focusZoom),
       );
+
+      if (!isServed && mounted) {
+        CustomToast.show(
+          context,
+          message: AppLocalizations.of(context)!.locationOutsideAmman,
+          type: ToastType.warning,
+        );
+      }
 
       // Get address
       _getAddressFromLatLng(newPosition);
@@ -319,21 +345,52 @@ class HomeViewState extends State<HomeView> {
     if (query.isEmpty) return;
 
     try {
-      List<Location> locations = await locationFromAddress(query);
-      if (locations.isNotEmpty) {
-        final location = locations.first;
-        final newPosition = LatLng(location.latitude, location.longitude);
-        
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLngZoom(newPosition, 15),
-        );
-        
-        setState(() {
-          _selectedPosition = newPosition;
-        });
-        
-        _getAddressFromLatLng(newPosition);
+      // The geocoding plugin wraps the platform geocoders, which take a plain
+      // string and expose no bbox/country/proximity parameters - scoping the
+      // query text is the only bias available. The polygon filter below is what
+      // actually enforces the restriction.
+      final List<Location> locations = await locationFromAddress(
+        AmmanBoundaryService.buildSearchQuery(query),
+      );
+
+      // A scoped query still returns matches elsewhere in Jordan when the name
+      // is ambiguous, so keep only the candidates that land inside Amman.
+      Location? match;
+      for (final Location location in locations) {
+        if (AmmanBoundaryService.isLocationInsideAmman(
+          LatLng(location.latitude, location.longitude),
+        )) {
+          match = location;
+          break;
+        }
       }
+
+      if (!mounted) return;
+
+      if (match == null) {
+        // Distinguishes "no such place" from "that place is outside Amman":
+        // Irbid and Zarqa geocode perfectly well, they are simply not served.
+        CustomToast.show(
+          context,
+          message: locations.isEmpty
+              ? '${AppLocalizations.of(context)!.locationNotFound}: $query'
+              : AppLocalizations.of(context)!.locationOutsideAmman,
+          type: locations.isEmpty ? ToastType.error : ToastType.warning,
+        );
+        return;
+      }
+
+      final newPosition = LatLng(match.latitude, match.longitude);
+
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(newPosition, AmmanBoundaryService.focusZoom),
+      );
+
+      setState(() {
+        _selectedPosition = newPosition;
+      });
+
+      _getAddressFromLatLng(newPosition);
     } catch (e) {
       debugPrint('Error searching location: $e');
       if (mounted) {
@@ -356,11 +413,52 @@ class HomeViewState extends State<HomeView> {
   }
 
   void _onCameraIdle() {
+    // cameraTargetBounds keeps the pin inside the bounding box, but the box has
+    // corners the polygon does not cover, so the gap is closed once panning
+    // settles. Correcting here rather than in onCameraMove is what keeps the
+    // map from fighting the finger mid-drag.
+    if (_isCorrectingCamera) {
+      _isCorrectingCamera = false;
+      _getAddressFromLatLng(_selectedPosition);
+      return;
+    }
+
+    if (!AmmanBoundaryService.isLocationInsideAmman(_selectedPosition)) {
+      final LatLng corrected =
+          AmmanBoundaryService.nearestPointInside(_selectedPosition);
+
+      _isCorrectingCamera = true;
+      _selectedPosition = corrected;
+      _mapController?.animateCamera(CameraUpdate.newLatLng(corrected));
+
+      if (mounted) {
+        CustomToast.show(
+          context,
+          message: AppLocalizations.of(context)!.locationOutsideAmman,
+          type: ToastType.warning,
+        );
+      }
+      return;
+    }
+
     _getAddressFromLatLng(_selectedPosition);
   }
 
   Future<void> _confirmOrder() async {
     final l10n = AppLocalizations.of(context)!;
+
+    // Last line of defence before the coordinates leave the screen. The camera
+    // and search paths already block this, but an order is the only thing that
+    // is expensive to get wrong.
+    if (!AmmanBoundaryService.isLocationInsideAmman(_selectedPosition)) {
+      CustomToast.show(
+        context,
+        message: l10n.locationOutsideAmman,
+        type: ToastType.warning,
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     
     try {
@@ -738,10 +836,27 @@ class HomeViewState extends State<HomeView> {
                                 borderRadius: BorderRadius.circular(16),
                                 child: InkWell(
                                   onTap: () {
+                                    final saved = LatLng(
+                                      location['lat'],
+                                      location['long'],
+                                    );
+                                    // Addresses saved before the service area
+                                    // was restricted can sit outside it, so
+                                    // they are re-checked on use rather than
+                                    // trusted.
+                                    if (!AmmanBoundaryService
+                                        .isLocationInsideAmman(saved)) {
+                                      CustomToast.show(
+                                        context,
+                                        message: l10n.locationOutsideAmman,
+                                        type: ToastType.warning,
+                                      );
+                                      return;
+                                    }
                                     setState(() {
                                       _showWelcomeDialog = false;
-                                      _currentPosition = LatLng(location['lat'], location['long']);
-                                      _selectedPosition = LatLng(location['lat'], location['long']);
+                                      _currentPosition = saved;
+                                      _selectedPosition = saved;
                                     });
                                   },
                                   borderRadius: BorderRadius.circular(16),
@@ -820,8 +935,13 @@ class HomeViewState extends State<HomeView> {
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: _currentPosition,
-              zoom: 15,
+              zoom: AmmanBoundaryService.focusZoom,
             ),
+            // Handled by the map engine itself, so panning stops at the edge
+            // instead of springing back - the polygon's concave parts are then
+            // tidied up in onCameraIdle.
+            cameraTargetBounds: AmmanBoundaryService.cameraTargetBounds,
+            minMaxZoomPreference: AmmanBoundaryService.zoomPreference,
             onMapCreated: (controller) {
               _mapController = controller;
             },

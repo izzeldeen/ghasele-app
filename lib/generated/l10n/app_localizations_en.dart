@@ -548,4 +548,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationSaved => 'Location saved';
+
+  @override
+  String get locationOutsideAmman =>
+      'Please select a location within Amman, Jordan.';
 }

@@ -547,4 +547,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get locationSaved => 'تم حفظ الموقع';
+
+  @override
+  String get locationOutsideAmman => 'الرجاء اختيار موقع داخل عمّان، الأردن.';
 }
