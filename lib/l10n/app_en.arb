@@ -178,5 +178,33 @@
   "addPromoCode": "Add promo code",
   "enterPromoCode": "Enter code here",
   "locationSaved": "Location saved",
-  "locationOutsideAmman": "Please select a location within Amman, Jordan."
+  "locationOutsideAmman": "Please select a location within Amman, Jordan.",
+  "driverCollectionTab": "Collecting",
+  "driverDeliveryTab": "Delivering",
+  "driverNoCollectionTrips": "No collection trips",
+  "driverNoCollectionTripsDesc": "You have no trips to collect from clients right now.",
+  "driverNoDeliveryTrips": "No delivery trips",
+  "driverNoDeliveryTripsDesc": "You have no trips to deliver to clients right now.",
+  "driverCollected": "collected",
+  "driverDelivered": "delivered",
+  "driverReadyForHandover": "Ready for handover",
+  "driverInProgress": "In progress",
+  "driverStops": "Stops",
+  "driverAddItems": "Add items",
+  "driverItemType": "Item type",
+  "driverQuantity": "Qty",
+  "driverSaveAndCollect": "Save items and mark collected",
+  "driverItemsSaved": "Items saved and order collected",
+  "driverAllCollected": "All {count} orders collected",
+  "@driverAllCollected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "driverNavigateToCleaner": "Navigate to dry cleaner",
+  "driverHandOverToCleaner": "Complete trip and send to cleaning",
+  "driverOutForDelivery": "Out for delivery",
+  "driverMarkDelivered": "Mark delivered"
 }

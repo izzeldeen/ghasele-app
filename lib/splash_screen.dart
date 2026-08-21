@@ -76,10 +76,12 @@ class _SplashScreenState extends State<SplashScreen>
     final token = prefs.getString('auth_token');
     if (!mounted) return;
 
-    Navigator.pushReplacementNamed(
-      context,
-      (token != null && token.isNotEmpty) ? '/main' : '/login',
-    );
+    String route = '/login';
+    if (token != null && token.isNotEmpty) {
+      route = prefs.getString('user_role') == 'Driver' ? '/driver-main' : '/main';
+    }
+
+    Navigator.pushReplacementNamed(context, route);
   }
 
   @override

@@ -12,13 +12,36 @@ class OrdersView extends StatefulWidget {
 }
 
 class OrdersViewState extends State<OrdersView> {
+  static const int _pageSize = 20;
+
+  final ScrollController _scrollController = ScrollController();
   List<dynamic> _orders = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _page = 1;
 
   @override
   void initState() {
     super.initState();
     fetchOrders();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_hasMore || _isLoadingMore || _isLoading) return;
+    // Trigger the next page a bit before hitting the physical bottom.
+    final threshold = _scrollController.position.maxScrollExtent - 200;
+    if (_scrollController.position.pixels >= threshold) {
+      _loadMoreOrders();
+    }
   }
 
   Future<void> fetchOrders() async {
@@ -29,13 +52,21 @@ class OrdersViewState extends State<OrdersView> {
 
       if (token == null || userId == null) return;
 
-      final result = await ApiService.getUserOrders(userId: userId, token: token);
+      final result = await ApiService.getUserOrders(
+        userId: userId,
+        token: token,
+        page: 1,
+        pageSize: _pageSize,
+      );
       if (mounted) {
         if (result['success']) {
+          final data = result['data'] as List<dynamic>;
           setState(() {
-            _orders = result['data'];
+            _orders = data;
             // Sort by createdAt descending
             _orders.sort((a, b) => (b['createdAt'] as String).compareTo(a['createdAt'] as String));
+            _page = 1;
+            _hasMore = data.length == _pageSize;
             _isLoading = false;
           });
         } else {
@@ -45,6 +76,43 @@ class OrdersViewState extends State<OrdersView> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _loadMoreOrders() async {
+    setState(() => _isLoadingMore = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final userId = prefs.getString('user_id');
+
+      if (token == null || userId == null) return;
+
+      final nextPage = _page + 1;
+      final result = await ApiService.getUserOrders(
+        userId: userId,
+        token: token,
+        page: nextPage,
+        pageSize: _pageSize,
+      );
+      if (mounted) {
+        if (result['success']) {
+          final data = result['data'] as List<dynamic>;
+          setState(() {
+            _orders.addAll(data);
+            _orders.sort((a, b) => (b['createdAt'] as String).compareTo(a['createdAt'] as String));
+            _page = nextPage;
+            _hasMore = data.length == _pageSize;
+            _isLoadingMore = false;
+          });
+        } else {
+          setState(() => _isLoadingMore = false);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingMore = false);
       }
     }
   }
@@ -122,9 +190,10 @@ class OrdersViewState extends State<OrdersView> {
       onRefresh: fetchOrders,
       color: AppTheme.primary,
       child: ListView.builder(
+        controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         physics: const BouncingScrollPhysics(),
-        itemCount: _orders.length + 1,
+        itemCount: _orders.length + 1 + (_isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
@@ -147,6 +216,21 @@ class OrdersViewState extends State<OrdersView> {
                     ),
                   ),
                 ],
+              ),
+            );
+          }
+          if (index == _orders.length + 1) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                  ),
+                ),
               ),
             );
           }

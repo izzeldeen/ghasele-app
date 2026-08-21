@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'home_screen.dart';
+import 'driver_home_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'splash_screen.dart';
@@ -114,6 +115,7 @@ class MyApp extends StatelessWidget {
               final index = args is int ? args : 2;
               return HomeScreen(initialIndex: index);
             },
+            '/driver-main': (_) => const DriverHomeScreen(),
             '/order-success': (_) => const OrderSuccessView(),
             '/order-failure': (context) {
               final args = ModalRoute.of(context)?.settings.arguments as String?;

@@ -178,5 +178,33 @@
   "addPromoCode": "إضافة كود خصم",
   "enterPromoCode": "أدخل الكود هنا",
   "locationSaved": "تم حفظ الموقع",
-  "locationOutsideAmman": "الرجاء اختيار موقع داخل عمّان، الأردن."
+  "locationOutsideAmman": "الرجاء اختيار موقع داخل عمّان، الأردن.",
+  "driverCollectionTab": "الاستلام",
+  "driverDeliveryTab": "التوصيل",
+  "driverNoCollectionTrips": "لا توجد رحلات استلام",
+  "driverNoCollectionTripsDesc": "ليس لديك رحلات لاستلامها من العملاء حالياً.",
+  "driverNoDeliveryTrips": "لا توجد رحلات توصيل",
+  "driverNoDeliveryTripsDesc": "ليس لديك رحلات لتوصيلها للعملاء حالياً.",
+  "driverCollected": "تم الاستلام",
+  "driverDelivered": "تم التوصيل",
+  "driverReadyForHandover": "جاهزة للتسليم",
+  "driverInProgress": "قيد التنفيذ",
+  "driverStops": "المحطات",
+  "driverAddItems": "إضافة العناصر",
+  "driverItemType": "نوع العنصر",
+  "driverQuantity": "الكمية",
+  "driverSaveAndCollect": "حفظ العناصر وتحديد كمُستلم",
+  "driverItemsSaved": "تم حفظ العناصر واستلام الطلب",
+  "driverAllCollected": "تم استلام جميع الطلبات ({count})",
+  "@driverAllCollected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "driverNavigateToCleaner": "التوجه إلى المغسلة",
+  "driverHandOverToCleaner": "إنهاء الرحلة وإرسالها للتنظيف",
+  "driverOutForDelivery": "خارج للتوصيل",
+  "driverMarkDelivered": "تحديد كتم التوصيل"
 }

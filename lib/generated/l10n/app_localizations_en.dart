@@ -552,4 +552,71 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationOutsideAmman =>
       'Please select a location within Amman, Jordan.';
+
+  @override
+  String get driverCollectionTab => 'Collecting';
+
+  @override
+  String get driverDeliveryTab => 'Delivering';
+
+  @override
+  String get driverNoCollectionTrips => 'No collection trips';
+
+  @override
+  String get driverNoCollectionTripsDesc =>
+      'You have no trips to collect from clients right now.';
+
+  @override
+  String get driverNoDeliveryTrips => 'No delivery trips';
+
+  @override
+  String get driverNoDeliveryTripsDesc =>
+      'You have no trips to deliver to clients right now.';
+
+  @override
+  String get driverCollected => 'collected';
+
+  @override
+  String get driverDelivered => 'delivered';
+
+  @override
+  String get driverReadyForHandover => 'Ready for handover';
+
+  @override
+  String get driverInProgress => 'In progress';
+
+  @override
+  String get driverStops => 'Stops';
+
+  @override
+  String get driverAddItems => 'Add items';
+
+  @override
+  String get driverItemType => 'Item type';
+
+  @override
+  String get driverQuantity => 'Qty';
+
+  @override
+  String get driverSaveAndCollect => 'Save items and mark collected';
+
+  @override
+  String get driverItemsSaved => 'Items saved and order collected';
+
+  @override
+  String driverAllCollected(int count) {
+    return 'All $count orders collected';
+  }
+
+  @override
+  String get driverNavigateToCleaner => 'Navigate to dry cleaner';
+
+  @override
+  String get driverHandOverToCleaner => 'Complete trip and send to cleaning';
+
+  @override
+  String get driverOutForDelivery => 'Out for delivery';
+
+  @override
+  String get driverMarkDelivered => 'Mark delivered';
 }

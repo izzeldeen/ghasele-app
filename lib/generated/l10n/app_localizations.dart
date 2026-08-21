@@ -1171,6 +1171,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a location within Amman, Jordan.'**
   String get locationOutsideAmman;
+
+  /// No description provided for @driverCollectionTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting'**
+  String get driverCollectionTab;
+
+  /// No description provided for @driverDeliveryTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering'**
+  String get driverDeliveryTab;
+
+  /// No description provided for @driverNoCollectionTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'No collection trips'**
+  String get driverNoCollectionTrips;
+
+  /// No description provided for @driverNoCollectionTripsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no trips to collect from clients right now.'**
+  String get driverNoCollectionTripsDesc;
+
+  /// No description provided for @driverNoDeliveryTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'No delivery trips'**
+  String get driverNoDeliveryTrips;
+
+  /// No description provided for @driverNoDeliveryTripsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no trips to deliver to clients right now.'**
+  String get driverNoDeliveryTripsDesc;
+
+  /// No description provided for @driverCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'collected'**
+  String get driverCollected;
+
+  /// No description provided for @driverDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'delivered'**
+  String get driverDelivered;
+
+  /// No description provided for @driverReadyForHandover.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for handover'**
+  String get driverReadyForHandover;
+
+  /// No description provided for @driverInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get driverInProgress;
+
+  /// No description provided for @driverStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops'**
+  String get driverStops;
+
+  /// No description provided for @driverAddItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items'**
+  String get driverAddItems;
+
+  /// No description provided for @driverItemType.
+  ///
+  /// In en, this message translates to:
+  /// **'Item type'**
+  String get driverItemType;
+
+  /// No description provided for @driverQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get driverQuantity;
+
+  /// No description provided for @driverSaveAndCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save items and mark collected'**
+  String get driverSaveAndCollect;
+
+  /// No description provided for @driverItemsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Items saved and order collected'**
+  String get driverItemsSaved;
+
+  /// No description provided for @driverAllCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} orders collected'**
+  String driverAllCollected(int count);
+
+  /// No description provided for @driverNavigateToCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate to dry cleaner'**
+  String get driverNavigateToCleaner;
+
+  /// No description provided for @driverHandOverToCleaner.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete trip and send to cleaning'**
+  String get driverHandOverToCleaner;
+
+  /// No description provided for @driverOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get driverOutForDelivery;
+
+  /// No description provided for @driverMarkDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark delivered'**
+  String get driverMarkDelivered;
 }
 
 class _AppLocalizationsDelegate

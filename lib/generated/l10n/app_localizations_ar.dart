@@ -550,4 +550,71 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get locationOutsideAmman => 'الرجاء اختيار موقع داخل عمّان، الأردن.';
+
+  @override
+  String get driverCollectionTab => 'الاستلام';
+
+  @override
+  String get driverDeliveryTab => 'التوصيل';
+
+  @override
+  String get driverNoCollectionTrips => 'لا توجد رحلات استلام';
+
+  @override
+  String get driverNoCollectionTripsDesc =>
+      'ليس لديك رحلات لاستلامها من العملاء حالياً.';
+
+  @override
+  String get driverNoDeliveryTrips => 'لا توجد رحلات توصيل';
+
+  @override
+  String get driverNoDeliveryTripsDesc =>
+      'ليس لديك رحلات لتوصيلها للعملاء حالياً.';
+
+  @override
+  String get driverCollected => 'تم الاستلام';
+
+  @override
+  String get driverDelivered => 'تم التوصيل';
+
+  @override
+  String get driverReadyForHandover => 'جاهزة للتسليم';
+
+  @override
+  String get driverInProgress => 'قيد التنفيذ';
+
+  @override
+  String get driverStops => 'المحطات';
+
+  @override
+  String get driverAddItems => 'إضافة العناصر';
+
+  @override
+  String get driverItemType => 'نوع العنصر';
+
+  @override
+  String get driverQuantity => 'الكمية';
+
+  @override
+  String get driverSaveAndCollect => 'حفظ العناصر وتحديد كمُستلم';
+
+  @override
+  String get driverItemsSaved => 'تم حفظ العناصر واستلام الطلب';
+
+  @override
+  String driverAllCollected(int count) {
+    return 'تم استلام جميع الطلبات ($count)';
+  }
+
+  @override
+  String get driverNavigateToCleaner => 'التوجه إلى المغسلة';
+
+  @override
+  String get driverHandOverToCleaner => 'إنهاء الرحلة وإرسالها للتنظيف';
+
+  @override
+  String get driverOutForDelivery => 'خارج للتوصيل';
+
+  @override
+  String get driverMarkDelivered => 'تحديد كتم التوصيل';
 }

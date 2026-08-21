@@ -166,14 +166,6 @@ class HomeViewState extends State<HomeView> {
         CameraUpdate.newLatLngZoom(newPosition, AmmanBoundaryService.focusZoom),
       );
 
-      if (!isServed && mounted) {
-        CustomToast.show(
-          context,
-          message: AppLocalizations.of(context)!.locationOutsideAmman,
-          type: ToastType.warning,
-        );
-      }
-
       // Get address
       _getAddressFromLatLng(newPosition);
     } catch (e) {
@@ -274,8 +266,20 @@ class HomeViewState extends State<HomeView> {
           ElevatedButton(
             onPressed: () async {
               if (nameController.text.isEmpty) return;
+
+              // The only path that persists coordinates without a service-area
+              // check. The camera correction usually gets here first, but a
+              // position seeded from GPS or a saved address can still reach
+              // this dialog uncorrected, and a stored out-of-area address then
+              // fails much later, at order time.
+              if (!AmmanBoundaryService
+                  .isLocationInsideAmman(_selectedPosition)) {
+                Navigator.of(context).pop();
+                return;
+              }
+
               Navigator.of(context).pop();
-              
+
               setState(() => _isLoading = true);
               
               try {
@@ -368,15 +372,17 @@ class HomeViewState extends State<HomeView> {
       if (!mounted) return;
 
       if (match == null) {
-        // Distinguishes "no such place" from "that place is outside Amman":
-        // Irbid and Zarqa geocode perfectly well, they are simply not served.
-        CustomToast.show(
-          context,
-          message: locations.isEmpty
-              ? '${AppLocalizations.of(context)!.locationNotFound}: $query'
-              : AppLocalizations.of(context)!.locationOutsideAmman,
-          type: locations.isEmpty ? ToastType.error : ToastType.warning,
-        );
+        // "Not found" still gets a toast - that's a real error about the
+        // search itself. A match that simply lands outside Amman is silent:
+        // Irbid and Zarqa geocode perfectly well, they are just not served,
+        // and that case isn't shown to the user at all.
+        if (locations.isEmpty) {
+          CustomToast.show(
+            context,
+            message: '${AppLocalizations.of(context)!.locationNotFound}: $query',
+            type: ToastType.error,
+          );
+        }
         return;
       }
 
@@ -427,17 +433,11 @@ class HomeViewState extends State<HomeView> {
       final LatLng corrected =
           AmmanBoundaryService.nearestPointInside(_selectedPosition);
 
+      // Corrects the pin silently - no warning shown, the map just settles
+      // back inside the service area on its own.
       _isCorrectingCamera = true;
       _selectedPosition = corrected;
       _mapController?.animateCamera(CameraUpdate.newLatLng(corrected));
-
-      if (mounted) {
-        CustomToast.show(
-          context,
-          message: AppLocalizations.of(context)!.locationOutsideAmman,
-          type: ToastType.warning,
-        );
-      }
       return;
     }
 
@@ -449,13 +449,9 @@ class HomeViewState extends State<HomeView> {
 
     // Last line of defence before the coordinates leave the screen. The camera
     // and search paths already block this, but an order is the only thing that
-    // is expensive to get wrong.
+    // is expensive to get wrong. Silent, like the other checks - just refuses
+    // to proceed rather than surfacing a warning.
     if (!AmmanBoundaryService.isLocationInsideAmman(_selectedPosition)) {
-      CustomToast.show(
-        context,
-        message: l10n.locationOutsideAmman,
-        type: ToastType.warning,
-      );
       return;
     }
 
@@ -495,10 +491,28 @@ class HomeViewState extends State<HomeView> {
             'address': _selectedAddress,
           });
         } else {
-          String errorMessage = result['message'] ?? l10n.orderFailed;
-          if (errorMessage.contains("already have a pending order")) {
-            errorMessage = l10n.hasPendingOrder;
+          // A stale token still passes the null check above, so an expired
+          // session only shows up here as a 401 with an empty body.
+          if (result['statusCode'] == 401) {
+            await prefs.remove('auth_token');
+            await prefs.remove('user_id');
+            if (!mounted) return;
+            CustomToast.show(
+              context,
+              message: 'User session expired. Please login again.',
+              type: ToastType.error,
+            );
+            Navigator.of(context).pushReplacementNamed('/login');
+            return;
           }
+
+          // Branch on the error code, not the message: the API localizes its
+          // text to the Accept-Language we send, so matching English prose
+          // never fires for an Arabic user.
+          final String errorMessage = result['errorCode'] == 'order.pending_exists'
+              ? l10n.hasPendingOrder
+              : (result['message'] ?? l10n.orderFailed);
+
           Navigator.of(context).pushNamed(
             '/order-failure',
             arguments: errorMessage,
@@ -846,11 +860,6 @@ class HomeViewState extends State<HomeView> {
                                     // trusted.
                                     if (!AmmanBoundaryService
                                         .isLocationInsideAmman(saved)) {
-                                      CustomToast.show(
-                                        context,
-                                        message: l10n.locationOutsideAmman,
-                                        type: ToastType.warning,
-                                      );
                                       return;
                                     }
                                     setState(() {
@@ -1122,6 +1131,8 @@ class HomeViewState extends State<HomeView> {
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
                           backgroundColor: AppTheme.primary,
+                          disabledBackgroundColor: AppTheme.neutral300,
+                          disabledForegroundColor: AppTheme.neutral500,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),

@@ -102,6 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.setString('user_email', data['email'] ?? '');
     await prefs.setString('user_fullname', data['fullName'] ?? '');
     await prefs.setString('user_phone', data['phoneNumber'] ?? '');
+    final role = data['role'] ?? 'Client';
+    await prefs.setString('user_role', role);
 
     try {
       await NotificationService.updateToken();
@@ -110,10 +112,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (mounted) {
-      CustomToast.show(context,
-          message: AppLocalizations.of(context)!.loginSuccess,
-          type: ToastType.success);
-      Navigator.of(context).pushReplacementNamed('/main');
+      // No success toast: landing on the home screen already confirms the
+      // login, and the toast only delayed that with something to dismiss.
+      Navigator.of(context)
+          .pushReplacementNamed(role == 'Driver' ? '/driver-main' : '/main');
     }
   }
 

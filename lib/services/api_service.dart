@@ -32,6 +32,43 @@ class ApiService {
     };
   }
 
+  /// Decodes a failed response into a uniform result.
+  ///
+  /// The API reports errors as `{statusCode, errorCode, message}`, but two cases
+  /// carry no usable body at all: a 401 from the auth middleware is empty, and
+  /// an infrastructure failure can return HTML. Callers need [statusCode] and
+  /// [errorCode] to branch on - matching on [message] is unsafe because the text
+  /// is localized to whatever `Accept-Language` was sent.
+  static Map<String, dynamic> _errorResult(http.Response response) {
+    String? errorCode;
+    String? message;
+
+    if (response.body.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          errorCode = decoded['errorCode'] as String?;
+          message = decoded['message'] as String?;
+        }
+      } catch (_) {
+        // Not JSON - keep the raw body, it is the only diagnostic we have.
+        message = response.body;
+      }
+    }
+
+    if (kDebugMode) {
+      print('API ERROR ${response.statusCode} '
+          '${response.request?.url} code=$errorCode body=${response.body}');
+    }
+
+    return {
+      'success': false,
+      'statusCode': response.statusCode,
+      'errorCode': errorCode,
+      'message': (message != null && message.isNotEmpty) ? message : null,
+    };
+  }
+
   static Future<Map<String, dynamic>> signup({
     required String phoneNumber,
     required String password,
@@ -217,11 +254,10 @@ class ApiService {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': response.body};
       }
+      return _errorResult(response);
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
@@ -230,8 +266,10 @@ class ApiService {
   static Future<Map<String, dynamic>> getUserOrders({
     required String userId,
     required String token,
+    int page = 1,
+    int pageSize = 20,
   }) async {
-    final url = Uri.parse('$baseUrl/orders/user/$userId');
+    final url = Uri.parse('$baseUrl/orders/user/$userId?page=$page&pageSize=$pageSize');
     try {
       final response = await http.get(
         url,
@@ -604,6 +642,148 @@ class ApiService {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return {'success': true};
+      } else {
+        try {
+          final errorData = jsonDecode(response.body);
+          return {'success': false, 'message': errorData['message'] ?? response.body};
+        } catch (_) {
+          return {'success': false, 'message': response.body};
+        }
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Driver trip APIs
+  /// Trips assigned to the calling driver. The app buckets these into the
+  /// collection / delivery tabs client-side by `status`, same as the admin
+  /// dashboard - there is no separate trip "type" field.
+  static Future<Map<String, dynamic>> getMyTrips({required String token}) async {
+    final url = Uri.parse('$baseUrl/Trips/my');
+    try {
+      final response = await http.get(
+        url,
+        headers: _headers(token: token, json: false),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        return {'success': false, 'message': response.body};
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> addOrderItems({
+    required String orderId,
+    required List<Map<String, dynamic>> items,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/orders/$orderId/items');
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers(token: token),
+        body: jsonEncode({'items': items}),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        return {'success': false, 'message': response.body};
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> collectOrder({
+    required String orderId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/Trips/orders/$orderId/collect');
+    try {
+      final response = await http.post(url, headers: _headers(token: token, json: false));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        try {
+          final errorData = jsonDecode(response.body);
+          return {'success': false, 'message': errorData['message'] ?? response.body};
+        } catch (_) {
+          return {'success': false, 'message': response.body};
+        }
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> deliverToCleaner({
+    required String tripId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/Trips/$tripId/deliver-to-cleaner');
+    try {
+      final response = await http.post(url, headers: _headers(token: token, json: false));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        try {
+          final errorData = jsonDecode(response.body);
+          return {'success': false, 'message': errorData['message'] ?? response.body};
+        } catch (_) {
+          return {'success': false, 'message': response.body};
+        }
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateOrderStatus({
+    required String orderId,
+    required String status,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/Trips/orders/$orderId/status');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers(token: token),
+        body: jsonEncode(status),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        try {
+          final errorData = jsonDecode(response.body);
+          return {'success': false, 'message': errorData['message'] ?? response.body};
+        } catch (_) {
+          return {'success': false, 'message': response.body};
+        }
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> deliverOrder({
+    required String orderId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/Trips/orders/$orderId/deliver');
+    try {
+      final response = await http.post(url, headers: _headers(token: token, json: false));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
       } else {
         try {
           final errorData = jsonDecode(response.body);
