@@ -23,6 +23,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  /// Temporarily hidden for this iOS build. Not required by App Store
+  /// guideline 4.8 since no other third-party sign-in is offered.
+  static const bool _appleSignInEnabled = false;
+
   @override
   void dispose() {
     _phoneController.dispose();
@@ -274,20 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (v) => v == null || v.length < 6 ? l10n.minCharacters : null,
                     ),
-                    
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/forgot-password');
-                        },
-                        child: Text(
-                          l10n.forgotPassword,
-                          style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
+
                     const SizedBox(height: 32),
 
                     // Sign In Button
@@ -322,9 +313,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                       ),
                     ),
-                    // Sign in with Apple — required by App Store review when
-                    // other third-party sign-in is offered. iOS/macOS only.
-                    if (Platform.isIOS) ...[
+                    // Sign in with Apple — only shown when explicitly enabled
+                    // above. iOS/macOS only.
+                    if (Platform.isIOS && _appleSignInEnabled) ...[
                       const SizedBox(height: 16),
                       SignInWithAppleButton(
                         onPressed: _isLoading ? () {} : _signInWithApple,
