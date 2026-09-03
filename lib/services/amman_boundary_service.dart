@@ -32,6 +32,14 @@ class AmmanBoundaryService {
     LatLng(32.0600, 35.8200), // back up towards Abu Nsair
   ];
 
+  /// Whether ordering is restricted to the Amman polygon.
+  ///
+  /// Turned off by product decision: customers may now pick any location. While false the
+  /// map pans anywhere, zooms out past the governorate, searches are not rewritten to
+  /// ", Amman, Jordan", and the silent snap-back that pulled the pin home is inert.
+  /// The polygon and its helpers are left intact so this is a one-line reversal.
+  static const bool enforceServiceArea = false;
+
   /// Downtown Amman - the camera target before any GPS fix arrives.
   static const LatLng ammanCenter = LatLng(31.9539, 35.9106);
 
@@ -47,11 +55,17 @@ class AmmanBoundaryService {
   /// it cannot drift away from the polygon when the polygon is edited.
   static final LatLngBounds ammanBounds = _computeBounds();
 
-  static final CameraTargetBounds cameraTargetBounds =
-      CameraTargetBounds(ammanBounds);
+  /// Unbounded while the service area is off - a bounded camera stops the pan at the box
+  /// edge, which reads as a frozen map rather than a refusal.
+  static final CameraTargetBounds cameraTargetBounds = enforceServiceArea
+      ? CameraTargetBounds(ammanBounds)
+      : CameraTargetBounds.unbounded;
 
-  static const MinMaxZoomPreference zoomPreference =
-      MinMaxZoomPreference(minZoom, maxZoom);
+  /// minZoom 11 exists to keep neighbouring governorates off screen. With the restriction
+  /// lifted that only prevents zooming out far enough to reach another city.
+  static final MinMaxZoomPreference zoomPreference = enforceServiceArea
+      ? const MinMaxZoomPreference(minZoom, maxZoom)
+      : const MinMaxZoomPreference(3.0, maxZoom);
 
   static final LatLng _centroid = _computeCentroid();
 
@@ -59,7 +73,20 @@ class AmmanBoundaryService {
   ///
   /// Standard ray casting: count how many polygon edges a ray cast east from
   /// the point crosses; an odd count means the point is enclosed.
-  static bool isLocationInsideAmman(LatLng location) {
+  /// Whether ordering, panning and searching are permitted at [location].
+  ///
+  /// Answers "may the user act here", which is what the service-area flag governs. With the
+  /// restriction off this is always true, switching every caller off at once rather than
+  /// leaving ten call sites to drift apart. For "is this point actually in Amman" - which
+  /// stays meaningful either way - use [isWithinPolygon].
+  static bool isLocationInsideAmman(LatLng location) =>
+      !enforceServiceArea || isWithinPolygon(location);
+
+  /// The raw geometric test, independent of [enforceServiceArea].
+  ///
+  /// Used to decide where to *open* the map: a GPS fix on another continent is a poor place
+  /// to start even when ordering there is allowed, so the camera still falls back to Amman.
+  static bool isWithinPolygon(LatLng location) {
     final double lat = location.latitude;
     final double lng = location.longitude;
     bool inside = false;
@@ -88,7 +115,7 @@ class AmmanBoundaryService {
   /// back rather than snapping it to the city centre - a small correction reads
   /// as a nudge, whereas teleporting downtown feels broken.
   static LatLng nearestPointInside(LatLng location) {
-    if (isLocationInsideAmman(location)) return location;
+    if (isWithinPolygon(location)) return location;
 
     // Longitude degrees shrink towards the poles, so compare in a locally flat
     // projection or the "nearest" edge comes out wrong by ~15% at this latitude.
@@ -121,7 +148,7 @@ class AmmanBoundaryService {
         closest.latitude + (_centroid.latitude - closest.latitude) * inset,
         closest.longitude + (_centroid.longitude - closest.longitude) * inset,
       );
-      if (isLocationInsideAmman(nudged)) return nudged;
+      if (isWithinPolygon(nudged)) return nudged;
     }
 
     return ammanCenter;
@@ -133,6 +160,11 @@ class AmmanBoundaryService {
   /// improves what comes back, it does not enforce anything.
   static String buildSearchQuery(String query) {
     final String trimmed = query.trim();
+
+    // Without the restriction, appending ", Amman, Jordan" would drag every search back
+    // into the city the user is trying to leave.
+    if (!enforceServiceArea) return trimmed;
+
     final String lower = trimmed.toLowerCase();
 
     final bool alreadyScoped = lower.contains('amman') ||

@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Android emulator against a backend running on this machine.
+            // 10.0.2.2 is the emulator's alias for the host - "localhost" inside the emulator
+            // means the emulator itself, so it can never reach your PC.
+            // The backend must be started on the "http" profile (binds 0.0.0.0:5001);
+            // the IIS Express profile binds localhost only and is unreachable from here.
+            "name": "ghasele (emulator -> local API)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=API_BASE_URL=http://10.0.2.2:5001/api"
+            ]
+        },
+        {
+            // Physical Android device on the same Wi-Fi. Replace with your PC's LAN IP
+            // (ipconfig -> IPv4 Address); 10.0.2.2 only exists inside the emulator.
+            "name": "ghasele (device -> local API)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=API_BASE_URL=http://192.168.1.100:5001/api"
+            ]
+        },
+        {
+            // No override: uses the default in api_service.dart.
+            "name": "ghasele (default API)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart"
+        }
+    ]
+}

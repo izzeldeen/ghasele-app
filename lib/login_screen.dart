@@ -23,9 +23,13 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
-  /// Temporarily hidden for this iOS build. Not required by App Store
-  /// guideline 4.8 since no other third-party sign-in is offered.
-  static const bool _appleSignInEnabled = false;
+  /// Shows the Sign in with Apple button. iOS/macOS only - the button is gated on
+  /// Platform.isIOS at the render site, since Apple does not offer this on Android.
+  ///
+  /// Requires the com.apple.developer.applesignin entitlement (present in
+  /// Runner.entitlements) and the bundle id listed under AppleAuth:ClientIds on the
+  /// API, which verifies the identity token's audience against it.
+  static const bool _appleSignInEnabled = true;
 
   @override
   void dispose() {

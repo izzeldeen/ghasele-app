@@ -49,9 +49,20 @@
 		     broader than the feature justifies. -->
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Cleanyjo uses your location to set your laundry pickup and delivery address on the map.</string>
+		<!-- image_picker: attaching a photo to a support ticket. -->
+		<key>NSCameraUsageDescription</key>
+		<string>Cleanyjo needs camera access so you can attach a photo to a support ticket.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Cleanyjo needs photo access so you can attach a photo to a support ticket.</string>
 		<!-- Standard HTTPS only: no proprietary or non-exempt encryption. Set
 		     here so App Store Connect stops asking on every upload. -->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
+		<!-- Required by Firebase for silent APNs (Phone Auth & FCM) -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>fetch</string>
+			<string>remote-notification</string>
+		</array>
 	</dict>
 </plist>

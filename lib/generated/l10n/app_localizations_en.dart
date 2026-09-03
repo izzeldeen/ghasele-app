@@ -244,6 +244,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidPhoneNumber => 'Invalid phone number';
 
   @override
+  String get contactNumberRequiredTitle => 'Add a contact number';
+
+  @override
+  String get contactNumberRequiredMessage =>
+      'We need a phone number so the driver can reach you about this order.';
+
+  @override
   String get or => 'or';
 
   @override
@@ -381,6 +388,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageRequired => 'Message required';
 
   @override
+  String get photoOptional => 'Photo (optional)';
+
+  @override
+  String get attachPhoto => 'Attach photo';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get removePhoto => 'Remove';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get attachment => 'Attachment';
+
+  @override
+  String get attachmentTooLarge =>
+      'The photo is too large. Please pick an image under 5 MB.';
+
+  @override
+  String get activeOrderTitle => 'Order in progress';
+
+  @override
+  String get activeOrderTapHint => 'Tap to see your invoice number';
+
+  @override
+  String get invoiceNumber => 'Invoice number';
+
+  @override
+  String get orderStatusLabel => 'Status';
+
+  @override
   String get verify => 'Verify';
 
   @override
@@ -444,10 +488,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupPassword => 'Set up your password to secure your account';
 
   @override
+  String get sendCode => 'Send Code';
+
+  @override
+  String get enterPhoneToRegister =>
+      'Enter your phone number and we\'ll send you a verification code';
+
+  @override
+  String get completeProfile => 'Complete your profile';
+
+  @override
+  String get completeProfileSubtitle =>
+      'Choose your name and a password to finish creating your account';
+
+  @override
+  String get completeSignup => 'Complete Sign Up';
+
+  @override
+  String get codeSentToWhatsapp => 'Code sent to your WhatsApp';
+
+  @override
+  String get codeSentToSms => 'Code sent by SMS';
+
+  @override
+  String get invalidOtp => 'Invalid or expired code. Please try again.';
+
+  @override
+  String get enterVerificationCode => 'Enter the 6-digit code';
+
+  @override
+  String get connectionError =>
+      'Couldn\'t reach the server. Please check your connection and try again.';
+
+  @override
   String get items => 'Items';
 
   @override
-  String get deliveryFee => 'Delivery Fee';
+  String get deliveryFee => 'Delivery';
 
   @override
   String get close => 'Close';
@@ -619,4 +696,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get driverMarkDelivered => 'Mark delivered';
+
+  @override
+  String get serviceSpeed => 'Service speed';
+
+  @override
+  String get serviceNormal => 'Standard';
+
+  @override
+  String get serviceNormalDesc => 'Ready within 48 hours';
+
+  @override
+  String get serviceExpress => 'Express';
+
+  @override
+  String get serviceExpressDesc => 'Ready within 24 hours';
+
+  @override
+  String get jodShort => 'JOD';
 }

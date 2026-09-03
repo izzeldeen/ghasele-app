@@ -43,7 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
           final List notifications = result['data'];
           if (mounted) {
             setState(() {
-              _unreadCount = notifications.where((n) => n['isRead'] == false).length;
+              _unreadCount = notifications
+                  .where((n) => n['isRead'] == false)
+                  .length;
             });
           }
         }
@@ -61,11 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Widget> views = [
       OrdersView(key: _ordersKey),
       const PricingView(),
-      HomeView(key: _homeKey),
+      HomeView(key: _homeKey, isActive: _currentIndex == 2),
       const SupportView(),
       const ProfileView(),
     ];
-    
+
     final titles = [
       l10n.orders,
       l10n.pricing,
@@ -113,7 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationsView()),
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsView(),
+                ),
               );
               _fetchUnreadCount(); // Refresh count when returning
             },
@@ -123,14 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               localeProvider.toggleLocale();
             },
-            tooltip: localeProvider.locale.languageCode == 'ar' ? 'English' : 'العربية',
+            tooltip: localeProvider.locale.languageCode == 'ar'
+                ? 'English'
+                : 'العربية',
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: views,
-      ),
+      body: IndexedStack(index: _currentIndex, children: views),
       bottomNavigationBar: _buildModernBottomNav(l10n),
     );
   }
@@ -191,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required int index,
   }) {
     final isSelected = _currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {

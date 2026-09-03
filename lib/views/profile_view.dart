@@ -150,7 +150,12 @@ class _ProfileViewState extends State<ProfileView> {
     return Scaffold(
       backgroundColor: AppTheme.neutral50,
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+        // AlwaysScrollable so the page still accepts a drag when its content happens to be
+        // shorter than the viewport (large-text settings shrink nothing, but a small phone in
+        // landscape can), rather than silently ignoring the gesture.
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         child: Column(
           children: [
             _buildHeader(context, l10n),

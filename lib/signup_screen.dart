@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
-import 'package:ghasele/widgets/custom_toast.dart';
 import 'package:ghasele/theme/app_theme.dart';
-import 'package:ghasele/services/notification_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ghasele/config/auth_config.dart';
+import 'package:ghasele/services/firebase_otp_service.dart';
 
+/// Step 1 of the phone-first registration flow: the user enters only a phone number and we send
+/// a verification code. Which channel carries it depends on [AuthConfig.useFirebaseOtp] - Firebase
+/// Phone Auth (Google sends the SMS) or the original WhatsApp OTP.
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -15,113 +17,123 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  
   final _formKey = GlobalKey<FormState>();
-  
-  int _currentStep = 0;
-  bool _isLoading = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
 
+  bool _isLoading = false;
+  // Server-side error (e.g. number already registered), shown inline under the
+  // field. Local "required"/format checks go through the form validator instead.
+  String? _errorText;
+
+  /// Original path: the backend generates the code and sends it over WhatsApp. Unchanged.
   @override
   void dispose() {
-    _nameController.dispose();
     _phoneController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _nextStep() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _currentStep = 1);
+  /// Strips a leading 0 / 962 / +962 and returns the bare 9-digit local number,
+  /// or null if it is not a valid Jordan mobile number.
+  String? _normalizedPhone() {
+    String phone = _phoneController.text.trim();
+    if (phone.startsWith('+962')) {
+      phone = phone.substring(4);
+    } else if (phone.startsWith('962')) {
+      phone = phone.substring(3);
+    } else if (phone.startsWith('0')) {
+      phone = phone.substring(1);
+    }
+    return phone.length == 9 ? phone : null;
+  }
+
+  Future<void> _sendCode() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final phone = _normalizedPhone();
+    if (phone == null) {
+      setState(() => _errorText = AppLocalizations.of(context)!.invalidPhoneNumber);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorText = null;
+    });
+
+    try {
+      final fullPhone = '+962$phone';
+
+      if (AuthConfig.useFirebaseOtp) {
+        await _sendViaFirebase(fullPhone);
+      } else {
+        await _sendViaWhatsApp(fullPhone);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _errorText = AppLocalizations.of(context)!.connectionError);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _previousStep() {
-    setState(() => _currentStep = 0);
+  Future<void> _sendViaWhatsApp(String fullPhone) async {
+    final result = await ApiService.startRegistration(fullPhone);
+
+    if (!mounted) return;
+
+    if (result['success']) {
+      // No confirmation popup - landing on the code screen is the confirmation.
+      Navigator.of(context).pushReplacementNamed(
+        '/verify-registration-otp',
+        arguments: fullPhone,
+      );
+    } else {
+      setState(() => _errorText =
+          result['message'] ?? AppLocalizations.of(context)!.connectionError);
+    }
   }
 
-  Future<void> _signUp() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+  /// Firebase path: Google sends and later checks the SMS, so nothing reaches our backend until
+  /// the user has proven the number and we hold a signed ID token.
+  Future<void> _sendViaFirebase(String fullPhone) async {
+    final result = await FirebaseOtpService.sendCode(fullPhone);
 
-      try {
-        String phone = _phoneController.text.trim();
-        // Remove common mistakes: leading 0, 962, +962
-        if (phone.startsWith('0')) {
-          phone = phone.substring(1);
-        } else if (phone.startsWith('+962')) {
-          phone = phone.substring(4);
-        } else if (phone.startsWith('962')) {
-          phone = phone.substring(3);
-        }
-        
-        // Final guard: should be exactly 9 digits for Jordan (7XXXXXXXX)
-        if (phone.length != 9) {
-          setState(() {
-            _isLoading = false;
-            _currentStep = 0; // Go back to step 1 to fix phone
-          });
-          CustomToast.show(context, message: "Phone number must be 9 digits (7XXXXXXXX)", type: ToastType.error);
-          return;
-        }
+    if (!mounted) return;
 
-        final fullPhone = '+962$phone';
-        
-        // Never log the password: debugPrint is not stripped from release
-        // builds, so this would write live credentials to the device log.
-        debugPrint('SIGNUP REQUEST: phone=$fullPhone, name=${_nameController.text.trim()}');
-
-        final result = await ApiService.signup(
-          phoneNumber: fullPhone,
-          password: _passwordController.text,
-          fullName: _nameController.text.trim(),
+    switch (result.status) {
+      case OtpSendStatus.codeSent:
+        Navigator.of(context).pushReplacementNamed(
+          '/verify-registration-otp',
+          arguments: {
+            'phone': fullPhone,
+            'verificationId': result.verificationId,
+          },
         );
+      case OtpSendStatus.autoVerified:
+        // Android read the SMS by itself. Still route through the code screen rather than
+        // duplicating the token exchange here - it sees the token and finishes immediately.
+        Navigator.of(context).pushReplacementNamed(
+          '/verify-registration-otp',
+          arguments: {
+            'phone': fullPhone,
+            'idToken': result.idToken,
+          },
+        );
+      case OtpSendStatus.failed:
+        setState(() => _errorText = _firebaseSendError(result.errorCode));
+    }
+  }
 
-        debugPrint('SIGNUP RESULT: $result');
-
-        if (mounted) {
-          if (result['success']) {
-            final data = result['data'];
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('auth_token', data['token']);
-            await prefs.setString('user_id', data['id']);
-            await prefs.setString('user_username', data['username'] ?? '');
-            await prefs.setString('user_email', data['email'] ?? '');
-            await prefs.setString('user_fullname', data['fullName'] ?? '');
-            await prefs.setString('user_phone', data['phoneNumber'] ?? '');
-
-            try {
-              await NotificationService.updateToken();
-            } catch (e) {
-              debugPrint('Failed to update FCM token: $e');
-            }
-
-            if (mounted) {
-              CustomToast.show(context,
-                  message: AppLocalizations.of(context)!.signupSuccess,
-                  type: ToastType.success);
-              Navigator.of(context).pushReplacementNamed('/main');
-            }
-          } else {
-            CustomToast.show(context,
-                message: result['message'] ?? 'Sign up failed',
-                type: ToastType.error);
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          CustomToast.show(context,
-              message: 'Error: $e', type: ToastType.error);
-        }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
+  /// Maps Firebase's error codes onto the strings this app already ships. Anything unrecognised
+  /// falls back to the generic connection message rather than surfacing a raw Firebase code.
+  String _firebaseSendError(String? code) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (code) {
+      case 'invalid-phone-number':
+        return l10n.invalidPhoneNumber;
+      default:
+        return l10n.connectionError;
     }
   }
 
@@ -145,59 +157,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [primaryColor.withOpacity(0.05), accentColor.withOpacity(0.1)],
+                  colors: [
+                    primaryColor.withOpacity(0.05),
+                    accentColor.withOpacity(0.1)
+                  ],
                 ),
               ),
             ),
           ),
-          
+
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: primaryColor),
-                      onPressed: () {
-                        if (_currentStep == 1) {
-                          _previousStep();
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    
-                    const SizedBox(height: 40),
-                    // Logo Section
-                    Center(
-                      child: Image.asset(
-                        'assets/logo/logo-trans.png',
-                        height: 120, // Balanced size for signup
-                        fit: BoxFit.contain,
-                        // Source is 1024x1024 (~4MB decoded); cap the decode to
-                        // what a 3x screen actually needs at this size.
-                        cacheWidth: 512,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-
-                if (_currentStep == 0) ...[
-                  // Full Name
-                  _buildInputLabel(l10n.fullName),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _nameController,
-                        hint: l10n.pleaseEnterName,
-                        icon: Icons.person_outline_rounded,
-                        validator: (v) => v == null || v.isEmpty ? l10n.pleaseEnterName : null,
-                      ),
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       const SizedBox(height: 20),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: primaryColor),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(height: 50),
+                      // Logo Section
+                      Center(
+                        child: Image.asset(
+                          'assets/logo/logo-trans.png',
+                          height: 120,
+                          fit: BoxFit.contain,
+                          // Source is 1024x1024 (~4MB decoded); cap the decode to
+                          // what a 3x screen actually needs at this size.
+                          cacheWidth: 512,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+
+                      Text(
+                        l10n.signup,
+                        style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.neutral900),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.enterPhoneToRegister,
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 30),
 
                       // Phone Input
                       _buildInputLabel(l10n.phoneNumber),
@@ -208,9 +218,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           textAlign: TextAlign.start,
+                          onChanged: (_) {
+                            if (_errorText != null) {
+                              setState(() => _errorText = null);
+                            }
+                          },
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10), // Allow for 0XXXXXXXX or 7XXXXXXXX
+                            LengthLimitingTextInputFormatter(10),
                           ],
                           decoration: _buildInputDecoration(
                             hint: '7XXXXXXXX',
@@ -218,22 +233,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             prefixText: '+962 ',
                             primaryColor: primaryColor,
                           ),
-                          validator: (v) => v == null || v.isEmpty ? l10n.pleaseEnterPhoneNumber : null,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return l10n.pleaseEnterPhoneNumber;
+                            }
+                            return null;
+                          },
                         ),
                       ),
+                      if (_errorText != null) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          _errorText!,
+                          style: const TextStyle(
+                              color: AppTheme.error,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
                       const SizedBox(height: 40),
 
-                      // Next Button
                       _buildActionButton(
-                        onPressed: _nextStep,
-                        label: l10n.next,
+                        onPressed: _isLoading ? null : _sendCode,
+                        isLoading: _isLoading,
+                        label: l10n.sendCode,
                         primaryColor: primaryColor,
                         accentColor: accentColor,
                       ),
                       const SizedBox(height: 16),
                       Center(
                         child: TextButton(
-                          onPressed: () => Navigator.of(context).pushNamed('/privacy'),
+                          onPressed: () =>
+                              Navigator.of(context).pushNamed('/privacy'),
                           child: Text(
                             l10n.privacyPolicy,
                             style: TextStyle(
@@ -244,80 +275,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                    ] else ...[
-                      // Password
-                      _buildInputLabel(l10n.password),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _passwordController,
-                        hint: l10n.password,
-                        icon: Icons.lock_outline_rounded,
-                        isPassword: true,
-                        obscure: _obscurePassword,
-                        onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
-                        validator: (v) => v == null || v.length < 6 ? l10n.minCharacters : null,
-                      ),
-                      const SizedBox(height: 20),
 
-                      // Confirm Password
-                      _buildInputLabel(l10n.confirmPassword),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _confirmPasswordController,
-                        hint: l10n.confirmPassword,
-                        icon: Icons.lock_reset_rounded,
-                        isPassword: true,
-                        obscure: _obscureConfirmPassword,
-                        onToggleVisibility: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return l10n.pleaseEnterPassword;
-                          if (v != _passwordController.text) return l10n.passwordsDoNotMatch;
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 24),
 
-                      // Submit Button
-                      _buildActionButton(
-                        onPressed: _isLoading ? null : _signUp,
-                        isLoading: _isLoading,
-                        label: l10n.signup,
-                        primaryColor: primaryColor,
-                        accentColor: accentColor,
-                      ),
-
-                      const SizedBox(height: 20),
-                      Center(
-                        child: TextButton(
-                          onPressed: _isLoading ? null : _previousStep,
-                          child: Text(l10n.backToPersonalInfo, 
-                            style: TextStyle(color: _isLoading ? Colors.grey[400] : Colors.grey[600])),
-                        ),
-                      ),
-                    ],
-
-                    const SizedBox(height: 32),
-
-                    // Login Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(l10n.alreadyHaveAccount, style: TextStyle(color: Colors.grey[600])),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
-                          child: Text(
-                            l10n.signIn,
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: primaryColor, fontSize: 16),
+                      // Login Link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(l10n.alreadyHaveAccount,
+                              style: TextStyle(color: Colors.grey[600])),
+                          TextButton(
+                            onPressed: () => Navigator.of(context)
+                                .pushReplacementNamed('/login'),
+                            child: Text(
+                              l10n.signIn,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryColor,
+                                  fontSize: 16),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           ),
         ],
       ),
@@ -353,10 +338,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: isLoading
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2))
             : Text(
                 label,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
       ),
     );
@@ -365,31 +357,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _buildInputLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.neutral900),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    bool isPassword = false,
-    bool obscure = false,
-    VoidCallback? onToggleVisibility,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscure,
-      decoration: _buildInputDecoration(
-        hint: hint,
-        icon: icon,
-        isPassword: isPassword,
-        obscure: obscure,
-        onToggleVisibility: onToggleVisibility,
-        primaryColor: AppTheme.brandGreen,
-      ),
-      validator: validator,
+      style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: AppTheme.neutral900),
     );
   }
 
@@ -397,25 +368,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required String hint,
     required IconData icon,
     String? prefixText,
-    bool isPassword = false,
-    bool obscure = false,
-    VoidCallback? onToggleVisibility,
     required Color primaryColor,
   }) {
     return InputDecoration(
       hintText: hint,
       prefixIcon: Icon(icon, color: primaryColor),
       prefixText: prefixText,
-      prefixStyle: prefixText != null ? TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 16) : null,
-      suffixIcon: isPassword
-          ? IconButton(
-              icon: Icon(obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: Colors.grey, size: 20),
-              onPressed: onToggleVisibility,
-            )
+      prefixStyle: prefixText != null
+          ? TextStyle(
+              color: primaryColor, fontWeight: FontWeight.bold, fontSize: 16)
           : null,
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       border: _buildBorder(),
       enabledBorder: _buildBorder(),
       focusedBorder: _buildBorder(color: primaryColor),

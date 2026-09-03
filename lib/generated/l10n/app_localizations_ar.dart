@@ -244,6 +244,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invalidPhoneNumber => 'رقم الهاتف غير صالح';
 
   @override
+  String get contactNumberRequiredTitle => 'أضف رقم للتواصل';
+
+  @override
+  String get contactNumberRequiredMessage =>
+      'نحتاج رقم هاتف ليتمكن السائق من التواصل معك بشأن هذا الطلب.';
+
+  @override
   String get or => 'أو';
 
   @override
@@ -380,6 +387,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messageRequired => 'الرسالة مطلوبة';
 
   @override
+  String get photoOptional => 'صورة (اختياري)';
+
+  @override
+  String get attachPhoto => 'إرفاق صورة';
+
+  @override
+  String get changePhoto => 'تغيير الصورة';
+
+  @override
+  String get removePhoto => 'إزالة';
+
+  @override
+  String get takePhoto => 'التقاط صورة';
+
+  @override
+  String get chooseFromGallery => 'اختيار من المعرض';
+
+  @override
+  String get attachment => 'المرفق';
+
+  @override
+  String get attachmentTooLarge =>
+      'حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 5 ميجابايت.';
+
+  @override
+  String get activeOrderTitle => 'طلب قيد التنفيذ';
+
+  @override
+  String get activeOrderTapHint => 'اضغط لعرض رقم الفاتورة';
+
+  @override
+  String get invoiceNumber => 'رقم الفاتورة';
+
+  @override
+  String get orderStatusLabel => 'الحالة';
+
+  @override
   String get verify => 'تحقق';
 
   @override
@@ -443,10 +487,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get setupPassword => 'قم بإعداد كلمة المرور الخاصة بك لتأمين حسابك';
 
   @override
+  String get sendCode => 'إرسال الرمز';
+
+  @override
+  String get enterPhoneToRegister => 'أدخل رقم هاتفك وسنرسل لك رمز التحقق';
+
+  @override
+  String get completeProfile => 'أكمل ملفك الشخصي';
+
+  @override
+  String get completeProfileSubtitle =>
+      'اختر اسمك وكلمة المرور لإنهاء إنشاء حسابك';
+
+  @override
+  String get completeSignup => 'إكمال التسجيل';
+
+  @override
+  String get codeSentToWhatsapp => 'تم إرسال الرمز إلى واتساب';
+
+  @override
+  String get codeSentToSms => 'تم إرسال الرمز عبر رسالة نصية';
+
+  @override
+  String get invalidOtp =>
+      'رمز غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get enterVerificationCode => 'أدخل الرمز المكوّن من 6 أرقام';
+
+  @override
+  String get connectionError =>
+      'تعذّر الاتصال بالخادم. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
   String get items => 'الأصناف';
 
   @override
-  String get deliveryFee => 'رسوم التوصيل';
+  String get deliveryFee => 'التوصيل';
 
   @override
   String get close => 'إغلاق';
@@ -617,4 +694,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get driverMarkDelivered => 'تحديد كتم التوصيل';
+
+  @override
+  String get serviceSpeed => 'سرعة الخدمة';
+
+  @override
+  String get serviceNormal => 'عادي';
+
+  @override
+  String get serviceNormalDesc => 'جاهز خلال 48 ساعة';
+
+  @override
+  String get serviceExpress => 'مستعجل';
+
+  @override
+  String get serviceExpressDesc => 'جاهز خلال 24 ساعة';
+
+  @override
+  String get jodShort => 'دينار';
 }

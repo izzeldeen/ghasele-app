@@ -12,6 +12,8 @@ import 'signup_screen.dart';
 import 'splash_screen.dart';
 import 'forgot_password_screen.dart';
 import 'otp_verification_screen.dart';
+import 'registration_otp_screen.dart';
+import 'complete_registration_screen.dart';
 import 'reset_password_screen.dart';
 
 import 'views/order_success_view.dart';
@@ -105,6 +107,23 @@ class MyApp extends StatelessWidget {
             '/verify-otp': (context) {
               final phone = ModalRoute.of(context)?.settings.arguments as String;
               return OtpVerificationScreen(phoneNumber: phone);
+            },
+            '/verify-registration-otp': (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              // A plain String is the WhatsApp path and keeps working untouched. The Firebase
+              // path must carry a verificationId (or an already-obtained token), so it passes a Map.
+              if (args is Map) {
+                return RegistrationOtpScreen(
+                  phoneNumber: args['phone'] as String,
+                  firebaseVerificationId: args['verificationId'] as String?,
+                  firebaseIdToken: args['idToken'] as String?,
+                );
+              }
+              return RegistrationOtpScreen(phoneNumber: args as String);
+            },
+            '/complete-registration': (context) {
+              final phone = ModalRoute.of(context)?.settings.arguments as String;
+              return CompleteRegistrationScreen(phoneNumber: phone);
             },
             '/reset-password': (context) {
               final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;

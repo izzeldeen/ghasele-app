@@ -560,6 +560,18 @@ abstract class AppLocalizations {
   /// **'Invalid phone number'**
   String get invalidPhoneNumber;
 
+  /// No description provided for @contactNumberRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a contact number'**
+  String get contactNumberRequiredTitle;
+
+  /// No description provided for @contactNumberRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a phone number so the driver can reach you about this order.'**
+  String get contactNumberRequiredMessage;
+
   /// No description provided for @or.
   ///
   /// In en, this message translates to:
@@ -830,6 +842,78 @@ abstract class AppLocalizations {
   /// **'Message required'**
   String get messageRequired;
 
+  /// No description provided for @photoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo (optional)'**
+  String get photoOptional;
+
+  /// No description provided for @attachPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach photo'**
+  String get attachPhoto;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePhoto;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removePhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get attachment;
+
+  /// No description provided for @attachmentTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo is too large. Please pick an image under 5 MB.'**
+  String get attachmentTooLarge;
+
+  /// No description provided for @activeOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order in progress'**
+  String get activeOrderTitle;
+
+  /// No description provided for @activeOrderTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see your invoice number'**
+  String get activeOrderTapHint;
+
+  /// No description provided for @invoiceNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice number'**
+  String get invoiceNumber;
+
+  /// No description provided for @orderStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get orderStatusLabel;
+
   /// No description provided for @verify.
   ///
   /// In en, this message translates to:
@@ -956,6 +1040,66 @@ abstract class AppLocalizations {
   /// **'Set up your password to secure your account'**
   String get setupPassword;
 
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendCode;
+
+  /// No description provided for @enterPhoneToRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number and we\'ll send you a verification code'**
+  String get enterPhoneToRegister;
+
+  /// No description provided for @completeProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile'**
+  String get completeProfile;
+
+  /// No description provided for @completeProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your name and a password to finish creating your account'**
+  String get completeProfileSubtitle;
+
+  /// No description provided for @completeSignup.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Sign Up'**
+  String get completeSignup;
+
+  /// No description provided for @codeSentToWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to your WhatsApp'**
+  String get codeSentToWhatsapp;
+
+  /// No description provided for @codeSentToSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent by SMS'**
+  String get codeSentToSms;
+
+  /// No description provided for @invalidOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or expired code. Please try again.'**
+  String get invalidOtp;
+
+  /// No description provided for @enterVerificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get enterVerificationCode;
+
+  /// No description provided for @connectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the server. Please check your connection and try again.'**
+  String get connectionError;
+
   /// No description provided for @items.
   ///
   /// In en, this message translates to:
@@ -965,7 +1109,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryFee.
   ///
   /// In en, this message translates to:
-  /// **'Delivery Fee'**
+  /// **'Delivery'**
   String get deliveryFee;
 
   /// No description provided for @close.
@@ -1297,6 +1441,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark delivered'**
   String get driverMarkDelivered;
+
+  /// No description provided for @serviceSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Service speed'**
+  String get serviceSpeed;
+
+  /// No description provided for @serviceNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get serviceNormal;
+
+  /// No description provided for @serviceNormalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready within 48 hours'**
+  String get serviceNormalDesc;
+
+  /// No description provided for @serviceExpress.
+  ///
+  /// In en, this message translates to:
+  /// **'Express'**
+  String get serviceExpress;
+
+  /// No description provided for @serviceExpressDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready within 24 hours'**
+  String get serviceExpressDesc;
+
+  /// No description provided for @jodShort.
+  ///
+  /// In en, this message translates to:
+  /// **'JOD'**
+  String get jodShort;
 }
 
 class _AppLocalizationsDelegate

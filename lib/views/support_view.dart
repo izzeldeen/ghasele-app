@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
@@ -384,6 +387,15 @@ class _SupportViewState extends State<SupportView> {
                           ),
                           const SizedBox(height: 24),
                           _buildDetailSection(l10n.yourMessage, ticket['message'] ?? ''),
+                          if (ticket['attachmentUrl'] != null &&
+                              ticket['attachmentUrl'].toString().isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            _buildAttachmentSection(
+                              context,
+                              l10n.attachment,
+                              ApiService.resolveAssetUrl(ticket['attachmentUrl'].toString()),
+                            ),
+                          ],
                           if (ticket['response'] != null && ticket['response'].toString().isNotEmpty) ...[
                             const SizedBox(height: 24),
                             _buildResponseSection(l10n.supportResponse, ticket['response'].toString()),
@@ -478,6 +490,51 @@ class _SupportViewState extends State<SupportView> {
     );
   }
 
+  Widget _buildAttachmentSection(BuildContext context, String title, String imageUrl) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.neutral500,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => _PhotoViewerPage(imageUrl: imageUrl)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) => progress == null
+                  ? child
+                  : Container(
+                      height: 200,
+                      color: AppTheme.neutral100,
+                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+              errorBuilder: (context, error, stack) => Container(
+                height: 200,
+                color: AppTheme.neutral100,
+                alignment: Alignment.center,
+                child: const Icon(Icons.broken_image_rounded, color: AppTheme.neutral400, size: 40),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   String _formatDate(String dateStr, AppLocalizations l10n) {
     try {
       final date = DateTime.parse(dateStr);
@@ -514,6 +571,9 @@ class _CreateTicketViewState extends State<CreateTicketView> {
   String _selectedCategory = 'Order Issue';
   bool _isSubmitting = false;
 
+  final ImagePicker _picker = ImagePicker();
+  XFile? _photo;
+
   List<Map<String, dynamic>> _getCategories(AppLocalizations l10n) {
     return [
       {'name': l10n.general, 'icon': Icons.help_outline_rounded, 'value': 'General'},
@@ -531,6 +591,57 @@ class _CreateTicketViewState extends State<CreateTicketView> {
     _subjectController.dispose();
     _messageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickPhoto(AppLocalizations l10n) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 40, height: 5, decoration: BoxDecoration(color: AppTheme.neutral200, borderRadius: BorderRadius.circular(2.5))),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded, color: AppTheme.primary),
+              title: Text(l10n.takePhoto),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: AppTheme.primary),
+              title: Text(l10n.chooseFromGallery),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 70,
+        maxWidth: 1600,
+      );
+      if (picked == null) return;
+
+      // 5 MB server cap - reject early with a clear message.
+      final bytes = await picked.length();
+      if (bytes > 5 * 1024 * 1024) {
+        if (mounted) _showMessage(l10n.attachmentTooLarge, isError: true);
+        return;
+      }
+      if (mounted) setState(() => _photo = picked);
+    } catch (e) {
+      if (mounted) _showMessage(l10n.failedToSubmit, isError: true);
+    }
   }
 
   Future<void> _submitTicket(AppLocalizations l10n) async {
@@ -555,6 +666,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
         message: _messageController.text.trim(),
         category: _selectedCategory,
         token: token,
+        attachmentPath: _photo?.path,
       );
 
       if (mounted) {
@@ -694,6 +806,10 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 24),
+                    _buildLabel(l10n.photoOptional),
+                    const SizedBox(height: 10),
+                    _buildPhotoField(l10n),
                   ],
                 ),
               ),
@@ -713,6 +829,74 @@ class _CreateTicketViewState extends State<CreateTicketView> {
         fontWeight: FontWeight.w800,
         color: AppTheme.neutral500,
         letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildPhotoField(AppLocalizations l10n) {
+    if (_photo == null) {
+      return InkWell(
+        onTap: () => _pickPhoto(l10n),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 22),
+          decoration: BoxDecoration(
+            color: AppTheme.neutral50,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.neutral200),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.add_a_photo_rounded, color: AppTheme.primary, size: 26),
+              const SizedBox(height: 8),
+              Text(
+                l10n.attachPhoto,
+                style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.neutral700),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.file(
+            File(_photo!.path),
+            width: double.infinity,
+            height: 180,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            children: [
+              _photoActionButton(Icons.swap_horiz_rounded, () => _pickPhoto(l10n)),
+              const SizedBox(width: 8),
+              _photoActionButton(Icons.close_rounded, () => setState(() => _photo = null)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _photoActionButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.black54,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(icon, color: Colors.white, size: 18),
+        ),
       ),
     );
   }
@@ -773,6 +957,39 @@ class _CreateTicketViewState extends State<CreateTicketView> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+      ),
+    );
+  }
+}
+
+/// Full-screen, pinch-to-zoom viewer for a ticket photo.
+class _PhotoViewerPage extends StatelessWidget {
+  final String imageUrl;
+  const _PhotoViewerPage({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          minScale: 1,
+          maxScale: 5,
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stack) => const Icon(
+              Icons.broken_image_rounded,
+              color: Colors.white38,
+              size: 64,
+            ),
+          ),
+        ),
       ),
     );
   }
