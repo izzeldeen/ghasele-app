@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart' show MediaType;
 
 class ApiService {
   // Production API. This is the default so a release build needs no extra flags.
@@ -625,6 +626,27 @@ class ApiService {
     }
   }
 
+  /// Maps a picked file's extension to the image content type the backend
+  /// whitelists. iOS commonly hands back .heic from the photo library, Android
+  /// .jpg from the camera; both are accepted server-side. Unknown extensions
+  /// fall back to jpeg rather than octet-stream, since image_picker only ever
+  /// returns images.
+  static MediaType _imageMediaType(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'png':
+        return MediaType('image', 'png');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'heic':
+        return MediaType('image', 'heic');
+      case 'heif':
+        return MediaType('image', 'heif');
+      default:
+        return MediaType('image', 'jpeg');
+    }
+  }
+
   // Support Ticket APIs
   //
   // Sent as multipart/form-data so an optional photo can ride along in the same
@@ -649,7 +671,14 @@ class ApiService {
 
       if (attachmentPath != null && attachmentPath.isNotEmpty) {
         request.files.add(
-          await http.MultipartFile.fromPath('attachment', attachmentPath),
+          await http.MultipartFile.fromPath(
+            'attachment',
+            attachmentPath,
+            // Without this the part is sent as application/octet-stream, which the
+            // backend rejects with ticket.attachment_invalid_type - it whitelists
+            // image/* content types. MultipartFile does no extension sniffing.
+            contentType: _imageMediaType(attachmentPath),
+          ),
         );
       }
 

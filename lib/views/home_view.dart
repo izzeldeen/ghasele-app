@@ -799,27 +799,34 @@ class HomeViewState extends State<HomeView> {
                 style: const TextStyle(fontSize: 13.5, height: 1.4),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: controller,
-                keyboardType: TextInputType.phone,
-                autofocus: true,
-                // Same shape the signup screen accepts, so one account cannot end up with a
-                // number the rest of the app would reject.
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                decoration: InputDecoration(
-                  labelText: l10n.phoneNumber,
-                  prefixText: '+962 ',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+              // Phone numbers read left-to-right in every locale, so the field is
+              // pinned to LTR. Inheriting the ambient direction puts the "+962 "
+              // prefix on the right in Arabic, which reads as a suffix.
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: TextFormField(
+                  controller: controller,
+                  keyboardType: TextInputType.phone,
+                  autofocus: true,
+                  textAlign: TextAlign.left,
+                  // Same shape the signup screen accepts, so one account cannot end up with a
+                  // number the rest of the app would reject.
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneNumber,
+                    prefixText: '+962 ',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  validator: (value) {
+                    final digits = _localJordanDigits(value ?? '');
+                    return digits == null ? l10n.invalidPhoneNumber : null;
+                  },
                 ),
-                validator: (value) {
-                  final digits = _localJordanDigits(value ?? '');
-                  return digits == null ? l10n.invalidPhoneNumber : null;
-                },
               ),
             ],
           ),
