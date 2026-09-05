@@ -138,6 +138,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get continueWithGoogle => 'المتابعة باستخدام Google';
 
   @override
+  String get continueWithApple => 'المتابعة باستخدام Apple';
+
+  @override
+  String get orContinueWith => 'أو تابع باستخدام';
+
+  @override
   String get googleSignInFailed =>
       'تعذّر تسجيل الدخول عبر Google. يرجى المحاولة مرة أخرى.';
 

@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 import 'package:ghasele/services/firebase_otp_service.dart';
-import 'package:ghasele/services/notification_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Step 2 of the phone-first registration flow. Confirms the OTP sent by [signup_screen.dart].
 /// Success does not create an account or log the user in - it just verifies the phone and sends
@@ -175,58 +173,26 @@ class _RegistrationOtpScreenState extends State<RegistrationOtpScreen> {
     }
   }
 
-  /// Exchanges a verified Firebase ID token for our JWT and drops the user into the app.
+  /// Carries the verified Firebase token on to CompleteRegistrationScreen.
   ///
-  /// Unlike the WhatsApp path this does not continue to CompleteRegistrationScreen: the backend
-  /// creates the account during the exchange, so the user is already signed in when it returns.
+  /// This used to call firebase-login and drop the user straight into the app. That created the
+  /// account with an empty password, so the same user could never sign in through the login screen
+  /// afterwards - it failed with invalid credentials against a hash that was never set. Both paths
+  /// now finish on the same screen, and the account is created with the password chosen there.
+  ///
+  /// The Firebase session is deliberately left signed in: the token is the credential
+  /// CompleteRegistrationScreen presents, and it signs out once the account exists.
   Future<void> _exchangeFirebaseToken(String idToken) async {
-    if (!_isLoading) setState(() => _isLoading = true);
-
-    final result = await ApiService.firebaseLogin(idToken);
-
     if (!mounted) return;
+    setState(() => _isLoading = false);
 
-    if (result['success'] != true) {
-      setState(() {
-        _isLoading = false;
-        _errorText =
-            result['message'] ?? AppLocalizations.of(context)!.connectionError;
-      });
-      return;
-    }
-
-    // Our JWT is what keeps the user signed in from here, so the Firebase session has done its
-    // job. Leaving it active would make a later verify silently reuse this account.
-    await FirebaseOtpService.signOut();
-
-    if (!mounted) return;
-    await _handleAuthSuccess(result['data']);
-  }
-
-  /// Persists the auth payload and routes into the app - mirrors LoginScreen.
-  Future<void> _handleAuthSuccess(dynamic data) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', data['token']);
-    await prefs.setString('user_id', data['id']);
-    await prefs.setString('user_username', data['username'] ?? '');
-    await prefs.setString('user_email', data['email'] ?? '');
-    await prefs.setString('user_fullname', data['fullName'] ?? '');
-    await prefs.setString('user_phone', data['phoneNumber'] ?? '');
-    final role = data['role'] ?? 'Client';
-    await prefs.setString('user_role', role);
-
-    try {
-      await NotificationService.updateToken();
-    } catch (e) {
-      debugPrint('Failed to update FCM token: $e');
-    }
-
-    if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        role == 'Driver' ? '/driver-main' : '/main',
-        (route) => false,
-      );
-    }
+    Navigator.of(context).pushReplacementNamed(
+      '/complete-registration',
+      arguments: {
+        'phone': widget.phoneNumber,
+        'idToken': idToken,
+      },
+    );
   }
 
   Future<void> _resend() async {

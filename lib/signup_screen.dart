@@ -63,6 +63,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final fullPhone = '+962$phone';
 
+      // Ask before sending anything. The Firebase path hands straight to Google and does not
+      // reach our API until complete-registration, so without this check a number that already
+      // has an account got an SMS, a name prompt and a password prompt before being refused.
+      final check = await ApiService.isPhoneRegistered(fullPhone);
+      if (!mounted) return;
+      if (check != null && check.registered) {
+        setState(() => _errorText =
+            check.message ?? AppLocalizations.of(context)!.connectionError);
+        return;
+      }
+
       if (AuthConfig.useFirebaseOtp) {
         await _sendViaFirebase(fullPhone);
       } else {

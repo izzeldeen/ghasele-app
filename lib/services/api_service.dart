@@ -3,6 +3,19 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' show MediaType;
 
+/// Answer from `POST /api/auth/phone-registered`.
+class PhoneCheck {
+  /// True when the number already has a complete account and signup must not proceed.
+  final bool registered;
+
+  /// The server's localized "already registered" wording, present only when [registered].
+  /// Taken from the server so the two languages stay in one place rather than being duplicated
+  /// in the app's own ARB files.
+  final String? message;
+
+  const PhoneCheck({required this.registered, this.message});
+}
+
 class ApiService {
   // Production API. This is the default so a release build needs no extra flags.
   //
@@ -186,6 +199,51 @@ class ApiService {
   }
 
 
+
+  /// Completes an SMS registration, creating the account with a password.
+  ///
+  /// The Firebase path used to call [firebaseLogin] straight after verifying the code, which
+  /// created accounts with no password - those users could then never sign in through
+  /// [login]. This is the registration counterpart: same verified token, but the password the
+  /// user picked is set as the account is created.
+  static Future<Map<String, dynamic>> firebaseCompleteRegistration({
+    required String idToken,
+    required String fullName,
+    required String password,
+  }) async {
+    final url = Uri.parse('$baseUrl/auth/firebase-complete-registration');
+    try {
+      if (kDebugMode) {
+        print('API FIREBASE COMPLETE REG -> $url');
+      }
+
+      final response = await http
+          .post(
+            url,
+            headers: _headers(),
+            body: jsonEncode({
+              'IdToken': idToken,
+              'FullName': fullName,
+              'Password': password,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      if (kDebugMode) {
+        print('API FIREBASE COMPLETE REG RESPONSE: ${response.statusCode}');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+
+      if (kDebugMode) print('API FIREBASE COMPLETE REG BODY: ${response.body}');
+      return _errorResult(response);
+    } catch (e) {
+      if (kDebugMode) print('API FIREBASE COMPLETE REG EXCEPTION: $e');
+      return {'success': false, 'message': null, 'networkError': true};
+    }
+  }
   /// Trades a Firebase ID token obtained through Google sign-in for one of our own JWTs.
   ///
   /// Its own endpoint rather than [firebaseLogin]: that one requires a phone_number claim and
@@ -230,6 +288,49 @@ class ApiService {
     } catch (e) {
       if (kDebugMode) print('API GOOGLE LOGIN EXCEPTION: $e');
       return {'success': false, 'message': null, 'networkError': true};
+    }
+  }
+
+  /// Asks whether [phoneNumber] already has an account, before any verification code is sent.
+  ///
+  /// The Firebase OTP path talks to Google first and reaches this API only at the very last step,
+  /// so without this call a duplicate number was not refused until the user had received an SMS
+  /// and filled in a name and password - and then was signed into the existing account instead.
+  ///
+  /// Returns null when the question could not be answered (offline, timeout, server error).
+  /// Callers should let signup proceed on null rather than block it: the server rejects the
+  /// duplicate again at complete-registration, so a failed check delays the message but never
+  /// lets a duplicate account through.
+  static Future<PhoneCheck?> isPhoneRegistered(String phoneNumber) async {
+    final url = Uri.parse('$baseUrl/auth/phone-registered');
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: _headers(),
+            body: jsonEncode({'PhoneNumber': phoneNumber}),
+          )
+          .timeout(const Duration(seconds: 12));
+
+      if (response.statusCode != 200) {
+        if (kDebugMode) {
+          print('API PHONE REGISTERED: ${response.statusCode} ${response.body}');
+        }
+        return null;
+      }
+
+      final data = jsonDecode(response.body);
+      if (data is! Map<String, dynamic>) return null;
+
+      return PhoneCheck(
+        registered: data['registered'] == true,
+        message: data['message']?.toString(),
+      );
+    } catch (e) {
+      // An older deployment has no such endpoint and answers 404; that lands here or above and is
+      // treated the same as being offline, so the app keeps working against either version.
+      if (kDebugMode) print('API PHONE REGISTERED EXCEPTION: $e');
+      return null;
     }
   }
   /// Step 1 of the phone-first registration flow. Sends only the phone number; the backend

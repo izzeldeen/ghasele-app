@@ -122,8 +122,16 @@ class MyApp extends StatelessWidget {
               return RegistrationOtpScreen(phoneNumber: args as String);
             },
             '/complete-registration': (context) {
-              final phone = ModalRoute.of(context)?.settings.arguments as String;
-              return CompleteRegistrationScreen(phoneNumber: phone);
+              final args = ModalRoute.of(context)?.settings.arguments;
+              // Same split as the OTP route: a plain String is the WhatsApp path, a Map carries the
+              // verified Firebase token the account is created from.
+              if (args is Map) {
+                return CompleteRegistrationScreen(
+                  phoneNumber: args['phone'] as String,
+                  firebaseIdToken: args['idToken'] as String?,
+                );
+              }
+              return CompleteRegistrationScreen(phoneNumber: args as String);
             },
             '/reset-password': (context) {
               final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;

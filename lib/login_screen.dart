@@ -129,6 +129,40 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// A square, bordered tile holding a provider mark. Sized to the same 56pt height and 16pt
+  /// radius as the primary button so the row lines up with the rest of the form.
+  Widget _socialIconButton({
+    required Widget child,
+    required VoidCallback? onTap,
+    required String tooltip,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox(
+        width: 72,
+        height: 56,
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.neutral200, width: 1.5),
+              ),
+              // Dimmed while a sign-in is already running, so the row visibly stops accepting taps.
+              child: Center(
+                child: Opacity(opacity: onTap == null ? 0.4 : 1, child: child),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _signInWithGoogle() async {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
@@ -358,66 +392,43 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                       ),
                     ),
-                    // Continue with Google. Unlike Apple this is shown on both platforms - Google
-                    // sign-in is supported on Android and iOS alike. Styled as a white, bordered
-                    // counterpart to the primary button: same height and radius, so the two read as
-                    // a pair rather than two unrelated controls.
-                    const SizedBox(height: 14),
-                    Container(
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.neutral900.withValues(alpha: 0.06),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
-                          onTap: _isLoading ? null : _signInWithGoogle,
-                          borderRadius: BorderRadius.circular(16),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppTheme.neutral200, width: 1.5),
-                            ),
-                            child: Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const GoogleLogo(size: 22),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    l10n.continueWithGoogle,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppTheme.neutral900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    // Social sign-in, as compact icon buttons rather than two stacked full-width
+                    // bars: the primary action stays the phone/password button above, and these
+                    // read as alternatives to it instead of competing with it.
+                    const SizedBox(height: 22),
+                    Row(
+                      children: [
+                        const Expanded(child: Divider(color: AppTheme.neutral200, thickness: 1)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            l10n.orContinueWith,
+                            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                           ),
                         ),
-                      ),
+                        const Expanded(child: Divider(color: AppTheme.neutral200, thickness: 1)),
+                      ],
                     ),
-                    // Sign in with Apple — only shown when explicitly enabled
-                    // above. iOS/macOS only.
-                    if (Platform.isIOS && _appleSignInEnabled) ...[
-                      const SizedBox(height: 16),
-                      SignInWithAppleButton(
-                        onPressed: _isLoading ? () {} : _signInWithApple,
-                        height: 56,
-                        style: SignInWithAppleButtonStyle.black,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ],
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _socialIconButton(
+                          onTap: _isLoading ? null : _signInWithGoogle,
+                          tooltip: l10n.continueWithGoogle,
+                          child: const GoogleLogo(size: 26),
+                        ),
+                        // Apple is iOS-only; Google is offered on both platforms.
+                        if (Platform.isIOS && _appleSignInEnabled) ...[
+                          const SizedBox(width: 16),
+                          _socialIconButton(
+                            onTap: _isLoading ? null : _signInWithApple,
+                            tooltip: l10n.continueWithApple,
+                            child: const Icon(Icons.apple, size: 30, color: Colors.black87),
+                          ),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     Center(
                       child: TextButton(

@@ -43,6 +43,8 @@
   "jod": "دينار",
   "signIn": "تسجيل الدخول",
   "continueWithGoogle": "المتابعة باستخدام Google",
+  "continueWithApple": "المتابعة باستخدام Apple",
+  "orContinueWith": "أو تابع باستخدام",
   "googleSignInFailed": "تعذّر تسجيل الدخول عبر Google. يرجى المحاولة مرة أخرى.",
   "enterEmail": "أدخل بريدك الإلكتروني",
   "enterPassword": "أدخل كلمة المرور",
