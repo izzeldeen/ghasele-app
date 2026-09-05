@@ -42,6 +42,8 @@
   "curtains": "Curtains",
   "jod": "JOD",
   "signIn": "Sign In",
+  "continueWithGoogle": "Continue with Google",
+  "googleSignInFailed": "Google sign-in failed. Please try again.",
   "enterEmail": "Enter your email",
   "enterPassword": "Enter your password",
   "enterName": "Enter your full name",

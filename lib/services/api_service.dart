@@ -185,6 +185,53 @@ class ApiService {
     }
   }
 
+
+  /// Trades a Firebase ID token obtained through Google sign-in for one of our own JWTs.
+  ///
+  /// Its own endpoint rather than [firebaseLogin]: that one requires a phone_number claim and
+  /// rejects every Google token, which carries an email instead. The account is created on first
+  /// sign-in with an empty phone number, so the contact number is collected later at checkout.
+  static Future<Map<String, dynamic>> googleLogin(String idToken) async {
+    final url = Uri.parse('$baseUrl/auth/google');
+    try {
+      if (kDebugMode) {
+        print('API GOOGLE LOGIN -> $url (idToken ${idToken.length} chars)');
+      }
+
+      final response = await http
+          .post(
+            url,
+            headers: _headers(),
+            body: jsonEncode({'IdToken': idToken}),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      if (kDebugMode) print('API GOOGLE LOGIN RESPONSE: ${response.statusCode}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+
+      if (kDebugMode) print('API GOOGLE LOGIN BODY: ${response.body}');
+
+      // 400 = no token in the body, 401 = token rejected or no verified email. Both arrive in the
+      // API's standard { errorCode, message } shape, already localized.
+      try {
+        final errorData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'statusCode': response.statusCode,
+          'errorCode': errorData['errorCode'],
+          'message': errorData['message'],
+        };
+      } catch (_) {
+        return {'success': false, 'message': response.body};
+      }
+    } catch (e) {
+      if (kDebugMode) print('API GOOGLE LOGIN EXCEPTION: $e');
+      return {'success': false, 'message': null, 'networkError': true};
+    }
+  }
   /// Step 1 of the phone-first registration flow. Sends only the phone number; the backend
   /// replies by dispatching a 6-digit WhatsApp OTP. No account is created yet.
   static Future<Map<String, dynamic>> startRegistration(

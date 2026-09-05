@@ -2,6 +2,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'services/google_sign_in_service.dart';
+import 'widgets/google_logo.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
@@ -124,6 +126,45 @@ class _LoginScreenState extends State<LoginScreen> {
       // login, and the toast only delayed that with something to dismiss.
       Navigator.of(context)
           .pushReplacementNamed(role == 'Driver' ? '/driver-main' : '/main');
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _isLoading = true);
+    try {
+      final result = await GoogleSignInService.signIn();
+
+      if (!mounted) return;
+
+      switch (result.status) {
+        case GoogleSignInStatus.cancelled:
+          // Dismissing the account picker is a decision, not a failure - say nothing.
+          return;
+        case GoogleSignInStatus.failed:
+          CustomToast.show(context,
+              message: l10n.googleSignInFailed, type: ToastType.error);
+          return;
+        case GoogleSignInStatus.success:
+          break;
+      }
+
+      final response = await ApiService.googleLogin(result.idToken!);
+      if (!mounted) return;
+
+      if (response['success'] == true) {
+        await _handleAuthSuccess(response['data']);
+      } else {
+        // Our own Firebase session has served its purpose and would otherwise make the next
+        // attempt silently reuse this account instead of showing the picker.
+        await GoogleSignInService.signOut();
+        if (!mounted) return;
+        CustomToast.show(context,
+            message: response['message']?.toString() ?? l10n.googleSignInFailed,
+            type: ToastType.error);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -315,6 +356,55 @@ class _LoginScreenState extends State<LoginScreen> {
                                 l10n.signIn,
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                               ),
+                      ),
+                    ),
+                    // Continue with Google. Unlike Apple this is shown on both platforms - Google
+                    // sign-in is supported on Android and iOS alike. Styled as a white, bordered
+                    // counterpart to the primary button: same height and radius, so the two read as
+                    // a pair rather than two unrelated controls.
+                    const SizedBox(height: 14),
+                    Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.neutral900.withValues(alpha: 0.06),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        child: InkWell(
+                          onTap: _isLoading ? null : _signInWithGoogle,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppTheme.neutral200, width: 1.5),
+                            ),
+                            child: Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const GoogleLogo(size: 22),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    l10n.continueWithGoogle,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.neutral900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     // Sign in with Apple — only shown when explicitly enabled

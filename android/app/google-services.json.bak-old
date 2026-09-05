@@ -20,10 +20,6 @@
             "package_name": "com.kalbouneh.naqa",
             "certificate_hash": "877cf6f9f1361316d6e4d3f9f9145265608a2305"
           }
-        },
-        {
-          "client_id": "343332964757-99i39t0h9s1sfqnmii523jsvv2l437v8.apps.googleusercontent.com",
-          "client_type": 3
         }
       ],
       "api_key": [
@@ -33,19 +29,7 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "343332964757-99i39t0h9s1sfqnmii523jsvv2l437v8.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "343332964757-eg18tg3vue22pti9f3t2labtj5n1qrlu.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.kalbouneh.cleanyjo"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

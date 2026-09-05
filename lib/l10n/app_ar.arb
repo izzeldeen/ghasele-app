@@ -42,6 +42,8 @@
   "curtains": "ستائر",
   "jod": "دينار",
   "signIn": "تسجيل الدخول",
+  "continueWithGoogle": "المتابعة باستخدام Google",
+  "googleSignInFailed": "تعذّر تسجيل الدخول عبر Google. يرجى المحاولة مرة أخرى.",
   "enterEmail": "أدخل بريدك الإلكتروني",
   "enterPassword": "أدخل كلمة المرور",
   "enterName": "أدخل اسمك الكامل",
