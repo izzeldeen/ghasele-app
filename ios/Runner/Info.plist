@@ -4,6 +4,15 @@
 	<dict>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<!-- The app ships Arabic and English. Without this iOS reports only the
+		     development region, so an Arabic device is not told the app speaks its
+		     language and the App Store lists English alone. The name itself stays
+		     "Cleanyjo" in both: there is no localized InfoPlist.strings overriding it. -->
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>en</string>
+			<string>ar</string>
+		</array>
 		<key>CFBundleDisplayName</key>
 		<string>Cleanyjo</string>
 		<key>CFBundleExecutable</key>

@@ -89,7 +89,10 @@ class MyApp extends StatelessWidget {
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, child) {
         return MaterialApp(
-          title: 'كليني',
+          // The brand name, not a translation of it, and the same string in both
+          // languages. Android shows this in the task switcher while the launcher shows
+          // android:label, so anything else here makes one app look like two.
+          title: 'Cleanyjo',
           locale: localeProvider.locale,
           localizationsDelegates: [
             AppLocalizations.delegate,
