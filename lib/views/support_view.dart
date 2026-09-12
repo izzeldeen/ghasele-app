@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ghasele/utils/jordan_phone.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghasele/services/api_service.dart';
@@ -32,15 +34,13 @@ class _SupportViewState extends State<SupportView> {
       _userId = prefs.getString('user_id') ?? '';
       _token = prefs.getString('auth_token') ?? '';
 
-      if (_userId!.isEmpty || _token!.isEmpty) {
-        if (mounted) setState(() => _isLoadingTickets = false);
-        return;
-      }
+      // A guest has no account to list tickets by, so theirs are fetched with the
+      // device token instead - the same value stamped on the ticket when it was opened.
+      final isGuest = _userId!.isEmpty || _token!.isEmpty;
 
-      final result = await ApiService.getUserTickets(
-        userId: _userId!,
-        token: _token!,
-      );
+      final result = isGuest
+          ? await ApiService.getGuestTickets()
+          : await ApiService.getUserTickets(userId: _userId!, token: _token!);
 
       if (mounted) {
         setState(() {
@@ -567,9 +567,15 @@ class _CreateTicketViewState extends State<CreateTicketView> {
   final _formKey = GlobalKey<FormState>();
   final _subjectController = TextEditingController();
   final _messageController = TextEditingController();
-  
+  final _phoneController = TextEditingController();
+
   String _selectedCategory = 'Order Issue';
   bool _isSubmitting = false;
+
+  /// Whether the form is being filled in without an account. Starts true so the contact
+  /// field is present on the first frame rather than appearing once prefs have loaded,
+  /// which would shift the form under the user's finger.
+  bool _isGuest = true;
 
   final ImagePicker _picker = ImagePicker();
   XFile? _photo;
@@ -587,9 +593,24 @@ class _CreateTicketViewState extends State<CreateTicketView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadGuestState();
+  }
+
+  Future<void> _loadGuestState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (mounted) {
+      setState(() => _isGuest = token == null || token.isEmpty);
+    }
+  }
+
+  @override
   void dispose() {
     _subjectController.dispose();
     _messageController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -651,21 +672,19 @@ class _CreateTicketViewState extends State<CreateTicketView> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('user_id') ?? '';
       final token = prefs.getString('auth_token') ?? '';
+      // _isGuest is what the contact-number field validated against, so it decides here
+      // too - the form and the request must not disagree about whether one was required.
+      final isGuest = _isGuest || token.isEmpty;
 
-      if (userId.isEmpty || token.isEmpty) {
-        _showMessage(l10n.pleaseLogin, isError: true);
-        setState(() => _isSubmitting = false);
-        return;
-      }
-
+      // The ticket is filed against the account behind the token, or - for a guest -
+      // against this device, with the number they just typed as the way to reach them.
       final result = await ApiService.createTicket(
-        userId: userId,
         subject: _subjectController.text.trim(),
         message: _messageController.text.trim(),
         category: _selectedCategory,
-        token: token,
+        token: isGuest ? null : token,
+        contactPhoneNumber: isGuest ? jordanPhoneToE164(_phoneController.text) : null,
         attachmentPath: _photo?.path,
       );
 
@@ -806,6 +825,12 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         return null;
                       },
                     ),
+                    if (_isGuest) ...[
+                      const SizedBox(height: 24),
+                      _buildLabel(l10n.contactNumber),
+                      const SizedBox(height: 10),
+                      _buildContactNumberField(l10n),
+                    ],
                     const SizedBox(height: 24),
                     _buildLabel(l10n.photoOptional),
                     const SizedBox(height: 10),
@@ -830,6 +855,47 @@ class _CreateTicketViewState extends State<CreateTicketView> {
         color: AppTheme.neutral500,
         letterSpacing: 0.5,
       ),
+    );
+  }
+
+  /// Contact number, shown only to guests and required of them: their ticket has no
+  /// account behind it, so this is the only way support can reach them.
+  Widget _buildContactNumberField(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.contactNumberTicketHint,
+          style: const TextStyle(fontSize: 13, height: 1.4, color: AppTheme.neutral500),
+        ),
+        const SizedBox(height: 10),
+        // Phone numbers read left-to-right in every locale, so the field is pinned to
+        // LTR. Inheriting the ambient direction puts the "+962 " prefix on the right in
+        // Arabic, where it reads as a suffix.
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            textAlign: TextAlign.left,
+            // Same shape the checkout dialog and signup screen accept, so one customer
+            // cannot end up with a number the rest of the app would reject.
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ],
+            decoration: _inputDecoration('7XXXXXXXX').copyWith(prefixText: '+962 '),
+            style: const TextStyle(fontWeight: FontWeight.w600),
+            validator: (value) {
+              if (!_isGuest) return null;
+              if (value == null || value.trim().isEmpty) {
+                return l10n.contactNumberRequired;
+              }
+              return localJordanDigits(value) == null ? l10n.invalidPhoneNumber : null;
+            },
+          ),
+        ),
+      ],
     );
   }
 

@@ -18,6 +18,13 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
   Map<String, dynamic>? _args;
   bool _checkedSavedStatus = false;
 
+  /// Whether this order was placed without an account.
+  ///
+  /// Saved locations hang off a user row, so there is nowhere to put one for a guest.
+  /// Starts true so the prompt is never shown during the moment before the session has
+  /// been read - offering it and then withdrawing it would be worse than a short delay.
+  bool _isGuest = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -36,7 +43,9 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
       final String? token = prefs.getString('auth_token');
       final String? userId = prefs.getString('user_id');
 
-      if (token == null || userId == null) return;
+      final bool guest = token == null || token.isEmpty || userId == null || userId.isEmpty;
+      if (mounted) setState(() => _isGuest = guest);
+      if (guest) return;
 
       final result = await ApiService.getUserLocations(
         userId: userId,
@@ -72,7 +81,11 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
 
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      // Named apart from this State's own context on purpose. Every toast below fires
+      // after the dialog has been popped, and the dialog's context is defunct by then -
+      // using it throws "_dependents.isEmpty is not true" and takes the screen down.
+      // The toasts belong to this screen, so they use this screen's context.
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.saveLocation),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -90,13 +103,13 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
               if (nameController.text.isEmpty) return;
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
 
               setState(() => _isSaving = true);
 
@@ -114,6 +127,9 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                     token: token,
                   );
 
+                  // The save outlives the screen if the customer navigates away mid-request.
+                  if (!mounted) return;
+
                   if (result['success']) {
                     CustomToast.show(context, message: l10n.locationSaved, type: ToastType.success);
                     setState(() {
@@ -122,9 +138,16 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   } else {
                     CustomToast.show(context, message: 'Failed to save location', type: ToastType.error);
                   }
+                } else if (mounted) {
+                  // Guest checkout reaches this screen too, and a guest has no account to
+                  // attach the location to. Without this the dialog just closed and the
+                  // location was silently dropped.
+                  CustomToast.show(context, message: l10n.loginToSaveLocation, type: ToastType.error);
                 }
               } catch (e) {
-                CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+                if (mounted) {
+                  CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+                }
               } finally {
                 if (mounted) setState(() => _isSaving = false);
               }
@@ -190,8 +213,10 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                   ),
                 ),
                 
-                // Save Location Prompt
-                if (!_isAlreadySaved && _args != null) ...[
+                // Save Location Prompt - signed-in customers only. A guest has no user
+                // row for a saved location to belong to, so offering it and then refusing
+                // the save was just a dead end.
+                if (!_isGuest && !_isAlreadySaved && _args != null) ...[
                   const SizedBox(height: 40),
                   Container(
                     padding: const EdgeInsets.all(20),

@@ -287,7 +287,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 100),
+                    // A guest reaches this screen from the account tab and has to be able
+                    // to get back to browsing without signing in - guest checkout is a
+                    // supported path, so the login screen cannot be a dead end.
+                    //
+                    // Hidden when there is nothing underneath to return to: after a sign-out
+                    // or a password reset this screen is the root of the stack, and a back
+                    // button there would either do nothing or reach a screen the cleared
+                    // session no longer permits.
+                    if (Navigator.canPop(context)) ...[
+                      const SizedBox(height: 20),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: primaryColor),
+                        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(height: 30),
+                    ] else
+                      const SizedBox(height: 100),
                     // Logo Section
                     Center(
                       child: Image.asset(

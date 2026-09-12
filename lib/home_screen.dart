@@ -26,11 +26,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<OrdersViewState> _ordersKey = GlobalKey<OrdersViewState>();
   int _unreadCount = 0;
 
+  /// True until a stored session is found. Profile is the only account-scoped tab: a guest
+  /// tapping it is sent to the login screen. Orders stays open - a guest's orders are looked
+  /// up by device token, so the tab has something real to show without an account.
+  bool _isGuest = true;
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _loadAuthState();
     _fetchUnreadCount();
+  }
+
+  Future<void> _loadAuthState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (!mounted) return;
+    setState(() => _isGuest = token == null || token.isEmpty);
+
+    // Opening straight onto Profile is the same request as tapping the tab, so a guest gets
+    // Home underneath and the login screen on top.
+    if (_isGuest && _currentIndex == 4) {
+      setState(() => _currentIndex = 2);
+      await Navigator.of(context).pushNamed('/login');
+    }
   }
 
   Future<void> _fetchUnreadCount() async {
@@ -138,6 +158,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Sends a guest to the login screen. On a successful sign-in the login screen replaces
+  /// itself with a fresh /main, so the only way back here is the guest backing out - in which
+  /// case the session is re-read in case they signed in through another path.
+  Future<void> _promptSignIn() async {
+    await Navigator.of(context).pushNamed('/login');
+    if (!mounted) return;
+    await _loadAuthState();
+  }
+
   Widget _buildModernBottomNav(AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
@@ -197,6 +226,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GestureDetector(
       onTap: () {
+        // Profile only means anything against an account. A guest gets the login screen and
+        // stays on the tab they were on, rather than switching to a signed-out one.
+        if (_isGuest && index == 4) {
+          _promptSignIn();
+          return;
+        }
         setState(() {
           _currentIndex = index;
         });

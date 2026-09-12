@@ -24,9 +24,16 @@ class _ProfileViewState extends State<ProfileView> {
     _loadUserData();
   }
 
+  /// True when nobody is signed in. The app is usable as a guest, so this screen has to render
+  /// something sensible rather than assuming a stored profile exists.
+  bool _isGuest = true;
+
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (!mounted) return;
     setState(() {
+      _isGuest = token == null || token.isEmpty;
       _userName = prefs.getString('user_fullname') ?? 'User';
       _userEmail = prefs.getString('user_email') ?? '';
       _userPhone = prefs.getString('user_phone') ?? '';
@@ -210,8 +217,11 @@ class _ProfileViewState extends State<ProfileView> {
                   ),
                   const SizedBox(height: 32),
                   _buildLogoutButton(l10n),
-                  const SizedBox(height: 16),
-                  _buildDeleteAccountButton(l10n),
+                  // Nothing to delete without an account, and the endpoint is authorized anyway.
+                  if (!_isGuest) ...[
+                    const SizedBox(height: 16),
+                    _buildDeleteAccountButton(l10n),
+                  ],
                   const SizedBox(height: 100),
                 ],
               ),
@@ -241,19 +251,22 @@ class _ProfileViewState extends State<ProfileView> {
             child: CircleAvatar(
               radius: 50,
               backgroundColor: Colors.white.withOpacity(0.1),
-              child: Text(
-                _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U',
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                ),
-              ),
+              child: _isGuest
+                  ? const Icon(Icons.person_outline_rounded,
+                      size: 44, color: Colors.white)
+                  : Text(
+                      _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U',
+                      style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            _userName,
+            _isGuest ? l10n.guest : _userName,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
@@ -262,7 +275,9 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const SizedBox(height: 4),
           Text(
-            _userEmail.isNotEmpty ? _userEmail : l10n.welcomeBack,
+            _isGuest
+                ? l10n.signInToSeeYourOrders
+                : (_userEmail.isNotEmpty ? _userEmail : l10n.welcomeBack),
             style: TextStyle(
               fontSize: 14,
               color: Colors.white.withOpacity(0.7),
@@ -357,6 +372,29 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildLogoutButton(AppLocalizations l10n) {
+    // A guest has no session to end, so the same slot offers the way in instead. Without this
+    // there is no route to the login screen at all once the app stops opening on it.
+    if (_isGuest) {
+      return SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton.icon(
+          onPressed: () => Navigator.of(context).pushNamed('/login'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.brandGreen,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          icon: const Icon(Icons.login_rounded, size: 20),
+          label: Text(
+            l10n.signIn,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       width: double.infinity,
       height: 56,

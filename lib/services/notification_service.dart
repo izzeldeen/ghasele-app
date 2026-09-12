@@ -84,8 +84,31 @@ class NotificationService {
     }
   }
 
+  /// Key the last known FCM token is cached under, so checkout can stamp it on a guest
+  /// order without waiting on Firebase.
+  static const String _prefsKey = 'fcm_token';
+
+  /// The last FCM token this device was issued, or null before one has been obtained.
+  ///
+  /// A guest order carries this value to the server, because a guest has no user row for
+  /// the token to live on - it is the only way an order update can reach their phone.
+  static Future<String?> cachedToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_prefsKey);
+    return (value == null || value.isEmpty) ? null : value;
+  }
+
+  /// Stores the token where it can be reached without Firebase, then tells the server.
+  ///
+  /// Which server call depends on who is using the app: a signed-in customer's token goes
+  /// on their user row, while a guest's is written onto the orders they placed from this
+  /// device. Firebase reissues tokens on reinstall, restore and its own schedule, so
+  /// without the guest branch the token stamped at checkout goes stale and their pushes
+  /// stop arriving with nothing to show that they did.
   static Future<void> _saveTokenToBackend(String fcmToken) async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefsKey, fcmToken);
+
     final String? userId = prefs.getString('user_id');
     final String? authToken = prefs.getString('auth_token');
 
@@ -101,8 +124,14 @@ class NotificationService {
       if (!result['success']) {
         if (kDebugMode) print('🔔 Backend error: ${result['message']}');
       }
-    } else {
-      if (kDebugMode) print('🔔 userId or authToken missing in SharedPreferences');
+      return;
+    }
+
+    // Signed out: the device token in the request header is what identifies the orders to
+    // update, so this can only ever touch orders placed from this device.
+    final result = await ApiService.updateGuestFcmToken(fcmToken: fcmToken);
+    if (kDebugMode) {
+      print('🔔 Guest FCM update: ${result['success']} (${result['data']})');
     }
   }
 

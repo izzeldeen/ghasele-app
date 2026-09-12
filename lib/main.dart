@@ -25,6 +25,7 @@ import 'theme/app_theme.dart';
 
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:ghasele/services/device_service.dart';
 import 'package:ghasele/services/notification_service.dart';
 
 /// Accepts self-signed certificates so a local dev API can be reached over
@@ -44,6 +45,10 @@ void main() async {
   if (kDebugMode) {
     HttpOverrides.global = MyHttpOverrides();
   }
+
+  // Ahead of the first frame because ApiService attaches this to every request, and a
+  // guest order or ticket sent before it is loaded would have nothing to file it under.
+  await DeviceService.ensureToken();
 
   // Firebase itself is a local, fast init and messaging depends on it, so it
   // stays ahead of the first frame.

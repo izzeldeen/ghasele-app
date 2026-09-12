@@ -76,7 +76,11 @@ class _SplashScreenState extends State<SplashScreen>
     final token = prefs.getString('auth_token');
     if (!mounted) return;
 
-    String route = '/login';
+    // Guests go straight to the app rather than a login wall. The home screen works without a
+    // token - the map, saved locations and pricing all degrade to their signed-out state - and an
+    // account is only required at checkout, where a contact number is collected instead.
+    // Drivers still need their own shell, which only a signed-in role can select.
+    String route = '/main';
     if (token != null && token.isNotEmpty) {
       route = prefs.getString('user_role') == 'Driver' ? '/driver-main' : '/main';
     }

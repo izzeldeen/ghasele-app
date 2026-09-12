@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrdersView extends StatefulWidget {
@@ -44,20 +45,30 @@ class OrdersViewState extends State<OrdersView> {
     }
   }
 
+  /// Loads one page of orders for whoever is using the app.
+  ///
+  /// A guest has no account to look orders up by, so their orders are fetched by the
+  /// device token instead - the same value that was stamped on them at checkout.
+  Future<Map<String, dynamic>> _fetchPage(int page) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final userId = prefs.getString('user_id');
+
+    if (token == null || token.isEmpty || userId == null || userId.isEmpty) {
+      return ApiService.getGuestOrders(page: page, pageSize: _pageSize);
+    }
+
+    return ApiService.getUserOrders(
+      userId: userId,
+      token: token,
+      page: page,
+      pageSize: _pageSize,
+    );
+  }
+
   Future<void> fetchOrders() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-      final userId = prefs.getString('user_id');
-
-      if (token == null || userId == null) return;
-
-      final result = await ApiService.getUserOrders(
-        userId: userId,
-        token: token,
-        page: 1,
-        pageSize: _pageSize,
-      );
+      final result = await _fetchPage(1);
       if (mounted) {
         if (result['success']) {
           final data = result['data'] as List<dynamic>;
@@ -83,19 +94,8 @@ class OrdersViewState extends State<OrdersView> {
   Future<void> _loadMoreOrders() async {
     setState(() => _isLoadingMore = true);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-      final userId = prefs.getString('user_id');
-
-      if (token == null || userId == null) return;
-
       final nextPage = _page + 1;
-      final result = await ApiService.getUserOrders(
-        userId: userId,
-        token: token,
-        page: nextPage,
-        pageSize: _pageSize,
-      );
+      final result = await _fetchPage(nextPage);
       if (mounted) {
         if (result['success']) {
           final data = result['data'] as List<dynamic>;
@@ -292,7 +292,8 @@ class OrdersViewState extends State<OrdersView> {
     final l10n = AppLocalizations.of(context)!;
     final items = order['items'] as List<dynamic>? ?? [];
     final status = order['status'] as String;
-    
+    final appointment = _formatAppointment(context, order);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -349,6 +350,25 @@ class OrdersViewState extends State<OrdersView> {
                 ),
               ],
             ),
+            if (appointment != null) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.event_outlined, size: 18, color: AppTheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${l10n.collectionTime}: $appointment',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.neutral800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 32),
             Text(
               l10n.items,
@@ -553,6 +573,51 @@ class OrdersViewState extends State<OrdersView> {
     );
   }
 
+  /// The booked collection appointment, e.g. "غداً - 1:00 م - 2:00 م".
+  ///
+  /// Read from the order's own stored schedule, never recomputed from the window: an
+  /// order booked for tomorrow must keep reading as tomorrow, and the stored date is
+  /// the only value that stays true as the days roll over.
+  ///
+  /// Null for orders placed before scheduling existed, which have no appointment to show.
+  String? _formatAppointment(BuildContext context, Map<String, dynamic> order) {
+    final rawDate = order['scheduledDate'] as String?;
+    if (rawDate == null) return null;
+
+    final date = DateTime.tryParse(rawDate);
+    if (date == null) return null;
+
+    final l10n = AppLocalizations.of(context)!;
+    final tag = Localizations.localeOf(context).toLanguageTag();
+
+    final today = DateUtils.dateOnly(DateTime.now());
+    final days = DateUtils.dateOnly(date).difference(today).inDays;
+    final dayLabel = days == 0
+        ? l10n.today
+        : days == 1
+            ? l10n.tomorrow
+            : DateFormat.yMMMEd(tag).format(date);
+
+    final start = order['scheduledStart'] as String?;
+    final end = order['scheduledEnd'] as String?;
+    if (start == null || end == null) return dayLabel;
+
+    final time = DateFormat.jm(tag);
+    return '$dayLabel - ${time.format(_at(date, start))} - ${time.format(_at(date, end))}';
+  }
+
+  /// Puts an "HH:mm" from the server onto [date] so only the time needs formatting.
+  DateTime _at(DateTime date, String hhmm) {
+    final parts = hhmm.split(':');
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      int.tryParse(parts.isNotEmpty ? parts[0] : '') ?? 0,
+      int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0,
+    );
+  }
+
   String _formatDate(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
@@ -572,6 +637,7 @@ class OrdersViewState extends State<OrdersView> {
     required String total,
   }) {
     final l10n = AppLocalizations.of(context)!;
+    final appointment = _formatAppointment(context, order);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -639,6 +705,25 @@ class OrdersViewState extends State<OrdersView> {
                       ),
                     ],
                   ),
+                  if (appointment != null) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(Icons.event_outlined, size: 16, color: AppTheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${l10n.collectionTime}: $appointment',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.neutral800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   if ((order['driverName'] ?? order['DriverName']) != null) ...[
                     const SizedBox(height: 12),
                     Row(

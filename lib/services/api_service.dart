@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' show MediaType;
 
+import 'device_service.dart';
+
 /// Answer from `POST /api/auth/phone-registered`.
 class PhoneCheck {
   /// True when the number already has a complete account and signup must not proceed.
@@ -17,22 +19,23 @@ class PhoneCheck {
 }
 
 class ApiService {
-  // Production API. This is the default so a release build needs no extra flags.
+  // The single base URL for every backend call in this app. Currently the local API.
   //
   // The /api suffix is required - controllers are routed at "api/[controller]".
   //
-  // Local development against IIS Express (binds https on localhost:44386 only) needs an
-  // adb reverse tunnel so `localhost` inside the emulator resolves to this machine:
+  // IIS Express binds https on localhost:44386 only, so an emulator needs a reverse
+  // tunnel for `localhost` inside it to resolve to this machine. Re-run it after
+  // restarting the emulator or the adb server:
   //   adb reverse tcp:44386 tcp:44386
-  //   flutter run --dart-define=API_BASE_URL=https://localhost:44386/api
-  // Re-run the tunnel after restarting the emulator or the adb server.
   //
-  // Against Kestrel (binds 0.0.0.0, so no tunnel needed):
-  //   emulator         --dart-define=API_BASE_URL=http://10.0.2.2:5001/api
-  //   device on Wi-Fi  --dart-define=API_BASE_URL=http://192.168.1.50:5001/api
+  // Needs a debug build: the dev certificate is self-signed and only accepted under
+  // kDebugMode (see MyHttpOverrides in main.dart).
+  //
+  // A physical device cannot reach `localhost`. Run Kestrel (binds 0.0.0.0) and override:
+  //   --dart-define=API_BASE_URL=http://192.168.1.50:5001/api
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.cleanyjo.com/api',
+    defaultValue: 'https://localhost:44386/api',
   );
 
   /// The API origin without the `/api` suffix. Static assets such as support-ticket
@@ -57,9 +60,14 @@ class ApiService {
   /// Standard headers for an API call. Pass [token] for authenticated requests,
   /// and set [json] to false for requests that carry no JSON body.
   static Map<String, String> _headers({String? token, bool json = true}) {
+    final deviceToken = DeviceService.token;
     return {
       if (json) 'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
+      // Sent on every request, signed in or not: it is what the server files a guest's
+      // orders and tickets under, and what the guest listings are looked up by. A
+      // header rather than a query parameter so the value stays out of access logs.
+      if (deviceToken != null) 'X-Device-Token': deviceToken,
       'Accept-Language': language,
     };
   }
@@ -155,9 +163,9 @@ class ApiService {
   static Future<Map<String, dynamic>> firebaseLogin(String idToken) async {
     final url = Uri.parse('$baseUrl/auth/firebase-login');
     try {
-      // The single most useful line when this fails: it shows whether --dart-define=API_BASE_URL
-      // actually took effect. The default (localhost:44386) is unreachable from an emulator, and
-      // that is indistinguishable from a backend problem without seeing the URL.
+      // The single most useful line when this fails: it shows which backend the app is
+      // actually talking to. A wrong or unreachable base URL is indistinguishable from a
+      // backend problem without seeing it.
       if (kDebugMode) {
         print('API FIREBASE LOGIN -> $url (idToken ${idToken.length} chars)');
       }
@@ -622,9 +630,27 @@ class ApiService {
     }
   }
 
-  /// Delivery prices the operator configured in the admin panel, used to label
-  /// the Standard/Express choice at checkout. Display only - the server stamps
-  /// the authoritative fee on the order from its own settings row.
+  /// The operator's trip schedule, projected onto the next [days] calendar dates.
+  ///
+  /// This is the only source of collection times the customer may choose from - the app
+  /// never offers a time of its own. Anonymous, because a guest has to see the schedule
+  /// before there is any account to authenticate with.
+  static Future<Map<String, dynamic>> getDeliverySlots({int days = 7}) async {
+    final url = Uri.parse('$baseUrl/delivery-windows/slots?days=$days');
+    try {
+      final response = await http.get(url, headers: _headers(json: false));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return _errorResult(response);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// The delivery fee the operator configured, shown at checkout. Display only - the
+  /// server stamps the authoritative fee on the order from its own settings row.
   static Future<Map<String, dynamic>> getDeliveryPricing(String token) async {
     final url = Uri.parse('$baseUrl/settings/delivery-pricing');
     try {
@@ -639,16 +665,33 @@ class ApiService {
     }
   }
 
+  /// Places an order, signed in or as a guest.
+  ///
+  /// Signed in: pass [token]. The server reads the owner from the token's claims, which is why no
+  /// user id is sent - an anonymous caller could otherwise attach an order to someone else's
+  /// account just by passing their id.
+  ///
+  /// Guest: omit [token] and pass [contactPhoneNumber]. The server flags the order as a guest
+  /// order and stores that number, since there is no user row for a driver to read one from.
   static Future<Map<String, dynamic>> createOrder({
     required double lat,
     required double lng,
-    required String userId,
-    required String token,
+    String? token,
+    String? contactPhoneNumber,
+
+    /// This device's FCM token, for a guest order only. It is stored on the order because a
+    /// guest has no user row to hold one, and it is what status pushes are sent to. Ignored
+    /// by the server for a signed-in order, which pushes to the account's token instead.
+    String? fcmToken,
     String? marketingCode,
 
-    /// 'Normal' or 'Express' - the server maps this to the delivery fee it
-    /// stamps on the order.
-    String type = 'Normal',
+    /// The trip schedule slot the customer booked, from [getDeliverySlots]. The server
+    /// re-validates the pair, so a slot that filled up or started while the sheet was
+    /// open is rejected rather than quietly accepted.
+    required String deliveryWindowId,
+
+    /// Local collection date for that window, "yyyy-MM-dd".
+    required String scheduledDate,
   }) async {
     final url = Uri.parse('$baseUrl/orders');
     try {
@@ -658,13 +701,15 @@ class ApiService {
         body: jsonEncode({
           'lat': lat,
           'long': lng,
-          'userId': userId,
+          'contactPhoneNumber': contactPhoneNumber,
+          'fcmToken': fcmToken,
           'totalAmount': 0.0,
           'netAmount': 0.0,
           'deliveryAmount': 0.0,
           'cleanerAmount': 0.0,
           'marketingCode': marketingCode,
-          'type': type,
+          'deliveryWindowId': deliveryWindowId,
+          'scheduledDate': scheduledDate,
         }),
       );
 
@@ -697,6 +742,53 @@ class ApiService {
       } else {
         return {'success': false, 'message': response.body};
       }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Orders placed from this device without an account.
+  ///
+  /// Identified by the X-Device-Token header alone, which [_headers] adds - there is no
+  /// Points this device's open guest orders at the current FCM token.
+  ///
+  /// Firebase reissues tokens, and a guest's token lives on the orders themselves - there is no
+  /// user row to update instead - so without this the pushes for an order placed before the
+  /// change would be sent to a token that no longer exists. The device is identified by the
+  /// X-Device-Token header, so this can only ever rewrite orders placed from this device.
+  static Future<Map<String, dynamic>> updateGuestFcmToken({
+    required String fcmToken,
+  }) async {
+    final url = Uri.parse('$baseUrl/orders/guest/fcm-token');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers(),
+        body: jsonEncode({'fcmToken': fcmToken}),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return _errorResult(response);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// user id or bearer token to send. Returns only this device's guest orders.
+  static Future<Map<String, dynamic>> getGuestOrders({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final url = Uri.parse('$baseUrl/orders/guest?page=$page&pageSize=$pageSize');
+    try {
+      final response = await http.get(url, headers: _headers(json: false));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return _errorResult(response);
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
@@ -799,23 +891,35 @@ class ApiService {
   //
   // Sent as multipart/form-data so an optional photo can ride along in the same
   // request. The backend endpoint is [Consumes("multipart/form-data")].
+  /// Opens a support ticket, signed in or as a guest.
+  ///
+  /// Pass [token] for a signed-in customer; the server takes the owner from it. A guest
+  /// sends no token and must supply [contactPhoneNumber] instead - with no account
+  /// behind the ticket, it is the only way support can reach them. Either way the
+  /// device token in the headers is what lets the app list the ticket again afterwards.
   static Future<Map<String, dynamic>> createTicket({
-    required String userId,
     required String subject,
     required String message,
     required String category,
-    required String token,
+    String? token,
+    String? contactPhoneNumber,
     String? attachmentPath,
   }) async {
     final url = Uri.parse('$baseUrl/support-tickets');
     try {
       final request = http.MultipartRequest('POST', url)
         ..headers.addAll(_headers(token: token, json: false))
-        ..fields['userId'] = userId
         ..fields['subject'] = subject
         ..fields['message'] = message
         ..fields['category'] = category
         ..fields['status'] = 'Open';
+
+      // Deliberately no userId field: the server derives the owner from the token, so
+      // sending one would either be ignored or, worse, let an anonymous caller file a
+      // ticket against someone else's account.
+      if (contactPhoneNumber != null && contactPhoneNumber.isNotEmpty) {
+        request.fields['contactPhoneNumber'] = contactPhoneNumber;
+      }
 
       if (attachmentPath != null && attachmentPath.isNotEmpty) {
         request.files.add(
@@ -860,6 +964,22 @@ class ApiService {
       } else {
         return {'success': false, 'message': response.body};
       }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Tickets opened from this device without an account, identified by the
+  /// X-Device-Token header that [_headers] adds.
+  static Future<Map<String, dynamic>> getGuestTickets() async {
+    final url = Uri.parse('$baseUrl/support-tickets/guest');
+    try {
+      final response = await http.get(url, headers: _headers(json: false));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return _errorResult(response);
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }

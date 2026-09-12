@@ -138,6 +138,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get continueWithGoogle => 'المتابعة باستخدام Google';
 
   @override
+  String get guest => 'زائر';
+
+  @override
+  String get signInToSeeYourOrders => 'سجّل الدخول لعرض طلباتك وحفظ عناوينك';
+
+  @override
   String get continueWithApple => 'المتابعة باستخدام Apple';
 
   @override
@@ -262,6 +268,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get contactNumberRequiredMessage =>
       'نحتاج رقم هاتف ليتمكن السائق من التواصل معك بشأن هذا الطلب.';
+
+  @override
+  String get contactNumber => 'رقم التواصل';
+
+  @override
+  String get contactNumberRequired => 'يرجى إدخال رقم للتواصل';
+
+  @override
+  String get contactNumberTicketHint =>
+      'أنت غير مسجل الدخول، لذا سيستخدم فريق الدعم هذا الرقم للتواصل معك.';
 
   @override
   String get or => 'أو';
@@ -642,6 +658,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationOutsideAmman => 'الرجاء اختيار موقع داخل عمّان، الأردن.';
 
   @override
+  String get loginToSaveLocation => 'سجّل الدخول لحفظ هذا الموقع';
+
+  @override
   String get driverCollectionTab => 'الاستلام';
 
   @override
@@ -709,20 +728,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverMarkDelivered => 'تحديد كتم التوصيل';
 
   @override
-  String get serviceSpeed => 'سرعة الخدمة';
-
-  @override
-  String get serviceNormal => 'عادي';
-
-  @override
-  String get serviceNormalDesc => 'جاهز خلال 48 ساعة';
-
-  @override
-  String get serviceExpress => 'مستعجل';
-
-  @override
-  String get serviceExpressDesc => 'جاهز خلال 24 ساعة';
-
-  @override
   String get jodShort => 'دينار';
+
+  @override
+  String get collectionTime => 'موعد الاستلام';
+
+  @override
+  String get selectCollectionTime => 'يرجى اختيار موعد الاستلام';
+
+  @override
+  String get noCollectionTimes =>
+      'لا توجد مواعيد استلام متاحة حالياً. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get collectionTimesFailed =>
+      'لم نتمكن من تحميل مواعيد الاستلام. تحقق من اتصالك بالإنترنت.';
+
+  @override
+  String get fullyBooked => 'محجوز بالكامل';
+
+  @override
+  String get tomorrow => 'غداً';
 }

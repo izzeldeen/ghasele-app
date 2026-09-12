@@ -7,8 +7,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 import 'package:ghasele/services/amman_boundary_service.dart';
+import 'package:ghasele/models/delivery_slot.dart';
 import 'package:ghasele/services/api_service.dart';
+import 'package:ghasele/services/notification_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
+import 'package:ghasele/utils/jordan_phone.dart';
+import 'package:ghasele/utils/jordan_time.dart';
 import 'package:ghasele/widgets/custom_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,18 +81,57 @@ class HomeViewState extends State<HomeView> {
   List<dynamic> _userLocations = [];
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _marketingController = TextEditingController();
+
+  /// Owned by the State rather than created per call in [_saveLocation]. A
+  /// per-call controller cannot be released safely: showDialog's future
+  /// completes while the dialog's TextField is still mounted, so disposing it
+  /// there left the field reading a dead controller and took down the tree.
+  final TextEditingController _locationNameController = TextEditingController();
   Timer? _refreshTimer;
 
-  /// Speed the customer picked at checkout, sent to the API as the order's
-  /// `type`. Kept on the state, not in the sheet, so reopening it remembers the
-  /// last choice.
-  String _orderType = 'Normal';
+  /// Whether the app is being used without an account.
+  ///
+  /// Starts true so the save-location button is never shown in the moment before the
+  /// session has been read - offering it and then taking it away reads worse than it
+  /// appearing a beat later.
+  bool _isGuest = true;
 
-  /// Delivery fees from the admin panel's settings row. Null until the fetch
-  /// lands (or if it fails) - the picker then shows the two options without
-  /// prices rather than inventing numbers.
+  /// How far ahead the customer may book: today and tomorrow.
+  ///
+  /// Asked of the server rather than trimmed after the fact, so the horizon lives in one
+  /// place and the app never holds slots it will not offer. Late in the day today
+  /// contributes nothing and the list is tomorrow's windows alone - which is the intent,
+  /// not an empty state.
+  static const int _scheduleHorizonDays = 2;
+
+  /// Collection times from the operator's trip schedule, and the one the customer picked.
+  /// Kept on the state rather than in the sheet so reopening it remembers the choice.
+  List<DeliverySlot> _slots = <DeliverySlot>[];
+  DeliverySlot? _selectedSlot;
+
+  /// Null while the schedule is still loading, so the sheet can show a spinner rather
+  /// than an empty schedule the operator has not actually left empty.
+  bool _slotsLoading = true;
+
+  /// True when the last schedule fetch failed outright - offline, unreachable server,
+  /// an error response.
+  ///
+  /// Kept apart from an empty [_slots] because the two mean opposite things to the
+  /// customer: "we could not reach the server, retry" versus "the operator has published
+  /// no windows". Collapsing them told customers there were no collection times while
+  /// the operator was looking at a full schedule in the dashboard.
+  bool _slotsFailed = false;
+
+  /// The checkout sheet's own setState, held while it is open.
+  ///
+  /// The sheet is a separate route, so this widget's setState does not repaint it. The
+  /// schedule refresh fires as the sheet opens and lands after it is on screen, and
+  /// without this the customer would sit looking at a spinner that never resolves.
+  StateSetter? _sheetSetState;
+
+  /// The delivery fee from the admin panel's settings row. Null until the fetch lands
+  /// (or if it fails) - the sheet then omits the price rather than inventing a number.
   double? _normalDeliveryPrice;
-  double? _expressDeliveryPrice;
 
   @override
   void initState() {
@@ -98,15 +141,15 @@ class HomeViewState extends State<HomeView> {
     checkPendingOrder();
     _fetchUserLocations();
     _fetchDeliveryPricing();
+    _fetchDeliverySlots();
 
     // Set up periodic refresh
     _startRefreshTimer();
   }
 
-  /// Pulls the operator's configured delivery fees so the checkout sheet can
-  /// price the Standard/Express choice. Failures are swallowed: the picker
-  /// still works without prices, and blocking checkout on a settings read
-  /// would be worse than showing the two options bare.
+  /// Pulls the operator's configured delivery fee so the checkout sheet can show it.
+  /// Failures are swallowed: the sheet still works without a price, and blocking
+  /// checkout on a settings read would be worse than omitting the figure.
   Future<void> _fetchDeliveryPricing() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -120,11 +163,64 @@ class HomeViewState extends State<HomeView> {
       setState(() {
         _normalDeliveryPrice = (data['normalDeliveryPrice'] as num?)
             ?.toDouble();
-        _expressDeliveryPrice = (data['expressDeliveryPrice'] as num?)
-            ?.toDouble();
       });
     } catch (e) {
       debugPrint('Error fetching delivery pricing: $e');
+    }
+  }
+
+  /// Loads the operator's trip schedule - the only collection times the customer may
+  /// choose from.
+  ///
+  /// Refetched each time the checkout sheet opens, not just at startup: slots fill up
+  /// and pass, and a sheet opened twenty minutes later would otherwise offer a time
+  /// the server is about to reject.
+  Future<void> _fetchDeliverySlots() async {
+    try {
+      final result = await ApiService.getDeliverySlots(days: _scheduleHorizonDays);
+      if (!mounted) return;
+
+      if (result['success'] != true) {
+        debugPrint('Delivery slots request failed: ${result['message']}');
+        setState(() {
+          _slotsLoading = false;
+          _slotsFailed = true;
+        });
+        _sheetSetState?.call(() {});
+        return;
+      }
+
+      final slots = (result['data'] as List<dynamic>)
+          .map((e) => DeliverySlot.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      void apply() {
+        _slots = slots;
+        _slotsLoading = false;
+        _slotsFailed = false;
+
+        // Drop a selection the refresh has invalidated - the window may have been
+        // deactivated, filled, or simply started since the customer picked it.
+        final stillOffered = slots.where(
+          (s) => s.windowId == _selectedSlot?.windowId &&
+              s.dateKey == _selectedSlot?.dateKey &&
+              s.isAvailable,
+        );
+        _selectedSlot = stillOffered.isEmpty ? null : stillOffered.first;
+      }
+
+      setState(apply);
+      // Repaint the sheet too, if it is the thing currently on screen.
+      _sheetSetState?.call(() {});
+    } catch (e) {
+      debugPrint('Error fetching delivery slots: $e');
+      if (mounted) {
+        setState(() {
+          _slotsLoading = false;
+          _slotsFailed = true;
+        });
+        _sheetSetState?.call(() {});
+      }
     }
   }
 
@@ -183,6 +279,7 @@ class HomeViewState extends State<HomeView> {
     _mapController?.dispose();
     _searchController.dispose();
     _marketingController.dispose();
+    _locationNameController.dispose();
     super.dispose();
   }
 
@@ -475,7 +572,14 @@ class HomeViewState extends State<HomeView> {
       final String? token = prefs.getString('auth_token');
       final String? userId = prefs.getString('user_id');
 
-      if (token == null || userId == null) return;
+      // Doubles as the session check for the save-location affordance: this already
+      // runs on init and after every save, so there is no second place reading the
+      // session and no window where the two disagree.
+      final bool guest =
+          token == null || token.isEmpty || userId == null || userId.isEmpty;
+      if (mounted) setState(() => _isGuest = guest);
+
+      if (guest) return;
 
       final result = await ApiService.getUserLocations(
         userId: userId,
@@ -496,17 +600,17 @@ class HomeViewState extends State<HomeView> {
 
   Future<void> _saveLocation() async {
     final l10n = AppLocalizations.of(context)!;
-    final TextEditingController nameController = TextEditingController();
+    _locationNameController.clear();
 
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.saveLocation),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: nameController,
+              controller: _locationNameController,
               decoration: InputDecoration(
                 labelText: l10n.locationNameHint,
                 border: OutlineInputBorder(),
@@ -521,12 +625,13 @@ class HomeViewState extends State<HomeView> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
-              if (nameController.text.isEmpty) return;
+              final String name = _locationNameController.text.trim();
+              if (name.isEmpty) return;
 
               // The only path that persists coordinates without a service-area
               // check. The camera correction usually gets here first, but a
@@ -536,11 +641,19 @@ class HomeViewState extends State<HomeView> {
               if (!AmmanBoundaryService.isLocationInsideAmman(
                 _selectedPosition,
               )) {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
+                // Say why. Closing the dialog on its own looked like the name
+                // had been rejected, so the customer retyped it instead of
+                // moving the pin.
+                CustomToast.show(
+                  context,
+                  message: l10n.locationOutsideAmman,
+                  type: ToastType.error,
+                );
                 return;
               }
 
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
 
               setState(() => _isLoading = true);
 
@@ -552,11 +665,16 @@ class HomeViewState extends State<HomeView> {
                 if (token != null && userId != null) {
                   final result = await ApiService.addUserLocation(
                     userId: userId,
-                    name: nameController.text,
+                    name: name,
                     lat: _selectedPosition.latitude,
                     lng: _selectedPosition.longitude,
                     token: token,
                   );
+
+                  // The request outlives the dialog and can outlive this tab,
+                  // so every toast past here needs the map to still be on
+                  // screen before it touches a context.
+                  if (!mounted) return;
 
                   if (result['success']) {
                     CustomToast.show(
@@ -572,13 +690,25 @@ class HomeViewState extends State<HomeView> {
                       type: ToastType.error,
                     );
                   }
+                } else if (mounted) {
+                  // A guest has no account for the location to belong to. Saying so is
+                  // the whole fix: this branch used to fall through silently, so the
+                  // dialog closed, nothing was saved, and the customer had no way to
+                  // tell that from the name being rejected.
+                  CustomToast.show(
+                    context,
+                    message: l10n.loginToSaveLocation,
+                    type: ToastType.error,
+                  );
                 }
               } catch (e) {
-                CustomToast.show(
-                  context,
-                  message: 'Error: $e',
-                  type: ToastType.error,
-                );
+                if (mounted) {
+                  CustomToast.show(
+                    context,
+                    message: 'Error: $e',
+                    type: ToastType.error,
+                  );
+                }
               } finally {
                 if (mounted) setState(() => _isLoading = false);
               }
@@ -592,10 +722,6 @@ class HomeViewState extends State<HomeView> {
         ],
       ),
     );
-
-    // Owned by this method rather than the State, so it has to be released
-    // once the dialog closes or every save leaks a controller.
-    nameController.dispose();
   }
 
   Future<void> _getAddressFromLatLng(LatLng position) async {
@@ -854,18 +980,9 @@ class HomeViewState extends State<HomeView> {
   }
 
   /// Strips a leading 0 / 962 / +962 and returns the bare 9-digit local number, or null when it
-  /// is not a valid Jordan mobile number. Mirrors _normalizedPhone in signup_screen.dart.
-  String? _localJordanDigits(String raw) {
-    String phone = raw.trim();
-    if (phone.startsWith('+962')) {
-      phone = phone.substring(4);
-    } else if (phone.startsWith('962')) {
-      phone = phone.substring(3);
-    } else if (phone.startsWith('0')) {
-      phone = phone.substring(1);
-    }
-    return phone.length == 9 ? phone : null;
-  }
+  /// is not a valid Jordan mobile number. Delegates so this screen and the support form cannot
+  /// drift apart on what counts as a valid number.
+  String? _localJordanDigits(String raw) => localJordanDigits(raw);
 
   Future<void> _confirmOrder() async {
     final l10n = AppLocalizations.of(context)!;
@@ -878,40 +995,53 @@ class HomeViewState extends State<HomeView> {
       return;
     }
 
-    // The order carries no phone of its own - CreateOrderDto has no such field, and the driver
-    // reads OrderDto.UserPhoneNumber straight off the user row. An account created through Apple
-    // sign-in has PhoneNumber empty, so without this the order would reach a driver with no way
-    // to contact the customer. Required: no number, no order.
-    if (!await _ensureContactNumber()) return;
+    // Collection is scheduled, never immediate, so there is no sensible default to fall
+    // back on - an order with no slot has no time anyone has agreed to.
+    final slot = _selectedSlot;
+    if (slot == null) {
+      CustomToast.show(
+        context,
+        message: l10n.selectCollectionTime,
+        type: ToastType.error,
+      );
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
+    final bool isGuest = token == null || token.isEmpty;
+
+    // A driver needs a number to call on arrival, and neither a guest nor an Apple/Google account
+    // necessarily has one. Guests are asked here and the number rides on the order itself; signed-in
+    // users get it saved to their profile so the next checkout does not ask again. Either way:
+    // no number, no order.
+    String? guestPhoneNumber;
+    if (isGuest) {
+      if (!mounted) return;
+      guestPhoneNumber = await _askForContactNumber();
+      if (guestPhoneNumber == null || !mounted) return;
+    } else {
+      if (!await _ensureContactNumber()) return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('auth_token');
-      final String? userId = prefs.getString('user_id');
-
-      if (token == null || userId == null) {
-        if (mounted) {
-          CustomToast.show(
-            context,
-            message: 'User session expired. Please login again.',
-            type: ToastType.error,
-          );
-          Navigator.of(context).pushReplacementNamed('/login');
-        }
-        return;
-      }
-
       final result = await ApiService.createOrder(
         lat: _selectedPosition.latitude,
         lng: _selectedPosition.longitude,
-        userId: userId,
-        token: token,
+        // Omitted for a guest, which is what makes the server treat this as a guest order.
+        token: isGuest ? null : token,
+        contactPhoneNumber: guestPhoneNumber,
+        // Only a guest needs this on the order: a signed-in customer's token is already on
+        // their user row. Null if Firebase has not issued one yet - the order still goes
+        // through, it just cannot be pushed to.
+        fcmToken: isGuest ? await NotificationService.cachedToken() : null,
         marketingCode: _marketingController.text.trim().isEmpty
             ? null
             : _marketingController.text.trim(),
-        type: _orderType,
+        deliveryWindowId: slot.windowId,
+        scheduledDate: slot.dateKey,
       );
 
       if (mounted) {
@@ -965,82 +1095,245 @@ class HomeViewState extends State<HomeView> {
     }
   }
 
-  /// One of the two speed options in the checkout sheet. [price] is the
-  /// delivery fee for this speed, or null while the settings fetch is still in
-  /// flight - the card then omits the price line rather than showing a zero.
-  Widget _buildServiceSpeedCard({
+  /// The customer's entire scheduling choice: one tap on a date-and-time option.
+  ///
+  /// Every option here comes from the trip schedule the operator configured - there is
+  /// no free time entry and no immediate-collection option, so a customer can only ask
+  /// for a slot the operation actually runs.
+  ///
+  /// Presented as a single vertical list rather than a day picker over a time list. The
+  /// two-step version made the customer's own schedule the thing they had to navigate -
+  /// and it could open on a day with nothing left on it. One list, earliest first, means
+  /// the soonest collection is always the first thing on screen.
+  Widget _buildScheduleSection({
     required AppLocalizations l10n,
-    required String type,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required double? price,
-    required VoidCallback onTap,
+    required VoidCallback onChanged,
   }) {
-    final bool selected = _orderType == type;
+    final locale = Localizations.localeOf(context);
+    final slots = DeliverySlot.bookable(_slots);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.event_outlined, size: 18, color: AppTheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              l10n.collectionTime,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.neutral700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_slotsLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        else if (_slotsFailed)
+          // The schedule could not be fetched at all. Saying "no collection times" here
+          // would blame the operator for a problem on our side, and leaves the customer
+          // waiting for a schedule that is already published.
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.neutral50,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppTheme.neutral200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.collectionTimesFailed,
+                  style: TextStyle(fontSize: 13, color: AppTheme.neutral600, height: 1.4),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _slotsLoading = true;
+                      _slotsFailed = false;
+                    });
+                    onChanged();
+                    _fetchDeliverySlots();
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.refresh_rounded, size: 16, color: AppTheme.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.tryAgain,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (slots.isEmpty)
+          // The operator has published no upcoming windows. Say so plainly rather than
+          // showing an empty list that reads as a broken screen.
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.neutral50,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppTheme.neutral200),
+            ),
+            child: Text(
+              l10n.noCollectionTimes,
+              style: TextStyle(fontSize: 13, color: AppTheme.neutral600, height: 1.4),
+            ),
+          )
+        else
+          _buildSlotList(
+            slots: slots,
+            locale: locale,
+            l10n: l10n,
+            onChanged: onChanged,
+          ),
+        if (_normalDeliveryPrice != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            '${l10n.deliveryFee} ${_normalDeliveryPrice!.toStringAsFixed(2)} ${l10n.jodShort}',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.neutral700,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// The whole schedule as one vertical list, soonest first.
+  ///
+  /// [slots] arrives already ordered by date then time, so index 0 is always the earliest
+  /// collection still available - which is what makes the rollover invisible to the
+  /// customer: once today's windows have elapsed the list simply starts at tomorrow.
+  ///
+  /// The list scrolls within a bounded height rather than growing the sheet. A week of
+  /// windows is far more rows than the day-picker ever showed, and letting them push the
+  /// sheet taller overflows it and carries the confirm button off screen - so the schedule
+  /// scrolls and the actions stay put.
+  Widget _buildSlotList({
+    required List<DeliverySlot> slots,
+    required Locale locale,
+    required AppLocalizations l10n,
+    required VoidCallback onChanged,
+  }) {
+    // The operator's clock, not the phone's, so the boundary between "today" and
+    // "tomorrow" is the same one the backend used to build this list.
+    final today = JordanTime.today();
+
+    return ConstrainedBox(
+      // A fraction of the screen rather than a fixed height, so a short phone does not
+      // lose the buttons and a tall one does not waste the space. Sized to cut a row in
+      // half, which is what tells the customer there is more to scroll.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.30,
+      ),
+      child: ListView.separated(
+        // Takes only the height it needs, so a schedule with two slots left does not
+        // leave an empty gap above the fee line.
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        itemCount: slots.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
+        itemBuilder: (context, index) => _buildSlotTile(
+          slot: slots[index],
+          locale: locale,
+          l10n: l10n,
+          today: today,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+  /// One bookable option: the date and the time window together, so choosing a
+  /// collection is a single decision rather than a day followed by a time.
+  Widget _buildSlotTile({
+    required DeliverySlot slot,
+    required Locale locale,
+    required AppLocalizations l10n,
+    required DateTime today,
+    required VoidCallback onChanged,
+  }) {
+    final selected = _selectedSlot?.windowId == slot.windowId &&
+        _selectedSlot?.dateKey == slot.dateKey;
+    // Full slots stay visible but unselectable: a day that is genuinely booked out
+    // should read as booked out, not as a day the operator forgot to schedule.
+    final available = slot.isAvailable;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: available
+          ? () {
+              setState(() => _selectedSlot = slot);
+              onChanged();
+            }
+          : null,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: selected
-              ? AppTheme.primary.withOpacity(0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          color: selected ? AppTheme.primary.withOpacity(0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? AppTheme.primary : AppTheme.neutral200,
             width: selected ? 2 : 1,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: selected ? AppTheme.primary : AppTheme.neutral500,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: selected ? AppTheme.primary : AppTheme.neutral900,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    size: 18,
-                    color: AppTheme.primary,
-                  ),
-              ],
+            Icon(
+              Icons.schedule_rounded,
+              size: 18,
+              color: !available
+                  ? AppTheme.neutral400
+                  : (selected ? AppTheme.primary : AppTheme.neutral500),
             ),
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              style: TextStyle(fontSize: 12, color: AppTheme.neutral500),
-            ),
-            if (price != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                '${l10n.deliveryFee} ${price.toStringAsFixed(2)} ${l10n.jodShort}',
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                slot.dateTimeLabel(
+                  locale,
+                  today: today,
+                  todayLabel: l10n.today,
+                  tomorrowLabel: l10n.tomorrow,
+                ),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: selected ? AppTheme.primary : AppTheme.neutral700,
+                  color: !available
+                      ? AppTheme.neutral400
+                      : (selected ? AppTheme.primary : AppTheme.neutral900),
                 ),
               ),
-            ],
+            ),
+            if (!available)
+              Text(
+                l10n.fullyBooked,
+                style: TextStyle(fontSize: 12, color: AppTheme.neutral400),
+              )
+            else if (selected)
+              const Icon(Icons.check_circle_rounded, size: 18, color: AppTheme.primary),
           ],
         ),
       ),
@@ -1051,12 +1344,17 @@ class HomeViewState extends State<HomeView> {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
 
+    // The schedule ages: windows fill up and start while the app sits on the map. Refetch
+    // on open so the sheet offers what is bookable now, not what was bookable at launch.
+    _fetchDeliverySlots();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
+          _sheetSetState = setModalState;
           bool showPromoField = _marketingController.text.isNotEmpty;
 
           return Container(
@@ -1111,49 +1409,12 @@ class HomeViewState extends State<HomeView> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Text(
-                  l10n.serviceSpeed,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.neutral700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildServiceSpeedCard(
-                        l10n: l10n,
-                        type: 'Normal',
-                        icon: Icons.local_laundry_service_outlined,
-                        title: l10n.serviceNormal,
-                        subtitle: l10n.serviceNormalDesc,
-                        price: _normalDeliveryPrice,
-                        // setState stores the choice on the view (it outlives
-                        // the sheet); setModalState is what repaints the cards.
-                        onTap: () {
-                          setState(() => _orderType = 'Normal');
-                          setModalState(() {});
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildServiceSpeedCard(
-                        l10n: l10n,
-                        type: 'Express',
-                        icon: Icons.bolt_rounded,
-                        title: l10n.serviceExpress,
-                        subtitle: l10n.serviceExpressDesc,
-                        price: _expressDeliveryPrice,
-                        onTap: () {
-                          setState(() => _orderType = 'Express');
-                          setModalState(() {});
-                        },
-                      ),
-                    ),
-                  ],
+                // The whole of the customer's scheduling choice: a date, then one of the
+                // operator's windows on that date. setState stores the pick on the view (it
+                // outlives the sheet); setModalState repaints the sheet.
+                _buildScheduleSection(
+                  l10n: l10n,
+                  onChanged: () => setModalState(() {}),
                 ),
                 const SizedBox(height: 24),
                 if (!showPromoField)
@@ -1298,7 +1559,9 @@ class HomeViewState extends State<HomeView> {
           );
         },
       ),
-    );
+      // Dropped when the sheet closes, so a late schedule refresh does not try to
+      // repaint a route that is no longer on screen.
+    ).whenComplete(() => _sheetSetState = null);
   }
 
   @override
@@ -1738,13 +2001,16 @@ class HomeViewState extends State<HomeView> {
                               ],
                             ),
                           ),
-                          IconButton(
-                            onPressed: _saveLocation,
-                            icon: const Icon(
-                              Icons.bookmark_add_outlined,
-                              color: AppTheme.primary,
+                          // Saved locations belong to a user row, so a guest has nowhere
+                          // to keep one - hidden rather than offered and then refused.
+                          if (!_isGuest)
+                            IconButton(
+                              onPressed: _saveLocation,
+                              icon: const Icon(
+                                Icons.bookmark_add_outlined,
+                                color: AppTheme.primary,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 20),

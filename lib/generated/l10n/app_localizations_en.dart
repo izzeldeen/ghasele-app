@@ -138,6 +138,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithGoogle => 'Continue with Google';
 
   @override
+  String get guest => 'Guest';
+
+  @override
+  String get signInToSeeYourOrders =>
+      'Sign in to see your orders and save addresses';
+
+  @override
   String get continueWithApple => 'Continue with Apple';
 
   @override
@@ -261,6 +268,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get contactNumberRequiredMessage =>
       'We need a phone number so the driver can reach you about this order.';
+
+  @override
+  String get contactNumber => 'Contact number';
+
+  @override
+  String get contactNumberRequired => 'Please enter a contact number';
+
+  @override
+  String get contactNumberTicketHint =>
+      'You are not signed in, so support will use this number to reach you.';
 
   @override
   String get or => 'or';
@@ -643,6 +660,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please select a location within Amman, Jordan.';
 
   @override
+  String get loginToSaveLocation => 'Sign in to save this location';
+
+  @override
   String get driverCollectionTab => 'Collecting';
 
   @override
@@ -710,20 +730,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverMarkDelivered => 'Mark delivered';
 
   @override
-  String get serviceSpeed => 'Service speed';
-
-  @override
-  String get serviceNormal => 'Standard';
-
-  @override
-  String get serviceNormalDesc => 'Ready within 48 hours';
-
-  @override
-  String get serviceExpress => 'Express';
-
-  @override
-  String get serviceExpressDesc => 'Ready within 24 hours';
-
-  @override
   String get jodShort => 'JOD';
+
+  @override
+  String get collectionTime => 'Collection time';
+
+  @override
+  String get selectCollectionTime => 'Please choose a collection time';
+
+  @override
+  String get noCollectionTimes =>
+      'There are no collection times available right now. Please try again later.';
+
+  @override
+  String get collectionTimesFailed =>
+      'We couldn\'t load the collection times. Check your connection.';
+
+  @override
+  String get fullyBooked => 'Fully booked';
+
+  @override
+  String get tomorrow => 'Tomorrow';
 }

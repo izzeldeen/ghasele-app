@@ -356,6 +356,18 @@ abstract class AppLocalizations {
   /// **'Continue with Google'**
   String get continueWithGoogle;
 
+  /// No description provided for @guest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guest;
+
+  /// No description provided for @signInToSeeYourOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your orders and save addresses'**
+  String get signInToSeeYourOrders;
+
   /// No description provided for @continueWithApple.
   ///
   /// In en, this message translates to:
@@ -595,6 +607,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We need a phone number so the driver can reach you about this order.'**
   String get contactNumberRequiredMessage;
+
+  /// No description provided for @contactNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact number'**
+  String get contactNumber;
+
+  /// No description provided for @contactNumberRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a contact number'**
+  String get contactNumberRequired;
+
+  /// No description provided for @contactNumberTicketHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not signed in, so support will use this number to reach you.'**
+  String get contactNumberTicketHint;
 
   /// No description provided for @or.
   ///
@@ -1340,6 +1370,12 @@ abstract class AppLocalizations {
   /// **'Please select a location within Amman, Jordan.'**
   String get locationOutsideAmman;
 
+  /// No description provided for @loginToSaveLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to save this location'**
+  String get loginToSaveLocation;
+
   /// No description provided for @driverCollectionTab.
   ///
   /// In en, this message translates to:
@@ -1466,41 +1502,47 @@ abstract class AppLocalizations {
   /// **'Mark delivered'**
   String get driverMarkDelivered;
 
-  /// No description provided for @serviceSpeed.
-  ///
-  /// In en, this message translates to:
-  /// **'Service speed'**
-  String get serviceSpeed;
-
-  /// No description provided for @serviceNormal.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard'**
-  String get serviceNormal;
-
-  /// No description provided for @serviceNormalDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Ready within 48 hours'**
-  String get serviceNormalDesc;
-
-  /// No description provided for @serviceExpress.
-  ///
-  /// In en, this message translates to:
-  /// **'Express'**
-  String get serviceExpress;
-
-  /// No description provided for @serviceExpressDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Ready within 24 hours'**
-  String get serviceExpressDesc;
-
   /// No description provided for @jodShort.
   ///
   /// In en, this message translates to:
   /// **'JOD'**
   String get jodShort;
+
+  /// No description provided for @collectionTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection time'**
+  String get collectionTime;
+
+  /// No description provided for @selectCollectionTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a collection time'**
+  String get selectCollectionTime;
+
+  /// No description provided for @noCollectionTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no collection times available right now. Please try again later.'**
+  String get noCollectionTimes;
+
+  /// No description provided for @collectionTimesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the collection times. Check your connection.'**
+  String get collectionTimesFailed;
+
+  /// No description provided for @fullyBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully booked'**
+  String get fullyBooked;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
 }
 
 class _AppLocalizationsDelegate
