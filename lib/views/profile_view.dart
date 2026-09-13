@@ -72,10 +72,13 @@ class _ProfileViewState extends State<ProfileView> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
+        // Logging out drops back to the guest home tab, not the login screen: the app is
+        // usable without an account, so signing out should not feel like being locked out.
+        Navigator.pushNamedAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          '/main',
           (route) => false,
+          arguments: 2,
         );
       }
     }
