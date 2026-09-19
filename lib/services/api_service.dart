@@ -19,25 +19,23 @@ class PhoneCheck {
 }
 
 class ApiService {
-  // The single base URL for every backend call in this app. Currently the local API.
+  // The single base URL for every backend call in this app. Currently the deployed API.
   //
-  // WARNING: this default must go back to the deployed API before a release build is cut.
-  // A store build cannot reach `localhost` - there is no tunnel on a real device, and the
-  // self-signed dev certificate is only accepted under kDebugMode (see MyHttpOverrides in
-  // main.dart), so a release build pointed at localhost fails every request at runtime
-  // rather than failing loudly at build time.
-  //
-  // Reaching localhost from an emulator still needs the tunnel:
-  //   adb reverse tcp:44386 tcp:44386                                     (emulator + IIS Express)
+  // Keep this default pointed at the deployed API: a store build cannot reach `localhost`
+  // - there is no tunnel on a real device, and the self-signed dev certificate is only
+  // accepted under kDebugMode (see MyHttpOverrides in main.dart), so a release build
+  // pointed at localhost fails every request at runtime rather than failing loudly at
+  // build time.
   //
   // The /api suffix is required - controllers are routed at "api/[controller]".
   //
   // Other backends can be selected without editing this line:
-  //   flutter run --dart-define=API_BASE_URL=https://api.cleanyjo.com/api  (deployed API)
+  //   flutter run --dart-define=API_BASE_URL=https://localhost:44386/api  (local API; an
+  //     emulator also needs `adb reverse tcp:44386 tcp:44386` with IIS Express)
   //   flutter run --dart-define=API_BASE_URL=http://192.168.1.50:5001/api  (device on Wi-Fi + Kestrel)
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://localhost:44386/api',
+    defaultValue: 'https://api.cleanyjo.com/api',
   );
 
   /// The API origin without the `/api` suffix. Static assets such as support-ticket
