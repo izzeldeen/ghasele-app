@@ -4,6 +4,7 @@ import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrdersView extends StatefulWidget {
   const OrdersView({super.key});
@@ -288,6 +289,42 @@ class OrdersViewState extends State<OrdersView> {
     );
   }
 
+  /// Opens the phone dialer on the driver's number.
+  ///
+  /// Deliberately `tel:` and not a direct dial: placing the call outright would need the
+  /// CALL_PHONE permission, and a misplaced tap would then ring the driver with nothing
+  /// the customer could do about it. The dialer opens pre-filled and the customer presses
+  /// the green button, which is also what every other app on the phone does.
+  ///
+  /// The number is stored as typed, so it arrives in any of the spellings
+  /// [jordanPhoneToE164] accepts ("0791234567", "+962 79 123 4567"). Everything but the
+  /// digits and a leading "+" is stripped, because spaces and dashes in a `tel:` URI are
+  /// escaped rather than ignored and the dialer then opens on a number that will not ring.
+  Future<void> _callDriver(BuildContext context, String rawNumber) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+
+    final trimmed = rawNumber.trim();
+    final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return;
+    final dialable = trimmed.startsWith('+') ? '+$digits' : digits;
+
+    // Failure is reported rather than swallowed: on a device with no dialer (a tablet, or
+    // an emulator) the tap would otherwise do nothing at all and read as a broken button.
+    try {
+      final launched = await launchUrl(
+        Uri(scheme: 'tel', path: dialable),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.callDriverFailed)));
+      }
+    } catch (e) {
+      debugPrint('Could not open the dialer for $dialable: $e');
+      messenger.showSnackBar(SnackBar(content: Text(l10n.callDriverFailed)));
+    }
+  }
+
   void _showOrderDetails(BuildContext context, Map<String, dynamic> order) {
     final l10n = AppLocalizations.of(context)!;
     final items = order['items'] as List<dynamic>? ?? [];
@@ -473,9 +510,11 @@ class OrdersViewState extends State<OrdersView> {
                     if (order['driverPhoneNumber'] != null)
                       IconButton(
                         icon: const Icon(Icons.phone_forwarded_outlined, color: AppTheme.primary),
-                        onPressed: () {
-                          // Note: url_launcher would be needed here for real calls
-                        },
+                        tooltip: l10n.callDriver,
+                        onPressed: () => _callDriver(
+                          context,
+                          order['driverPhoneNumber'].toString(),
+                        ),
                       ),
                   ],
                 ),

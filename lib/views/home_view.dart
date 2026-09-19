@@ -869,7 +869,7 @@ class HomeViewState extends State<HomeView> {
 
     setState(() => _isLoading = true);
     try {
-      final result = await ApiService.updateUserPhoneNumber(
+      final result = await ApiService.updateUserProfile(
         userId: userId,
         phoneNumber: entered,
         // Resent unchanged: the endpoint replaces the whole row.
@@ -979,10 +979,13 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  /// Strips a leading 0 / 962 / +962 and returns the bare 9-digit local number, or null when it
-  /// is not a valid Jordan mobile number. Delegates so this screen and the support form cannot
-  /// drift apart on what counts as a valid number.
-  String? _localJordanDigits(String raw) => localJordanDigits(raw);
+  /// The bare 9-digit local number for a Jordanian mobile, or null when the input is not
+  /// one. Delegates so the rule lives in one place.
+  ///
+  /// Uses the strict mobile check rather than the lenient nine-digit one: this number is
+  /// the only way the driver can reach a guest about the pickup, so a number that cannot
+  /// be dialled is worse than no order at all.
+  String? _localJordanDigits(String raw) => jordanMobileDigits(raw);
 
   Future<void> _confirmOrder() async {
     final l10n = AppLocalizations.of(context)!;

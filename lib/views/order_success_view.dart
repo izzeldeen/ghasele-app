@@ -167,6 +167,59 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
     nameController.dispose();
   }
 
+  /// One reassurance line: an icon, a short heading and a sentence.
+  ///
+  /// Deliberately quieter than the save-location prompt below it - that one asks
+  /// for a tap, these only answer "what happens now?", and the two should not
+  /// compete for the same attention.
+  Widget _buildAssurance({
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 22, color: AppTheme.brandGreen),
+          const SizedBox(width: 14),
+          // Expanded so a long sentence wraps inside the card instead of
+          // overflowing it - the Arabic strings are longer than the English.
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.neutral900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -212,7 +265,24 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                     height: 1.5,
                   ),
                 ),
-                
+
+                // What happens next, answered before the customer has to wonder.
+                // Shown to guests as well as account holders: the driver-on-the-way
+                // notification is pushed to the device, not to a user row, so a guest
+                // gets it too (see TripService.AssignOrdersToTripAsync).
+                const SizedBox(height: 28),
+                _buildAssurance(
+                  icon: Icons.notifications_active_rounded,
+                  title: l10n.orderSuccessNotifyTitle,
+                  text: l10n.orderSuccessNotifyText,
+                ),
+                const SizedBox(height: 12),
+                _buildAssurance(
+                  icon: Icons.verified_user_rounded,
+                  title: l10n.orderSuccessCareTitle,
+                  text: l10n.orderSuccessCareText,
+                ),
+
                 // Save Location Prompt - signed-in customers only. A guest has no user
                 // row for a saved location to belong to, so offering it and then refusing
                 // the save was just a dead end.

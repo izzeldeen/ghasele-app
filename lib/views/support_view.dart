@@ -660,8 +660,39 @@ class _CreateTicketViewState extends State<CreateTicketView> {
         return;
       }
       if (mounted) setState(() => _photo = picked);
+    } on PlatformException catch (e) {
+      // Every failure here used to report l10n.failedToSubmit - "Failed to submit ticket"
+      // - for something that happens before anything is submitted and never touches the
+      // API. Opening the camera on a simulator, or with permission previously refused,
+      // therefore looked like the ticket itself had been rejected, which sent the reader
+      // looking at the wrong end of the flow entirely.
+      debugPrint('Photo picker failed: ${e.code} ${e.message}');
+      if (!mounted) return;
+      _showMessage(_photoErrorFor(e, l10n), isError: true);
     } catch (e) {
-      if (mounted) _showMessage(l10n.failedToSubmit, isError: true);
+      debugPrint('Photo picker failed: $e');
+      if (mounted) _showMessage(l10n.photoFailed, isError: true);
+    }
+  }
+
+  /// Turns an image_picker failure into something that names the actual problem.
+  String _photoErrorFor(PlatformException e, AppLocalizations l10n) {
+    switch (e.code) {
+      // Android's code for a device with no usable camera. iOS never reaches here for
+      // that case - it shows its own "Camera not available." alert and returns nothing,
+      // which is why a simulator produces no message from this screen at all.
+      case 'no_available_camera':
+        return l10n.cameraUnavailable;
+      // Refused once and remembered by the OS: the prompt never appears again, so the
+      // fix is Settings, not tapping the button harder. The "restricted" pair is the same
+      // dead end arriving by a different route - parental controls or an MDM profile.
+      case 'camera_access_denied':
+      case 'photo_access_denied':
+      case 'camera_access_restricted':
+      case 'photo_access_restricted':
+        return l10n.photoPermissionDenied;
+      default:
+        return l10n.photoFailed;
     }
   }
 

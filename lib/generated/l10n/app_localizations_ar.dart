@@ -749,4 +749,88 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tomorrow => 'غداً';
+
+  @override
+  String get photoFailed => 'تعذّر إرفاق الصورة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get cameraUnavailable =>
+      'لا تتوفر كاميرا على هذا الجهاز. اختر صورة من المعرض بدلاً من ذلك.';
+
+  @override
+  String get photoPermissionDenied =>
+      'تم رفض الإذن. فعّل الوصول إلى الكاميرا والصور من الإعدادات لإرفاق صورة.';
+
+  @override
+  String get editName => 'تعديل الاسم';
+
+  @override
+  String get editPhoneNumber => 'تعديل رقم الهاتف';
+
+  @override
+  String get nameChangeNote => 'هذا هو الاسم الذي يراه السائق عند وصوله.';
+
+  @override
+  String get phoneChangeNote =>
+      'هذا الرقم نتواصل معك عبره بخصوص الطلب، وستستخدمه لتسجيل الدخول من الآن فصاعداً.';
+
+  @override
+  String get profileUpdated => 'تم حفظ بياناتك';
+
+  @override
+  String get phoneAlreadyInUse => 'هذا الرقم مرتبط بحساب آخر.';
+
+  @override
+  String get notSet => 'غير محدد';
+
+  @override
+  String get chooseLanguage => 'اختر اللغة';
+
+  @override
+  String get languageChanged => 'تم تغيير اللغة';
+
+  @override
+  String get browsingAsGuest => 'أنت تتصفح كضيف';
+
+  @override
+  String get guestBenefitsTitle => 'سجّل الدخول لتحصل على';
+
+  @override
+  String get guestBenefitOrders => 'كل طلباتك في مكان واحد';
+
+  @override
+  String get guestBenefitAddresses => 'احفظ عناوينك واطلب بضغطة واحدة';
+
+  @override
+  String get guestBenefitSupport => 'تابع محادثات الدعم من حيث توقفت';
+
+  @override
+  String get continueAsGuest => 'لاحقاً';
+
+  @override
+  String get appPreferences => 'التطبيق';
+
+  @override
+  String get tapToEdit => 'اضغط للتعديل';
+
+  @override
+  String get orderSuccessNotifyTitle => 'سنبقيك على اطلاع';
+
+  @override
+  String get orderSuccessNotifyText =>
+      'سيصلك إشعار عندما يكون السائق في طريقه لاستلام طلبك.';
+
+  @override
+  String get orderSuccessCareTitle => 'أغراضك بأيدٍ أمينة';
+
+  @override
+  String get orderSuccessCareText =>
+      'أغراضك مسؤوليتنا من لحظة استلامها وحتى تعود إليك.';
+
+  @override
+  String get callDriver => 'الاتصال بالسائق';
+
+  @override
+  String get callDriverFailed =>
+      'تعذّر فتح تطبيق الاتصال. يمكنك طلب الرقم يدوياً.';
 }

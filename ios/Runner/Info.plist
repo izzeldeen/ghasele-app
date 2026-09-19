@@ -84,5 +84,12 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Lets url_launcher see the dialer, for the driver-call button in the order details.
+	     Required only by canLaunchUrl, but declared so a later caller that checks first
+	     does not silently find tel: unavailable. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 </dict>
 </plist>

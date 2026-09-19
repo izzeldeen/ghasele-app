@@ -19,22 +19,25 @@ class PhoneCheck {
 }
 
 class ApiService {
-  // The single base URL for every backend call in this app. Currently the deployed API,
-  // which is what a release build must ship with: a store build cannot reach `localhost`
-  // - there is no tunnel on a real device, and the self-signed dev certificate is only
-  // accepted under kDebugMode (see MyHttpOverrides in main.dart), so a release build
-  // pointed at localhost fails every request rather than failing loudly at build time.
+  // The single base URL for every backend call in this app. Currently the local API.
+  //
+  // WARNING: this default must go back to the deployed API before a release build is cut.
+  // A store build cannot reach `localhost` - there is no tunnel on a real device, and the
+  // self-signed dev certificate is only accepted under kDebugMode (see MyHttpOverrides in
+  // main.dart), so a release build pointed at localhost fails every request at runtime
+  // rather than failing loudly at build time.
+  //
+  // Reaching localhost from an emulator still needs the tunnel:
+  //   adb reverse tcp:44386 tcp:44386                                     (emulator + IIS Express)
   //
   // The /api suffix is required - controllers are routed at "api/[controller]".
   //
-  // For local work, override instead of editing this line, so a release can never be cut
-  // from a working tree that happens to be pointed at a laptop:
-  //   adb reverse tcp:44386 tcp:44386                                     (emulator + IIS Express)
-  //   flutter run --dart-define=API_BASE_URL=https://localhost:44386/api  (debug build only)
-  //   flutter run --dart-define=API_BASE_URL=http://192.168.1.50:5001/api (device on Wi-Fi + Kestrel)
+  // Other backends can be selected without editing this line:
+  //   flutter run --dart-define=API_BASE_URL=https://api.cleanyjo.com/api  (deployed API)
+  //   flutter run --dart-define=API_BASE_URL=http://192.168.1.50:5001/api  (device on Wi-Fi + Kestrel)
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.cleanyjo.com/api',
+    defaultValue: 'https://localhost:44386/api',
   );
 
   /// The API origin without the `/api` suffix. Static assets such as support-ticket
@@ -110,11 +113,17 @@ class ApiService {
     };
   }
 
-  /// Sets the signed-in user's contact phone number.
+  /// Saves the signed-in user's own profile - name, phone number, username, email.
   ///
-  /// PUT /api/users/{id} replaces the whole user row, so [fullName], [username] and [email] are
-  /// resent as-is - omitting them would blank those columns rather than leave them alone.
-  static Future<Map<String, dynamic>> updateUserPhoneNumber({
+  /// PUT /api/users/{id} replaces the whole user row, so every field is sent on every call:
+  /// omitting one blanks that column rather than leaving it alone. Callers pass the value they
+  /// are changing and the stored value for everything else.
+  ///
+  /// The endpoint is scoped server-side to the caller's own account, so a token for one user
+  /// cannot edit another. A phone number already held by a different account is refused with
+  /// 409 and `errorCode: auth.phone_already_exists`, because the number is what the OTP
+  /// sign-in looks an account up by and two rows may not share one.
+  static Future<Map<String, dynamic>> updateUserProfile({
     required String userId,
     required String phoneNumber,
     required String fullName,
@@ -139,7 +148,7 @@ class ApiService {
           .timeout(const Duration(seconds: 20));
 
       if (kDebugMode) {
-        print('API UPDATE USER PHONE RESPONSE: ${response.statusCode}');
+        print('API UPDATE USER PROFILE RESPONSE: ${response.statusCode}');
       }
 
       // The endpoint answers 204 No Content on success, so an empty body is expected here.
@@ -149,7 +158,7 @@ class ApiService {
 
       return _errorResult(response);
     } catch (e) {
-      if (kDebugMode) print('API UPDATE USER PHONE EXCEPTION: $e');
+      if (kDebugMode) print('API UPDATE USER PROFILE EXCEPTION: $e');
       return {'success': false, 'message': null, 'networkError': true};
     }
   }

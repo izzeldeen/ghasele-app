@@ -1543,6 +1543,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tomorrow'**
   String get tomorrow;
+
+  /// No description provided for @photoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not attach the photo. Please try again.'**
+  String get photoFailed;
+
+  /// No description provided for @cameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no camera available. Choose a photo from the gallery instead.'**
+  String get cameraUnavailable;
+
+  /// No description provided for @photoPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied. Allow camera and photo access in Settings to attach a photo.'**
+  String get photoPermissionDenied;
+
+  /// No description provided for @editName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get editName;
+
+  /// No description provided for @editPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit phone number'**
+  String get editPhoneNumber;
+
+  /// No description provided for @nameChangeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the name your driver sees when they arrive.'**
+  String get nameChangeNote;
+
+  /// No description provided for @phoneChangeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how we reach you about an order - and how you\'ll sign in from now on.'**
+  String get phoneChangeNote;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details were saved'**
+  String get profileUpdated;
+
+  /// No description provided for @phoneAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'That number is already linked to another account.'**
+  String get phoneAlreadyInUse;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @chooseLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose language'**
+  String get chooseLanguage;
+
+  /// No description provided for @languageChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Language changed'**
+  String get languageChanged;
+
+  /// No description provided for @browsingAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re browsing as a guest'**
+  String get browsingAsGuest;
+
+  /// No description provided for @guestBenefitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to unlock'**
+  String get guestBenefitsTitle;
+
+  /// No description provided for @guestBenefitOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep every order in one place'**
+  String get guestBenefitOrders;
+
+  /// No description provided for @guestBenefitAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Save addresses and book in one tap'**
+  String get guestBenefitAddresses;
+
+  /// No description provided for @guestBenefitSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up support chats where you left off'**
+  String get guestBenefitSupport;
+
+  /// No description provided for @continueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get continueAsGuest;
+
+  /// No description provided for @appPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get appPreferences;
+
+  /// No description provided for @tapToEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to edit'**
+  String get tapToEdit;
+
+  /// No description provided for @orderSuccessNotifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll keep you posted'**
+  String get orderSuccessNotifyTitle;
+
+  /// No description provided for @orderSuccessNotifyText.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll get a notification when the driver is on the way to collect your order.'**
+  String get orderSuccessNotifyText;
+
+  /// No description provided for @orderSuccessCareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your items are in safe hands'**
+  String get orderSuccessCareTitle;
+
+  /// No description provided for @orderSuccessCareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Your items are our responsibility from the moment we collect them until they are back with you.'**
+  String get orderSuccessCareText;
+
+  /// No description provided for @callDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call driver'**
+  String get callDriver;
+
+  /// No description provided for @callDriverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the dialer. You can dial the number manually.'**
+  String get callDriverFailed;
 }
 
 class _AppLocalizationsDelegate

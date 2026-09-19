@@ -751,4 +751,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tomorrow => 'Tomorrow';
+
+  @override
+  String get photoFailed => 'Could not attach the photo. Please try again.';
+
+  @override
+  String get cameraUnavailable =>
+      'This device has no camera available. Choose a photo from the gallery instead.';
+
+  @override
+  String get photoPermissionDenied =>
+      'Permission denied. Allow camera and photo access in Settings to attach a photo.';
+
+  @override
+  String get editName => 'Edit name';
+
+  @override
+  String get editPhoneNumber => 'Edit phone number';
+
+  @override
+  String get nameChangeNote =>
+      'This is the name your driver sees when they arrive.';
+
+  @override
+  String get phoneChangeNote =>
+      'This is how we reach you about an order - and how you\'ll sign in from now on.';
+
+  @override
+  String get profileUpdated => 'Your details were saved';
+
+  @override
+  String get phoneAlreadyInUse =>
+      'That number is already linked to another account.';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get chooseLanguage => 'Choose language';
+
+  @override
+  String get languageChanged => 'Language changed';
+
+  @override
+  String get browsingAsGuest => 'You\'re browsing as a guest';
+
+  @override
+  String get guestBenefitsTitle => 'Sign in to unlock';
+
+  @override
+  String get guestBenefitOrders => 'Keep every order in one place';
+
+  @override
+  String get guestBenefitAddresses => 'Save addresses and book in one tap';
+
+  @override
+  String get guestBenefitSupport => 'Pick up support chats where you left off';
+
+  @override
+  String get continueAsGuest => 'Maybe later';
+
+  @override
+  String get appPreferences => 'App';
+
+  @override
+  String get tapToEdit => 'Tap to edit';
+
+  @override
+  String get orderSuccessNotifyTitle => 'We\'ll keep you posted';
+
+  @override
+  String get orderSuccessNotifyText =>
+      'You\'ll get a notification when the driver is on the way to collect your order.';
+
+  @override
+  String get orderSuccessCareTitle => 'Your items are in safe hands';
+
+  @override
+  String get orderSuccessCareText =>
+      'Your items are our responsibility from the moment we collect them until they are back with you.';
+
+  @override
+  String get callDriver => 'Call driver';
+
+  @override
+  String get callDriverFailed =>
+      'Could not open the dialer. You can dial the number manually.';
 }
