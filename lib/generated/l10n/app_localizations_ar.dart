@@ -833,4 +833,35 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get callDriverFailed =>
       'تعذّر فتح تطبيق الاتصال. يمكنك طلب الرقم يدوياً.';
+
+  @override
+  String get changeCollectionTime => 'تغيير موعد الاستلام';
+
+  @override
+  String get saveNewTime => 'حفظ الموعد الجديد';
+
+  @override
+  String get currentTime => 'الموعد الحالي';
+
+  @override
+  String get collectionTimeUpdated => 'تم تغيير موعد الاستلام.';
+
+  @override
+  String get cancelOrder => 'إلغاء الطلب';
+
+  @override
+  String get cancelOrderTitle => 'إلغاء هذا الطلب؟';
+
+  @override
+  String get cancelOrderMessage =>
+      'سيتم تحرير موعد الاستلام المحجوز، ولا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get keepOrder => 'الاحتفاظ بالطلب';
+
+  @override
+  String get orderCancelled => 'تم إلغاء طلبك.';
+
+  @override
+  String get orderChangeFailed => 'تعذّر تحديث طلبك. يرجى المحاولة مرة أخرى.';
 }

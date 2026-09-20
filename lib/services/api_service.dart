@@ -728,6 +728,62 @@ class ApiService {
     }
   }
 
+  /// Cancels an order the customer placed, while it is still awaiting collection.
+  ///
+  /// Works signed in or as a guest: pass [token] when there is one, and the device token
+  /// [_headers] always sends identifies a guest's own order. The server decides whether the
+  /// order may still be cancelled - the app's own check is only there to keep the button
+  /// from being offered on an order that has clearly moved on.
+  static Future<Map<String, dynamic>> cancelOrder({
+    required String orderId,
+    String? token,
+  }) async {
+    final url = Uri.parse('$baseUrl/orders/$orderId/cancel');
+    try {
+      final response = await http.post(url, headers: _headers(token: token));
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return _errorResult(response);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Moves an order to a different collection slot from [getDeliverySlots].
+  ///
+  /// The slot is re-validated server side exactly as it is at checkout, so a window that
+  /// filled up or started while the sheet was open comes back as an error rather than
+  /// being quietly accepted.
+  static Future<Map<String, dynamic>> rescheduleOrder({
+    required String orderId,
+    required String deliveryWindowId,
+
+    /// Local collection date for that window, "yyyy-MM-dd".
+    required String scheduledDate,
+    String? token,
+  }) async {
+    final url = Uri.parse('$baseUrl/orders/$orderId/schedule');
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers(token: token),
+        body: jsonEncode({
+          'deliveryWindowId': deliveryWindowId,
+          'scheduledDate': scheduledDate,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return _errorResult(response);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
   static Future<Map<String, dynamic>> getUserOrders({
     required String userId,
     required String token,

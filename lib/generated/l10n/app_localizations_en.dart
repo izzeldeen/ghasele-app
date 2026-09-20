@@ -837,4 +837,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get callDriverFailed =>
       'Could not open the dialer. You can dial the number manually.';
+
+  @override
+  String get changeCollectionTime => 'Change collection time';
+
+  @override
+  String get saveNewTime => 'Save new time';
+
+  @override
+  String get currentTime => 'Current';
+
+  @override
+  String get collectionTimeUpdated => 'Your collection time was changed.';
+
+  @override
+  String get cancelOrder => 'Cancel order';
+
+  @override
+  String get cancelOrderTitle => 'Cancel this order?';
+
+  @override
+  String get cancelOrderMessage =>
+      'Your booked collection time will be released. This cannot be undone.';
+
+  @override
+  String get keepOrder => 'Keep order';
+
+  @override
+  String get orderCancelled => 'Your order has been cancelled.';
+
+  @override
+  String get orderChangeFailed =>
+      'We couldn\'t update your order. Please try again.';
 }

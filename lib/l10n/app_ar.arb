@@ -273,5 +273,15 @@
   "orderSuccessCareTitle": "أغراضك بأيدٍ أمينة",
   "orderSuccessCareText": "أغراضك مسؤوليتنا من لحظة استلامها وحتى تعود إليك.",
   "callDriver": "الاتصال بالسائق",
-  "callDriverFailed": "تعذّر فتح تطبيق الاتصال. يمكنك طلب الرقم يدوياً."
+  "callDriverFailed": "تعذّر فتح تطبيق الاتصال. يمكنك طلب الرقم يدوياً.",
+  "changeCollectionTime": "تغيير موعد الاستلام",
+  "saveNewTime": "حفظ الموعد الجديد",
+  "currentTime": "الموعد الحالي",
+  "collectionTimeUpdated": "تم تغيير موعد الاستلام.",
+  "cancelOrder": "إلغاء الطلب",
+  "cancelOrderTitle": "إلغاء هذا الطلب؟",
+  "cancelOrderMessage": "سيتم تحرير موعد الاستلام المحجوز، ولا يمكن التراجع عن هذا الإجراء.",
+  "keepOrder": "الاحتفاظ بالطلب",
+  "orderCancelled": "تم إلغاء طلبك.",
+  "orderChangeFailed": "تعذّر تحديث طلبك. يرجى المحاولة مرة أخرى."
 }

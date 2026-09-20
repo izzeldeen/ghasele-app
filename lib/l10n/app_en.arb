@@ -273,5 +273,15 @@
   "orderSuccessCareTitle": "Your items are in safe hands",
   "orderSuccessCareText": "Your items are our responsibility from the moment we collect them until they are back with you.",
   "callDriver": "Call driver",
-  "callDriverFailed": "Could not open the dialer. You can dial the number manually."
+  "callDriverFailed": "Could not open the dialer. You can dial the number manually.",
+  "changeCollectionTime": "Change collection time",
+  "saveNewTime": "Save new time",
+  "currentTime": "Current",
+  "collectionTimeUpdated": "Your collection time was changed.",
+  "cancelOrder": "Cancel order",
+  "cancelOrderTitle": "Cancel this order?",
+  "cancelOrderMessage": "Your booked collection time will be released. This cannot be undone.",
+  "keepOrder": "Keep order",
+  "orderCancelled": "Your order has been cancelled.",
+  "orderChangeFailed": "We couldn't update your order. Please try again."
 }

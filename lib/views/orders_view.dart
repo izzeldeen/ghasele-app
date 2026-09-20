@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ghasele/generated/l10n/app_localizations.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/theme/app_theme.dart';
+import 'package:ghasele/widgets/custom_toast.dart';
+import 'package:ghasele/widgets/reschedule_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -325,6 +327,133 @@ class OrdersViewState extends State<OrdersView> {
     }
   }
 
+  /// Whether the customer may still cancel this order or move its collection time.
+  ///
+  /// PendingCollection is the whole rule: an order joins a trip by moving to Assigned, so
+  /// anything further along is already on a driver's list. The server enforces this again
+  /// - and can see whether the trip has actually set off, which the app cannot - so this
+  /// only decides whether the buttons are worth offering.
+  bool _isChangeable(Map<String, dynamic> order) =>
+      (order['status'] as String?)?.toLowerCase() == 'pendingcollection';
+
+  /// The signed-in customer's token, or null when the app is being used as a guest.
+  ///
+  /// A guest is not turned away: their order is identified by the device token
+  /// [ApiService] sends on every request, which is what it was placed with.
+  Future<String?> _authToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    return (token == null || token.isEmpty) ? null : token;
+  }
+
+  /// Opens the schedule so the customer can move this order to another collection slot.
+  Future<void> _changeCollectionTime(Map<String, dynamic> order) async {
+    final token = await _authToken();
+    if (!mounted) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final rawDate = order['scheduledDate'] as String?;
+
+    final updated = await showRescheduleSheet(
+      context,
+      orderId: order['id'] as String,
+      token: token,
+      currentWindowId: order['deliveryWindowId'] as String?,
+      // The slot list keys dates as "yyyy-MM-dd"; the order carries the same date, but
+      // a server that serialises it with a time component would not compare equal.
+      currentDateKey: rawDate == null || rawDate.length < 10
+          ? null
+          : rawDate.substring(0, 10),
+    );
+
+    // Null means they closed the sheet without choosing - nothing changed, so nothing to
+    // say and nothing to reload.
+    if (!mounted || updated == null) return;
+
+    CustomToast.show(
+      context,
+      message: l10n.collectionTimeUpdated,
+      type: ToastType.success,
+    );
+    fetchOrders();
+  }
+
+  /// Confirms, then cancels the order.
+  ///
+  /// Confirmed first because it cannot be undone: the order is closed and its collection
+  /// slot goes back to the schedule, where someone else can take it.
+  Future<void> _cancelOrder(Map<String, dynamic> order) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          l10n.cancelOrderTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        ),
+        content: Text(
+          l10n.cancelOrderMessage,
+          style: TextStyle(color: AppTheme.neutral600, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              l10n.keepOrder,
+              style: const TextStyle(
+                color: AppTheme.neutral700,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              l10n.cancelOrder,
+              style: const TextStyle(
+                color: AppTheme.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final token = await _authToken();
+    final result = await ApiService.cancelOrder(
+      orderId: order['id'] as String,
+      token: token,
+    );
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      CustomToast.show(
+        context,
+        message: l10n.orderCancelled,
+        type: ToastType.success,
+      );
+      fetchOrders();
+      return;
+    }
+
+    // The server's own message says why - the order may have been picked up while this
+    // screen sat open - and it is already in the customer's language.
+    CustomToast.show(
+      context,
+      message: (result['message'] as String?) ?? l10n.orderChangeFailed,
+      type: ToastType.error,
+    );
+    // Whatever the reason, this screen is showing a stale order. Reload so the buttons
+    // match what the order actually is now.
+    fetchOrders();
+  }
+
   void _showOrderDetails(BuildContext context, Map<String, dynamic> order) {
     final l10n = AppLocalizations.of(context)!;
     final items = order['items'] as List<dynamic>? ?? [];
@@ -585,6 +714,53 @@ class OrdersViewState extends State<OrdersView> {
               ],
             ),
             const SizedBox(height: 32),
+            // Only while the order is still the customer's to change. Both actions close
+            // this sheet first: each one opens something of its own, and the details
+            // behind it would be stale the moment either succeeds.
+            if (_isChangeable(order)) ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _changeCollectionTime(order);
+                  },
+                  icon: const Icon(Icons.event_repeat_rounded, size: 18),
+                  label: Text(
+                    l10n.changeCollectionTime,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.primary,
+                    side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _cancelOrder(order);
+                  },
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                  label: Text(
+                    l10n.cancelOrder,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

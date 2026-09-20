@@ -1699,6 +1699,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open the dialer. You can dial the number manually.'**
   String get callDriverFailed;
+
+  /// No description provided for @changeCollectionTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Change collection time'**
+  String get changeCollectionTime;
+
+  /// No description provided for @saveNewTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Save new time'**
+  String get saveNewTime;
+
+  /// No description provided for @currentTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get currentTime;
+
+  /// No description provided for @collectionTimeUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection time was changed.'**
+  String get collectionTimeUpdated;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order'**
+  String get cancelOrder;
+
+  /// No description provided for @cancelOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this order?'**
+  String get cancelOrderTitle;
+
+  /// No description provided for @cancelOrderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booked collection time will be released. This cannot be undone.'**
+  String get cancelOrderMessage;
+
+  /// No description provided for @keepOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep order'**
+  String get keepOrder;
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been cancelled.'**
+  String get orderCancelled;
+
+  /// No description provided for @orderChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t update your order. Please try again.'**
+  String get orderChangeFailed;
 }
 
 class _AppLocalizationsDelegate
