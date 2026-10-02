@@ -9,6 +9,7 @@ import 'home_screen.dart';
 import 'driver_home_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
+import 'onboarding_screen.dart';
 import 'splash_screen.dart';
 import 'forgot_password_screen.dart';
 import 'otp_verification_screen.dart';
@@ -110,6 +111,7 @@ class MyApp extends StatelessWidget {
           routes: {
             '/': (_) => const SplashScreen(),
             '/login': (_) => const LoginScreen(),
+            '/onboarding': (_) => const OnboardingScreen(),
             '/signup': (_) => const SignUpScreen(),
             '/forgot-password': (_) => const ForgotPasswordScreen(),
             '/verify-otp': (context) {

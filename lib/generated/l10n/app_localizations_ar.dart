@@ -9,7 +9,7 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appTitle => 'كليني';
+  String get appTitle => 'كلينيجو';
 
   @override
   String get login => 'تسجيل الدخول';
@@ -42,25 +42,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get alreadyHaveAccount => 'لديك حساب بالفعل؟';
 
   @override
-  String get loginSuccess => 'تم تسجيل الدخول بنجاح!';
+  String get loginSuccess => 'أهلاً بعودتك!';
 
   @override
-  String get signupSuccess => 'تم إنشاء الحساب بنجاح!';
+  String get signupSuccess => 'تم إنشاء حسابك بنجاح!';
 
   @override
   String get home => 'الرئيسية';
 
   @override
-  String get orders => 'الطلبات';
+  String get orders => 'طلباتي';
 
   @override
   String get wallet => 'المحفظة';
 
   @override
-  String get profile => 'الحساب';
+  String get profile => 'الملف الشخصي';
 
   @override
-  String get setPickupLocation => 'تحديد موقع الاستلام';
+  String get setPickupLocation => 'اختر موقع الاستلام';
 
   @override
   String get selectedLocation => 'الموقع المحدد';
@@ -81,7 +81,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancelled => 'ملغي';
 
   @override
-  String get total => 'المجموع';
+  String get total => 'الإجمالي';
 
   @override
   String get currentBalance => 'الرصيد الحالي';
@@ -93,22 +93,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get withdraw => 'سحب';
 
   @override
-  String get recentTransactions => 'المعاملات الأخيرة';
+  String get recentTransactions => 'آخر المعاملات';
 
   @override
-  String get addedFunds => 'إضافة رصيد';
+  String get addedFunds => 'تمت إضافة الرصيد';
 
   @override
   String get refund => 'استرداد';
 
   @override
-  String get loading => 'جاري التحميل...';
+  String get loading => 'جارٍ التحميل...';
 
   @override
   String get locationConfirmed => 'تم تأكيد الموقع';
 
   @override
-  String get locationNotFound => 'الموقع غير موجود';
+  String get locationNotFound => 'لم يتم العثور على الموقع';
 
   @override
   String get shirt => 'قميص';
@@ -123,7 +123,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get jacket => 'جاكيت';
 
   @override
-  String get bedsheets => 'أغطية سرير';
+  String get bedsheets => 'أغطية السرير';
 
   @override
   String get curtains => 'ستائر';
@@ -172,16 +172,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createAccount => 'إنشاء حساب';
 
   @override
-  String get passwordsDoNotMatch => 'كلمات المرور غير متطابقة';
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
 
   @override
-  String get invalidEmail => 'البريد الإلكتروني غير صالح';
+  String get invalidEmail => 'أدخل بريداً إلكترونياً صالحاً';
 
   @override
   String get minCharacters => '6 أحرف على الأقل';
 
   @override
-  String get pleaseEnterEmail => 'يرجى إدخال البريد الإلكتروني';
+  String get pleaseEnterEmail => 'يرجى إدخال بريدك الإلكتروني';
 
   @override
   String get pleaseEnterPassword => 'يرجى إدخال كلمة المرور';
@@ -190,14 +190,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseEnterName => 'يرجى إدخال اسمك';
 
   @override
-  String get pleaseEnterUsername => 'يرجى إدخال اسم المستخدم';
+  String get pleaseEnterUsername => 'يرجى اختيار اسم مستخدم';
 
   @override
-  String get confirmOrder => 'تأكيد الطلب';
+  String get confirmOrder => 'مراجعة الطلب وتأكيده';
 
   @override
   String get minOrderWarning =>
-      'الحد الأدنى للطلب هو 2 دينار. هل تود الاستمرار؟';
+      'الحد الأدنى للطلب هو 2 دينار. هل ترغب بالمتابعة؟';
 
   @override
   String get confirm => 'تأكيد';
@@ -206,10 +206,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
-  String get orderCreated => 'تم إنشاء الطلب بنجاح!';
+  String get orderCreated => 'تم إنشاء طلبك!';
 
   @override
-  String get orderFailed => 'فشل إنشاء الطلب';
+  String get orderFailed => 'تعذّر إنشاء طلبك';
 
   @override
   String get pending => 'قيد الانتظار';
@@ -218,21 +218,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get delivered => 'تم التوصيل';
 
   @override
-  String get orderSuccessTitle => 'تم إنشاء الطلب بنجاح!';
+  String get orderSuccessTitle => 'تم إنشاء طلبك بنجاح!';
 
   @override
-  String get orderSuccessMessage =>
-      'تم استلام طلب الغسيل الخاص بك وهو قيد المعالجة.';
+  String get orderSuccessMessage => 'استلمنا طلبك وسنبقيك على اطلاع بكل خطوة.';
 
   @override
-  String get orderFailureTitle => 'فشل إنشاء الطلب';
+  String get orderFailureTitle => 'تعذّر إنشاء طلبك';
 
   @override
   String get orderFailureMessage =>
-      'حدث خطأ ما أثناء إنشاء طلبك. يرجى المحاولة مرة أخرى.';
+      'حدث خطأ أثناء إنشاء طلبك. يرجى المحاولة مرة أخرى.';
 
   @override
-  String get goToMyOrders => 'الذهاب إلى طلباتي';
+  String get goToMyOrders => 'عرض طلباتي';
 
   @override
   String get backToHome => 'العودة للرئيسية';
@@ -242,7 +241,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get hasPendingOrder =>
-      'لديك طلب قيد الانتظار بالفعل. يرجى الانتظار حتى يتم معالجته.';
+      'لديك طلب نشط بالفعل. يرجى الانتظار حتى تتم معالجته قبل إنشاء طلب جديد.';
 
   @override
   String get logout => 'تسجيل الخروج';
@@ -257,17 +256,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterPhoneNumber => 'أدخل رقم هاتفك';
 
   @override
-  String get pleaseEnterPhoneNumber => 'الرجاء إدخال رقم الهاتف';
+  String get pleaseEnterPhoneNumber => 'يرجى إدخال رقم هاتفك';
 
   @override
-  String get invalidPhoneNumber => 'رقم الهاتف غير صالح';
+  String get invalidPhoneNumber => 'أدخل رقم هاتف صالحاً';
 
   @override
   String get contactNumberRequiredTitle => 'أضف رقم للتواصل';
 
   @override
   String get contactNumberRequiredMessage =>
-      'نحتاج رقم هاتف ليتمكن السائق من التواصل معك بشأن هذا الطلب.';
+      'نحتاج إلى رقم هاتف ليتمكن السائق من التواصل معك بخصوص طلبك.';
 
   @override
   String get contactNumber => 'رقم التواصل';
@@ -277,7 +276,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get contactNumberTicketHint =>
-      'أنت غير مسجل الدخول، لذا سيستخدم فريق الدعم هذا الرقم للتواصل معك.';
+      'أنت غير مسجل الدخول، لذلك سيستخدم فريق الدعم هذا الرقم للتواصل معك.';
 
   @override
   String get or => 'أو';
@@ -292,20 +291,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reliable => 'موثوق';
 
   @override
-  String get serviceSlogan => 'خدمة غسيل احترافية عند باب بيتك';
+  String get serviceSlogan => 'عناية احترافية بملابسك، عند باب بيتك';
 
   @override
-  String get joinSlogan => 'انضم إلى آلاف العملاء الراضين';
+  String get joinSlogan => 'انضم إلى آلاف العملاء السعداء';
 
   @override
-  String get selectPickupLocationTitle => 'حدد موقع الاستلام';
+  String get selectPickupLocationTitle => 'من أين نستلم طلبك؟';
 
   @override
   String get selectPickupLocationDesc =>
-      'يرجى تحديد الموقع الذي تريد منا استلام ملابسك منه.';
+      'اختر المكان الذي تريد منا استلام ملابسك منه.';
 
   @override
-  String get goToMap => 'الانتقال للخريطة وتحديد موقع جديد';
+  String get goToMap => 'اختر موقعاً جديداً على الخريطة';
 
   @override
   String get orChooseSavedLocation => 'أو اختر موقعاً محفوظاً';
@@ -314,13 +313,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get savedLocation => 'موقع محفوظ';
 
   @override
-  String get saveLocation => 'حفظ الموقع';
+  String get saveLocation => 'حفظ هذا الموقع';
 
   @override
-  String get askSaveLocation => 'هل تود حفظ هذا الموقع لاستخدامه لاحقاً؟';
+  String get askSaveLocation => 'هل تريد حفظ هذا الموقع لطلبك القادم؟';
 
   @override
-  String get locationNameHint => 'اسم الموقع (مثل المنزل، العمل)';
+  String get locationNameHint => 'اسم الموقع (مثلاً: المنزل، العمل)';
 
   @override
   String get save => 'حفظ';
@@ -329,28 +328,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionRequired => 'إجراء مطلوب';
 
   @override
-  String get support => 'الدعم الفني';
+  String get support => 'الدعم';
 
   @override
-  String get myTickets => 'تذاكري';
+  String get myTickets => 'تذاكر الدعم';
 
   @override
-  String get newTicket => 'تذكرة جديدة';
+  String get newTicket => 'تذكرة دعم جديدة';
 
   @override
-  String get noTickets => 'لا يوجد تذاكر بعد';
+  String get noTickets => 'لا توجد تذاكر دعم بعد';
 
   @override
-  String get submitFirstTicket => 'أرسل أول تذكرة دعم';
+  String get submitFirstTicket => 'تواصل مع الدعم وسنساعدك';
 
   @override
-  String get ticketSubmitted => 'تم إرسال التذكرة بنجاح!';
+  String get ticketSubmitted => 'تم إرسال تذكرتك بنجاح!';
 
   @override
-  String get failedToSubmit => 'فشل إرسال التذكرة';
+  String get failedToSubmit => 'تعذّر إرسال تذكرتك';
 
   @override
-  String get pleaseLogin => 'الرجاء تسجيل الدخول لإرسال تذكرة';
+  String get pleaseLogin => 'يرجى تسجيل الدخول للتواصل مع الدعم';
 
   @override
   String get category => 'الفئة';
@@ -365,10 +364,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get submitTicket => 'إرسال التذكرة';
 
   @override
-  String get briefDescription => 'وصف مختصر للمشكلة';
+  String get briefDescription => 'صف المشكلة باختصار';
 
   @override
-  String get describeIssue => 'اشرح مشكلتك بالتفصيل...';
+  String get describeIssue => 'أخبرنا بما حدث...';
 
   @override
   String get supportResponse => 'رد الدعم';
@@ -377,7 +376,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get yourMessage => 'رسالتك';
 
   @override
-  String get created => 'تم الإنشاء';
+  String get created => 'تاريخ الإنشاء';
 
   @override
   String get today => 'اليوم';
@@ -386,7 +385,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get yesterday => 'أمس';
 
   @override
-  String get daysAgo => 'أيام مضت';
+  String get daysAgo => 'منذ أيام';
 
   @override
   String get general => 'عام';
@@ -410,16 +409,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get other => 'أخرى';
 
   @override
-  String get subjectRequired => 'الموضوع مطلوب';
+  String get subjectRequired => 'يرجى إدخال الموضوع';
 
   @override
-  String get messageRequired => 'الرسالة مطلوبة';
+  String get messageRequired => 'يرجى إدخال الرسالة';
 
   @override
   String get photoOptional => 'صورة (اختياري)';
 
   @override
-  String get attachPhoto => 'إرفاق صورة';
+  String get attachPhoto => 'إضافة صورة';
 
   @override
   String get changePhoto => 'تغيير الصورة';
@@ -438,10 +437,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get attachmentTooLarge =>
-      'حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 5 ميجابايت.';
+      'حجم الصورة كبير جداً. اختر صورة أقل من 5 ميجابايت.';
 
   @override
-  String get activeOrderTitle => 'طلب قيد التنفيذ';
+  String get activeOrderTitle => 'طلبك قيد التنفيذ';
 
   @override
   String get activeOrderTapHint => 'اضغط لعرض رقم الفاتورة';
@@ -465,34 +464,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resendCode => 'إعادة إرسال الرمز';
 
   @override
-  String get phoneVerified => 'تم التحقق من الهاتف';
+  String get phoneVerified => 'تم التحقق من رقم الهاتف';
 
   @override
-  String get verificationFailed => 'فشل التحقق';
+  String get verificationFailed => 'تعذّر التحقق';
 
   @override
-  String get codeSent => 'تم إرسال الرمز';
+  String get codeSent => 'تم إرسال الرمز!';
 
   @override
   String get invalidCredentials => 'اسم المستخدم أو كلمة المرور غير صحيحة';
 
   @override
-  String get verifyPhoneNumber => 'تحقق من الهاتف';
+  String get verifyPhoneNumber => 'تحقق من رقم هاتفك';
 
   @override
-  String get logoutConfirm => 'هل أنت متأكد من تسجيل الخروج؟';
+  String get logoutConfirm => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
 
   @override
   String get notifications => 'التنبيهات';
 
   @override
-  String get noNotifications => 'لا يوجد تنبيهات بعد';
+  String get noNotifications => 'لا توجد تنبيهات جديدة';
+
+  @override
+  String get noPrices => 'لا توجد أسعار متاحة حالياً';
 
   @override
   String get newOrder => 'طلب جديد';
 
   @override
-  String get welcomeBack => 'أهلاً بك مجدداً';
+  String get welcomeBack => 'أهلاً بعودتك!';
 
   @override
   String get name => 'الاسم';
@@ -510,49 +512,49 @@ class AppLocalizationsAr extends AppLocalizations {
   String get next => 'التالي';
 
   @override
-  String get backToPersonalInfo => 'العودة للمعلومات الشخصية';
+  String get backToPersonalInfo => 'العودة إلى المعلومات الشخصية';
 
   @override
-  String get setupPassword => 'قم بإعداد كلمة المرور الخاصة بك لتأمين حسابك';
+  String get setupPassword => 'أنشئ كلمة مرور لحماية حسابك';
 
   @override
   String get sendCode => 'إرسال الرمز';
 
   @override
-  String get enterPhoneToRegister => 'أدخل رقم هاتفك وسنرسل لك رمز التحقق';
+  String get enterPhoneToRegister => 'أدخل رقم هاتفك وسنرسل لك رمز التحقق.';
 
   @override
   String get completeProfile => 'أكمل ملفك الشخصي';
 
   @override
   String get completeProfileSubtitle =>
-      'اختر اسمك وكلمة المرور لإنهاء إنشاء حسابك';
+      'أضف اسمك وكلمة مرور لإكمال إعداد حسابك.';
 
   @override
-  String get completeSignup => 'إكمال التسجيل';
+  String get completeSignup => 'إكمال إنشاء الحساب';
 
   @override
   String get codeSentToWhatsapp => 'تم إرسال الرمز إلى واتساب';
 
   @override
-  String get codeSentToSms => 'تم إرسال الرمز عبر رسالة نصية';
+  String get codeSentToSms => 'تم إرسال الرمز برسالة نصية';
 
   @override
   String get invalidOtp =>
-      'رمز غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.';
+      'الرمز غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.';
 
   @override
   String get enterVerificationCode => 'أدخل الرمز المكوّن من 6 أرقام';
 
   @override
   String get connectionError =>
-      'تعذّر الاتصال بالخادم. تحقق من اتصالك وحاول مرة أخرى.';
+      'تعذّر الاتصال بالخادم. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
 
   @override
-  String get items => 'الأصناف';
+  String get items => 'القطع';
 
   @override
-  String get deliveryFee => 'التوصيل';
+  String get deliveryFee => 'رسوم التوصيل';
 
   @override
   String get close => 'إغلاق';
@@ -577,28 +579,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get marketing => 'التسويق';
 
   @override
-  String get addMarketer => 'إضافة مسوق جديد';
+  String get addMarketer => 'إضافة مسوّق';
 
   @override
-  String get marketerName => 'اسم المسوق';
+  String get marketerName => 'اسم المسوّق';
 
   @override
   String get marketingCode => 'كود التسويق';
 
   @override
-  String get discount => 'خصم';
+  String get discount => 'الخصم';
 
   @override
-  String get share => 'عمولة';
+  String get share => 'العمولة';
 
   @override
-  String get noMarketers => 'لا يوجد مسوقين حالياً';
+  String get noMarketers => 'لم تتم إضافة أي مسوّقين بعد';
 
   @override
-  String get marketerAdded => 'تم إضافة المسوق بنجاح';
+  String get marketerAdded => 'تمت إضافة المسوّق بنجاح';
 
   @override
-  String get marketerDeleted => 'تم حذف المسوق بنجاح';
+  String get marketerDeleted => 'تم حذف المسوّق بنجاح';
 
   @override
   String get pricing => 'الأسعار';
@@ -613,19 +615,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statusPendingCollection => 'بانتظار الاستلام';
 
   @override
-  String get statusAssigned => 'تم تعيين سائق';
+  String get statusAssigned => 'تم تعيين السائق';
 
   @override
   String get statusCollected => 'تم الاستلام';
 
   @override
-  String get statusCleaning => 'قيد الغسيل';
+  String get statusCleaning => 'قيد التنظيف';
 
   @override
   String get statusReady => 'جاهز للتوصيل';
 
   @override
-  String get statusOutForDelivery => 'خارج للتوصيل';
+  String get statusOutForDelivery => 'في الطريق إليك';
 
   @override
   String get statusDelivered => 'تم التوصيل';
@@ -649,13 +651,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addPromoCode => 'إضافة كود خصم';
 
   @override
-  String get enterPromoCode => 'أدخل الكود هنا';
+  String get enterPromoCode => 'أدخل الكود';
 
   @override
-  String get locationSaved => 'تم حفظ الموقع';
+  String get locationSaved => 'تم حفظ الموقع!';
 
   @override
-  String get locationOutsideAmman => 'الرجاء اختيار موقع داخل عمّان، الأردن.';
+  String get locationOutsideAmman => 'يرجى اختيار موقع داخل عمّان، الأردن.';
 
   @override
   String get loginToSaveLocation => 'سجّل الدخول لحفظ هذا الموقع';
@@ -670,15 +672,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverNoCollectionTrips => 'لا توجد رحلات استلام';
 
   @override
-  String get driverNoCollectionTripsDesc =>
-      'ليس لديك رحلات لاستلامها من العملاء حالياً.';
+  String get driverNoCollectionTripsDesc => 'لا توجد لديك رحلات استلام حالياً.';
 
   @override
   String get driverNoDeliveryTrips => 'لا توجد رحلات توصيل';
 
   @override
-  String get driverNoDeliveryTripsDesc =>
-      'ليس لديك رحلات لتوصيلها للعملاء حالياً.';
+  String get driverNoDeliveryTripsDesc => 'لا توجد لديك رحلات توصيل حالياً.';
 
   @override
   String get driverCollected => 'تم الاستلام';
@@ -687,7 +687,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverDelivered => 'تم التوصيل';
 
   @override
-  String get driverReadyForHandover => 'جاهزة للتسليم';
+  String get driverReadyForHandover => 'جاهز للتسليم';
 
   @override
   String get driverInProgress => 'قيد التنفيذ';
@@ -696,19 +696,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverStops => 'المحطات';
 
   @override
-  String get driverAddItems => 'إضافة العناصر';
+  String get driverAddItems => 'إضافة قطع';
 
   @override
-  String get driverItemType => 'نوع العنصر';
+  String get driverItemType => 'نوع القطعة';
 
   @override
   String get driverQuantity => 'الكمية';
 
   @override
-  String get driverSaveAndCollect => 'حفظ العناصر وتحديد كمُستلم';
+  String get driverSaveAndCollect => 'حفظ القطع وتأكيد الاستلام';
 
   @override
-  String get driverItemsSaved => 'تم حفظ العناصر واستلام الطلب';
+  String get driverItemsSaved => 'تم حفظ القطع وتأكيد استلام الطلب';
 
   @override
   String driverAllCollected(int count) {
@@ -719,13 +719,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverNavigateToCleaner => 'التوجه إلى المغسلة';
 
   @override
-  String get driverHandOverToCleaner => 'إنهاء الرحلة وإرسالها للتنظيف';
+  String get driverHandOverToCleaner => 'إنهاء الرحلة وإرسال الطلبات للتنظيف';
 
   @override
   String get driverOutForDelivery => 'خارج للتوصيل';
 
   @override
-  String get driverMarkDelivered => 'تحديد كتم التوصيل';
+  String get driverMarkDelivered => 'تحديد كمُسلّم';
 
   @override
   String get jodShort => 'دينار';
@@ -734,7 +734,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get collectionTime => 'موعد الاستلام';
 
   @override
-  String get selectCollectionTime => 'يرجى اختيار موعد الاستلام';
+  String get selectCollectionTime => 'اختر موعد الاستلام';
 
   @override
   String get noCollectionTimes =>
@@ -742,10 +742,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get collectionTimesFailed =>
-      'لم نتمكن من تحميل مواعيد الاستلام. تحقق من اتصالك بالإنترنت.';
+      'تعذّر تحميل مواعيد الاستلام. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
 
   @override
-  String get fullyBooked => 'محجوز بالكامل';
+  String get fullyBooked => 'مكتمل الحجز';
 
   @override
   String get tomorrow => 'غداً';
@@ -759,7 +759,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get photoPermissionDenied =>
-      'تم رفض الإذن. فعّل الوصول إلى الكاميرا والصور من الإعدادات لإرفاق صورة.';
+      'تم تعطيل الوصول إلى الكاميرا أو الصور. فعّله من الإعدادات لإرفاق صورة.';
 
   @override
   String get editName => 'تعديل الاسم';
@@ -768,44 +768,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get editPhoneNumber => 'تعديل رقم الهاتف';
 
   @override
-  String get nameChangeNote => 'هذا هو الاسم الذي يراه السائق عند وصوله.';
+  String get nameChangeNote => 'هذا هو الاسم الذي سيراه السائق عند وصوله.';
 
   @override
   String get phoneChangeNote =>
-      'هذا الرقم نتواصل معك عبره بخصوص الطلب، وستستخدمه لتسجيل الدخول من الآن فصاعداً.';
+      'سنستخدم هذا الرقم للتواصل معك بخصوص الطلبات ولتسجيل الدخول.';
 
   @override
-  String get profileUpdated => 'تم حفظ بياناتك';
+  String get profileUpdated => 'تم حفظ بياناتك!';
 
   @override
-  String get phoneAlreadyInUse => 'هذا الرقم مرتبط بحساب آخر.';
+  String get phoneAlreadyInUse => 'هذا الرقم مرتبط بحساب آخر بالفعل.';
 
   @override
   String get notSet => 'غير محدد';
 
   @override
-  String get chooseLanguage => 'اختر اللغة';
+  String get chooseLanguage => 'اختر لغتك';
 
   @override
-  String get languageChanged => 'تم تغيير اللغة';
+  String get languageChanged => 'تم تحديث اللغة!';
 
   @override
   String get browsingAsGuest => 'أنت تتصفح كضيف';
 
   @override
-  String get guestBenefitsTitle => 'سجّل الدخول لتحصل على';
+  String get guestBenefitsTitle => 'سجّل الدخول واستفد أكثر من Cleanyjo';
 
   @override
-  String get guestBenefitOrders => 'كل طلباتك في مكان واحد';
+  String get guestBenefitOrders => 'احتفظ بكل طلباتك في مكان واحد';
 
   @override
-  String get guestBenefitAddresses => 'احفظ عناوينك واطلب بضغطة واحدة';
+  String get guestBenefitAddresses => 'احفظ عناوينك واطلب بسرعة أكبر';
 
   @override
-  String get guestBenefitSupport => 'تابع محادثات الدعم من حيث توقفت';
+  String get guestBenefitSupport => 'احتفظ بمحادثات الدعم في مكان واحد';
 
   @override
-  String get continueAsGuest => 'لاحقاً';
+  String get continueAsGuest => 'ربما لاحقاً';
 
   @override
   String get appPreferences => 'التطبيق';
@@ -814,21 +814,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapToEdit => 'اضغط للتعديل';
 
   @override
-  String get orderSuccessNotifyTitle => 'سنبقيك على اطلاع';
+  String get orderSuccessNotifyTitle => 'سنُبقيك على اطلاع';
 
   @override
   String get orderSuccessNotifyText =>
-      'سيصلك إشعار عندما يكون السائق في طريقه لاستلام طلبك.';
+      'سنرسل لك إشعاراً عندما يكون السائق في طريقه لاستلام طلبك.';
 
   @override
-  String get orderSuccessCareTitle => 'أغراضك بأيدٍ أمينة';
+  String get orderSuccessCareTitle => 'ملابسك بأيدٍ أمينة';
 
   @override
   String get orderSuccessCareText =>
-      'أغراضك مسؤوليتنا من لحظة استلامها وحتى تعود إليك.';
+      'من الاستلام وحتى التوصيل، نهتم بملابسك في كل خطوة.';
 
   @override
-  String get callDriver => 'الاتصال بالسائق';
+  String get callDriver => 'اتصل بالسائق';
 
   @override
   String get callDriverFailed =>
@@ -841,20 +841,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get saveNewTime => 'حفظ الموعد الجديد';
 
   @override
-  String get currentTime => 'الموعد الحالي';
+  String get currentTime => 'الحالي';
 
   @override
-  String get collectionTimeUpdated => 'تم تغيير موعد الاستلام.';
+  String get collectionTimeUpdated => 'تم تحديث موعد الاستلام!';
 
   @override
   String get cancelOrder => 'إلغاء الطلب';
 
   @override
-  String get cancelOrderTitle => 'إلغاء هذا الطلب؟';
+  String get cancelOrderTitle => 'هل تريد إلغاء هذا الطلب؟';
 
   @override
   String get cancelOrderMessage =>
-      'سيتم تحرير موعد الاستلام المحجوز، ولا يمكن التراجع عن هذا الإجراء.';
+      'سيتم إلغاء موعد الاستلام المحجوز، ولا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get keepOrder => 'الاحتفاظ بالطلب';
@@ -864,4 +864,59 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orderChangeFailed => 'تعذّر تحديث طلبك. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get skip => 'تخطي';
+
+  @override
+  String get onboardingStart => 'لنبدأ';
+
+  @override
+  String get onboardingPickPlaceTitle => 'أخبرنا من أين نستلم';
+
+  @override
+  String get onboardingPickPlaceBody =>
+      'حدد مكان الاستلام على الخريطة — البيت، المكتب، أو أي مكان في عمّان.';
+
+  @override
+  String get onboardingChooseTimeTitle => 'اختر الموعد الذي يناسبك';
+
+  @override
+  String get onboardingChooseTimeBody =>
+      'اختر أحد مواعيد الاستلام المتاحة وسنصل إليك.';
+
+  @override
+  String get onboardingCollectTitle => 'نستلم ونحسب قيمة طلبك';
+
+  @override
+  String get onboardingCollectBody =>
+      'يقوم السائق بعدّ القطع عند الاستلام، ثم يظهر لك السعر الفعلي. لا يوجد دفع مسبق.';
+
+  @override
+  String get onboardingDeliverTitle => 'نُعيدها نظيفة إلى باب بيتك';
+
+  @override
+  String get onboardingDeliverBody =>
+      'تابع طلبك في كل خطوة، وسنعيد ملابسك النظيفة إلى الموقع نفسه.';
+
+  @override
+  String priceFixed(String price) {
+    return '$price دينار';
+  }
+
+  @override
+  String priceStartingFrom(String price) {
+    return 'يبدأ من $price دينار';
+  }
+
+  @override
+  String priceRange(String min, String max) {
+    return 'من $min إلى $max دينار';
+  }
+
+  @override
+  String get cleaningAndIroning => 'غسيل وكي';
+
+  @override
+  String get driverItemPrice => 'السعر';
 }

@@ -552,25 +552,14 @@ class OrdersViewState extends State<OrdersView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['itemType'] ?? '',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.neutral800,
-                        ),
-                      ),
-                      if (item['serviceType'] != null)
-                        Text(
-                          item['serviceType'],
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.neutral500,
-                          ),
-                        ),
-                    ],
+                  // No service-type line under the name: washing and ironing are sold as
+                  // one service now, so it would only repeat the same word on every item.
+                  Text(
+                    item['itemType'] ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.neutral800,
+                    ),
                   ),
                   Text(
                     'x${item['quantity']}',

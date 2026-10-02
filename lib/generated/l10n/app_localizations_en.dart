@@ -9,13 +9,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Ghasele';
+  String get appTitle => 'Cleanyjo';
 
   @override
-  String get login => 'Login';
+  String get login => 'Log in';
 
   @override
-  String get signup => 'Sign Up';
+  String get signup => 'Create account';
 
   @override
   String get email => 'Email';
@@ -27,13 +27,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get username => 'Username';
 
   @override
-  String get fullName => 'Full Name';
+  String get fullName => 'Full name';
 
   @override
-  String get confirmPassword => 'Confirm Password';
+  String get confirmPassword => 'Confirm password';
 
   @override
-  String get forgotPassword => 'Forgot Password?';
+  String get forgotPassword => 'Forgot your password?';
 
   @override
   String get dontHaveAccount => 'Don\'t have an account?';
@@ -42,16 +42,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alreadyHaveAccount => 'Already have an account?';
 
   @override
-  String get loginSuccess => 'Login Successful!';
+  String get loginSuccess => 'Welcome back!';
 
   @override
-  String get signupSuccess => 'Account created successfully!';
+  String get signupSuccess => 'Your account is ready!';
 
   @override
   String get home => 'Home';
 
   @override
-  String get orders => 'Orders';
+  String get orders => 'My orders';
 
   @override
   String get wallet => 'Wallet';
@@ -60,22 +60,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile => 'Profile';
 
   @override
-  String get setPickupLocation => 'Set Pickup Location';
+  String get setPickupLocation => 'Choose pickup location';
 
   @override
-  String get selectedLocation => 'Selected Location';
+  String get selectedLocation => 'Selected location';
 
   @override
-  String get searchLocation => 'Search location...';
+  String get searchLocation => 'Search for a location...';
 
   @override
-  String get orderHistory => 'Order History';
+  String get orderHistory => 'Order history';
 
   @override
   String get completed => 'Completed';
 
   @override
-  String get inProgress => 'In Progress';
+  String get inProgress => 'In progress';
 
   @override
   String get cancelled => 'Cancelled';
@@ -84,19 +84,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get total => 'Total';
 
   @override
-  String get currentBalance => 'Current Balance';
+  String get currentBalance => 'Current balance';
 
   @override
-  String get addFunds => 'Add Funds';
+  String get addFunds => 'Add funds';
 
   @override
   String get withdraw => 'Withdraw';
 
   @override
-  String get recentTransactions => 'Recent Transactions';
+  String get recentTransactions => 'Recent transactions';
 
   @override
-  String get addedFunds => 'Added Funds';
+  String get addedFunds => 'Funds added';
 
   @override
   String get refund => 'Refund';
@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jacket => 'Jacket';
 
   @override
-  String get bedsheets => 'Bedsheets';
+  String get bedsheets => 'Bed sheets';
 
   @override
   String get curtains => 'Curtains';
@@ -132,7 +132,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jod => 'JOD';
 
   @override
-  String get signIn => 'Sign In';
+  String get signIn => 'Log in';
 
   @override
   String get continueWithGoogle => 'Continue with Google';
@@ -142,7 +142,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInToSeeYourOrders =>
-      'Sign in to see your orders and save addresses';
+      'Log in to view your orders and save your addresses';
 
   @override
   String get continueWithApple => 'Continue with Apple';
@@ -151,7 +151,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orContinueWith => 'or continue with';
 
   @override
-  String get googleSignInFailed => 'Google sign-in failed. Please try again.';
+  String get googleSignInFailed =>
+      'We couldn\'t sign you in with Google. Please try again.';
 
   @override
   String get enterEmail => 'Enter your email';
@@ -169,35 +170,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createPassword => 'Create a password';
 
   @override
-  String get createAccount => 'Create Account';
+  String get createAccount => 'Create account';
 
   @override
-  String get passwordsDoNotMatch => 'Passwords do not match';
+  String get passwordsDoNotMatch => 'Passwords don\'t match';
 
   @override
-  String get invalidEmail => 'Invalid email';
+  String get invalidEmail => 'Enter a valid email address';
 
   @override
-  String get minCharacters => 'Min 6 characters';
+  String get minCharacters => 'At least 6 characters';
 
   @override
-  String get pleaseEnterEmail => 'Please enter email';
+  String get pleaseEnterEmail => 'Please enter your email';
 
   @override
-  String get pleaseEnterPassword => 'Please enter password';
+  String get pleaseEnterPassword => 'Please enter your password';
 
   @override
   String get pleaseEnterName => 'Please enter your name';
 
   @override
-  String get pleaseEnterUsername => 'Please enter a username';
+  String get pleaseEnterUsername => 'Please choose a username';
 
   @override
-  String get confirmOrder => 'Confirm Order';
+  String get confirmOrder => 'Review & confirm order';
 
   @override
   String get minOrderWarning =>
-      'Minimum order is 2 JOD. Would you like to proceed?';
+      'The minimum order is 2 JOD. Would you like to continue?';
 
   @override
   String get confirm => 'Confirm';
@@ -206,10 +207,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get orderCreated => 'Order created successfully!';
+  String get orderCreated => 'Order placed!';
 
   @override
-  String get orderFailed => 'Failed to create order';
+  String get orderFailed => 'We couldn\'t create your order';
 
   @override
   String get pending => 'Pending';
@@ -218,56 +219,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delivered => 'Delivered';
 
   @override
-  String get orderSuccessTitle => 'Order Placed Successfully!';
+  String get orderSuccessTitle => 'You\'re all set!';
 
   @override
   String get orderSuccessMessage =>
-      'Your laundry order has been received and is being processed.';
+      'We\'ve received your order. We\'ll keep you updated every step of the way.';
 
   @override
-  String get orderFailureTitle => 'Order Failed';
+  String get orderFailureTitle => 'We couldn\'t place your order';
 
   @override
   String get orderFailureMessage =>
       'Something went wrong while placing your order. Please try again.';
 
   @override
-  String get goToMyOrders => 'Go to My Orders';
+  String get goToMyOrders => 'View my orders';
 
   @override
-  String get backToHome => 'Back to Home';
+  String get backToHome => 'Back to home';
 
   @override
-  String get tryAgain => 'Try Again';
+  String get tryAgain => 'Try again';
 
   @override
   String get hasPendingOrder =>
-      'You already have a pending order. Please wait for it to be processed.';
+      'You already have an active order. Please wait until it\'s processed before placing another one.';
 
   @override
-  String get logout => 'Logout';
+  String get logout => 'Log out';
 
   @override
-  String get personalInfo => 'Personal Information';
+  String get personalInfo => 'Personal information';
 
   @override
-  String get phoneNumber => 'Phone Number';
+  String get phoneNumber => 'Phone number';
 
   @override
   String get enterPhoneNumber => 'Enter your phone number';
 
   @override
-  String get pleaseEnterPhoneNumber => 'Please enter phone number';
+  String get pleaseEnterPhoneNumber => 'Please enter your phone number';
 
   @override
-  String get invalidPhoneNumber => 'Invalid phone number';
+  String get invalidPhoneNumber => 'Enter a valid phone number';
 
   @override
   String get contactNumberRequiredTitle => 'Add a contact number';
 
   @override
   String get contactNumberRequiredMessage =>
-      'We need a phone number so the driver can reach you about this order.';
+      'We need a phone number so the driver can reach you about your order.';
 
   @override
   String get contactNumber => 'Contact number';
@@ -277,7 +278,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactNumberTicketHint =>
-      'You are not signed in, so support will use this number to reach you.';
+      'You\'re not logged in, so support will use this number to reach you.';
 
   @override
   String get or => 'or';
@@ -292,66 +293,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reliable => 'Reliable';
 
   @override
-  String get serviceSlogan => 'Professional laundry service at your doorstep';
+  String get serviceSlogan =>
+      'Professional laundry care, right at your doorstep';
 
   @override
-  String get joinSlogan => 'Join thousands of satisfied customers';
+  String get joinSlogan => 'Join thousands of happy customers';
 
   @override
-  String get selectPickupLocationTitle => 'Select Pickup Location';
+  String get selectPickupLocationTitle => 'Where should we pick up?';
 
   @override
   String get selectPickupLocationDesc =>
-      'Please select the location where you want us to pick up your clothes.';
+      'Choose where you\'d like us to pick up your clothes.';
 
   @override
-  String get goToMap => 'Go to Map & Select New Location';
+  String get goToMap => 'Choose a new location on the map';
 
   @override
-  String get orChooseSavedLocation => 'OR Choose Saved Location';
+  String get orChooseSavedLocation => 'Or choose a saved location';
 
   @override
-  String get savedLocation => 'Saved Location';
+  String get savedLocation => 'Saved location';
 
   @override
-  String get saveLocation => 'Save Location';
+  String get saveLocation => 'Save this location';
 
   @override
-  String get askSaveLocation =>
-      'Would you like to save this location for later?';
+  String get askSaveLocation => 'Save this location for your next order?';
 
   @override
-  String get locationNameHint => 'Location Name (e.g. Home, Work)';
+  String get locationNameHint => 'Location name (e.g. Home, Work)';
 
   @override
   String get save => 'Save';
 
   @override
-  String get actionRequired => 'Action Required';
+  String get actionRequired => 'Action needed';
 
   @override
   String get support => 'Support';
 
   @override
-  String get myTickets => 'My Tickets';
+  String get myTickets => 'My support tickets';
 
   @override
-  String get newTicket => 'New Ticket';
+  String get newTicket => 'New support ticket';
 
   @override
-  String get noTickets => 'No tickets yet';
+  String get noTickets => 'No support tickets yet';
 
   @override
-  String get submitFirstTicket => 'Submit your first support ticket';
+  String get submitFirstTicket => 'Contact support and we\'ll help you out';
 
   @override
-  String get ticketSubmitted => 'Ticket submitted successfully!';
+  String get ticketSubmitted => 'Your ticket has been sent!';
 
   @override
-  String get failedToSubmit => 'Failed to submit ticket';
+  String get failedToSubmit => 'We couldn\'t send your ticket';
 
   @override
-  String get pleaseLogin => 'Please login to submit a ticket';
+  String get pleaseLogin => 'Please log in to contact support';
 
   @override
   String get category => 'Category';
@@ -363,19 +364,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get message => 'Message';
 
   @override
-  String get submitTicket => 'Submit Ticket';
+  String get submitTicket => 'Send ticket';
 
   @override
-  String get briefDescription => 'Brief description of issue';
+  String get briefDescription => 'Briefly describe the issue';
 
   @override
-  String get describeIssue => 'Describe your issue in detail...';
+  String get describeIssue => 'Tell us what happened...';
 
   @override
-  String get supportResponse => 'Support Response';
+  String get supportResponse => 'Support reply';
 
   @override
-  String get yourMessage => 'Your Message';
+  String get yourMessage => 'Your message';
 
   @override
   String get created => 'Created';
@@ -393,7 +394,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get general => 'General';
 
   @override
-  String get orderIssue => 'Order Issue';
+  String get orderIssue => 'Order issue';
 
   @override
   String get payment => 'Payment';
@@ -411,16 +412,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get other => 'Other';
 
   @override
-  String get subjectRequired => 'Subject required';
+  String get subjectRequired => 'Please enter a subject';
 
   @override
-  String get messageRequired => 'Message required';
+  String get messageRequired => 'Please enter a message';
 
   @override
   String get photoOptional => 'Photo (optional)';
 
   @override
-  String get attachPhoto => 'Attach photo';
+  String get attachPhoto => 'Add a photo';
 
   @override
   String get changePhoto => 'Change photo';
@@ -429,7 +430,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removePhoto => 'Remove';
 
   @override
-  String get takePhoto => 'Take photo';
+  String get takePhoto => 'Take a photo';
 
   @override
   String get chooseFromGallery => 'Choose from gallery';
@@ -439,13 +440,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attachmentTooLarge =>
-      'The photo is too large. Please pick an image under 5 MB.';
+      'That photo is too large. Please choose an image under 5 MB.';
 
   @override
-  String get activeOrderTitle => 'Order in progress';
+  String get activeOrderTitle => 'Your order is in progress';
 
   @override
-  String get activeOrderTapHint => 'Tap to see your invoice number';
+  String get activeOrderTapHint => 'Tap to view your invoice number';
 
   @override
   String get invoiceNumber => 'Invoice number';
@@ -457,43 +458,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verify => 'Verify';
 
   @override
-  String get verificationCode => 'Verification Code';
+  String get verificationCode => 'Verification code';
 
   @override
   String get enterCode => 'Enter code';
 
   @override
-  String get resendCode => 'Resend Code';
+  String get resendCode => 'Resend code';
 
   @override
-  String get phoneVerified => 'Phone Verified';
+  String get phoneVerified => 'Phone number verified';
 
   @override
-  String get verificationFailed => 'Verification Failed';
+  String get verificationFailed => 'Verification failed';
 
   @override
-  String get codeSent => 'Code Sent';
+  String get codeSent => 'Code sent!';
 
   @override
-  String get invalidCredentials => 'Username or password incorrect';
+  String get invalidCredentials => 'The username or password is incorrect';
 
   @override
-  String get verifyPhoneNumber => 'Verify Phone';
+  String get verifyPhoneNumber => 'Verify your phone number';
 
   @override
-  String get logoutConfirm => 'Are you sure you want to logout?';
+  String get logoutConfirm => 'Are you sure you want to log out?';
 
   @override
   String get notifications => 'Notifications';
 
   @override
-  String get noNotifications => 'No notifications yet';
+  String get noNotifications => 'You\'re all caught up!';
 
   @override
-  String get newOrder => 'New Order';
+  String get noPrices => 'No prices available right now';
 
   @override
-  String get welcomeBack => 'Welcome back';
+  String get newOrder => 'New order';
+
+  @override
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get name => 'Name';
@@ -511,86 +515,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get next => 'Next';
 
   @override
-  String get backToPersonalInfo => 'Back to Personal Info';
+  String get backToPersonalInfo => 'Back to personal information';
 
   @override
-  String get setupPassword => 'Set up your password to secure your account';
+  String get setupPassword => 'Create a password to keep your account secure';
 
   @override
-  String get sendCode => 'Send Code';
+  String get sendCode => 'Send code';
 
   @override
   String get enterPhoneToRegister =>
-      'Enter your phone number and we\'ll send you a verification code';
+      'Enter your phone number and we\'ll send you a verification code.';
 
   @override
   String get completeProfile => 'Complete your profile';
 
   @override
   String get completeProfileSubtitle =>
-      'Choose your name and a password to finish creating your account';
+      'Add your name and a password to finish setting up your account.';
 
   @override
-  String get completeSignup => 'Complete Sign Up';
+  String get completeSignup => 'Finish creating account';
 
   @override
-  String get codeSentToWhatsapp => 'Code sent to your WhatsApp';
+  String get codeSentToWhatsapp => 'Code sent to WhatsApp';
 
   @override
   String get codeSentToSms => 'Code sent by SMS';
 
   @override
-  String get invalidOtp => 'Invalid or expired code. Please try again.';
+  String get invalidOtp => 'That code is invalid or expired. Please try again.';
 
   @override
   String get enterVerificationCode => 'Enter the 6-digit code';
 
   @override
   String get connectionError =>
-      'Couldn\'t reach the server. Please check your connection and try again.';
+      'We couldn\'t connect to the server. Check your connection and try again.';
 
   @override
   String get items => 'Items';
 
   @override
-  String get deliveryFee => 'Delivery';
+  String get deliveryFee => 'Delivery fee';
 
   @override
   String get close => 'Close';
 
   @override
-  String get deleteAccount => 'Delete Account';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountConfirm =>
-      'Are you sure you want to delete your account? This action cannot be undone.';
+      'Are you sure you want to delete your account? This can\'t be undone.';
 
   @override
-  String get deleteAccountWarning => 'Account Deletion';
+  String get deleteAccountWarning => 'Delete your account';
 
   @override
-  String get privacyPolicy => 'Privacy Policy';
+  String get privacyPolicy => 'Privacy policy';
 
   @override
-  String get priceExamples => 'Price Examples';
+  String get priceExamples => 'Price examples';
 
   @override
   String get marketing => 'Marketing';
 
   @override
-  String get addMarketer => 'Add New Marketer';
+  String get addMarketer => 'Add marketer';
 
   @override
-  String get marketerName => 'Marketer Name';
+  String get marketerName => 'Marketer name';
 
   @override
-  String get marketingCode => 'Marketing Code';
+  String get marketingCode => 'Marketing code';
 
   @override
   String get discount => 'Discount';
 
   @override
-  String get share => 'Share';
+  String get share => 'Commission';
 
   @override
   String get noMarketers => 'No marketers added yet';
@@ -599,7 +603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get marketerAdded => 'Marketer added successfully';
 
   @override
-  String get marketerDeleted => 'Marketer deleted successfully';
+  String get marketerDeleted => 'Marketer removed successfully';
 
   @override
   String get pricing => 'Pricing';
@@ -608,25 +612,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverName => 'Driver';
 
   @override
-  String get driverPhone => 'Driver Phone';
+  String get driverPhone => 'Driver phone';
 
   @override
-  String get statusPendingCollection => 'Pending Collection';
+  String get statusPendingCollection => 'Waiting for pickup';
 
   @override
-  String get statusAssigned => 'Driver Assigned';
+  String get statusAssigned => 'Driver assigned';
 
   @override
-  String get statusCollected => 'Collected';
+  String get statusCollected => 'Picked up';
 
   @override
-  String get statusCleaning => 'Cleaning';
+  String get statusCleaning => 'Being cleaned';
 
   @override
-  String get statusReady => 'Ready';
+  String get statusReady => 'Ready for delivery';
 
   @override
-  String get statusOutForDelivery => 'Out for Delivery';
+  String get statusOutForDelivery => 'On the way to you';
 
   @override
   String get statusDelivered => 'Delivered';
@@ -641,55 +645,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ironing => 'Ironing';
 
   @override
-  String get both => 'Both';
+  String get both => 'Cleaning & ironing';
 
   @override
-  String get promoCode => 'Promo Code';
+  String get promoCode => 'Promo code';
 
   @override
-  String get addPromoCode => 'Add promo code';
+  String get addPromoCode => 'Add a promo code';
 
   @override
-  String get enterPromoCode => 'Enter code here';
+  String get enterPromoCode => 'Enter your code';
 
   @override
-  String get locationSaved => 'Location saved';
+  String get locationSaved => 'Location saved!';
 
   @override
   String get locationOutsideAmman =>
-      'Please select a location within Amman, Jordan.';
+      'Please choose a location within Amman, Jordan.';
 
   @override
-  String get loginToSaveLocation => 'Sign in to save this location';
+  String get loginToSaveLocation => 'Log in to save this location';
 
   @override
-  String get driverCollectionTab => 'Collecting';
+  String get driverCollectionTab => 'Pickups';
 
   @override
-  String get driverDeliveryTab => 'Delivering';
+  String get driverDeliveryTab => 'Deliveries';
 
   @override
-  String get driverNoCollectionTrips => 'No collection trips';
+  String get driverNoCollectionTrips => 'No pickup trips';
 
   @override
   String get driverNoCollectionTripsDesc =>
-      'You have no trips to collect from clients right now.';
+      'You don\'t have any pickup trips right now.';
 
   @override
   String get driverNoDeliveryTrips => 'No delivery trips';
 
   @override
   String get driverNoDeliveryTripsDesc =>
-      'You have no trips to deliver to clients right now.';
+      'You don\'t have any delivery trips right now.';
 
   @override
-  String get driverCollected => 'collected';
+  String get driverCollected => 'picked up';
 
   @override
   String get driverDelivered => 'delivered';
 
   @override
-  String get driverReadyForHandover => 'Ready for handover';
+  String get driverReadyForHandover => 'Ready to hand over';
 
   @override
   String get driverInProgress => 'In progress';
@@ -704,47 +708,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverItemType => 'Item type';
 
   @override
-  String get driverQuantity => 'Qty';
+  String get driverQuantity => 'Quantity';
 
   @override
-  String get driverSaveAndCollect => 'Save items and mark collected';
+  String get driverSaveAndCollect => 'Save items & mark as picked up';
 
   @override
-  String get driverItemsSaved => 'Items saved and order collected';
+  String get driverItemsSaved => 'Items saved and order marked as picked up';
 
   @override
   String driverAllCollected(int count) {
-    return 'All $count orders collected';
+    return 'All $count orders picked up';
   }
 
   @override
-  String get driverNavigateToCleaner => 'Navigate to dry cleaner';
+  String get driverNavigateToCleaner => 'Navigate to cleaner';
 
   @override
-  String get driverHandOverToCleaner => 'Complete trip and send to cleaning';
+  String get driverHandOverToCleaner => 'Finish trip & send to cleaning';
 
   @override
   String get driverOutForDelivery => 'Out for delivery';
 
   @override
-  String get driverMarkDelivered => 'Mark delivered';
+  String get driverMarkDelivered => 'Mark as delivered';
 
   @override
   String get jodShort => 'JOD';
 
   @override
-  String get collectionTime => 'Collection time';
+  String get collectionTime => 'Pickup time';
 
   @override
-  String get selectCollectionTime => 'Please choose a collection time';
+  String get selectCollectionTime => 'Choose a pickup time';
 
   @override
   String get noCollectionTimes =>
-      'There are no collection times available right now. Please try again later.';
+      'No pickup times are available right now. Please try again later.';
 
   @override
   String get collectionTimesFailed =>
-      'We couldn\'t load the collection times. Check your connection.';
+      'We couldn\'t load the pickup times. Check your connection and try again.';
 
   @override
   String get fullyBooked => 'Fully booked';
@@ -753,15 +757,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tomorrow => 'Tomorrow';
 
   @override
-  String get photoFailed => 'Could not attach the photo. Please try again.';
+  String get photoFailed => 'We couldn\'t attach the photo. Please try again.';
 
   @override
   String get cameraUnavailable =>
-      'This device has no camera available. Choose a photo from the gallery instead.';
+      'No camera is available on this device. Choose a photo from your gallery instead.';
 
   @override
   String get photoPermissionDenied =>
-      'Permission denied. Allow camera and photo access in Settings to attach a photo.';
+      'Camera or photo access is off. Enable it in Settings to attach a photo.';
 
   @override
   String get editName => 'Edit name';
@@ -771,14 +775,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nameChangeNote =>
-      'This is the name your driver sees when they arrive.';
+      'This is the name your driver will see when they arrive.';
 
   @override
   String get phoneChangeNote =>
-      'This is how we reach you about an order - and how you\'ll sign in from now on.';
+      'We\'ll use this number to contact you about orders and to sign you in.';
 
   @override
-  String get profileUpdated => 'Your details were saved';
+  String get profileUpdated => 'Your details have been saved!';
 
   @override
   String get phoneAlreadyInUse =>
@@ -788,25 +792,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notSet => 'Not set';
 
   @override
-  String get chooseLanguage => 'Choose language';
+  String get chooseLanguage => 'Choose your language';
 
   @override
-  String get languageChanged => 'Language changed';
+  String get languageChanged => 'Language updated!';
 
   @override
   String get browsingAsGuest => 'You\'re browsing as a guest';
 
   @override
-  String get guestBenefitsTitle => 'Sign in to unlock';
+  String get guestBenefitsTitle => 'Sign in to get more from Cleanyjo';
 
   @override
-  String get guestBenefitOrders => 'Keep every order in one place';
+  String get guestBenefitOrders => 'Keep all your orders in one place';
 
   @override
-  String get guestBenefitAddresses => 'Save addresses and book in one tap';
+  String get guestBenefitAddresses => 'Save addresses and order faster';
 
   @override
-  String get guestBenefitSupport => 'Pick up support chats where you left off';
+  String get guestBenefitSupport =>
+      'Keep your support conversations in one place';
 
   @override
   String get continueAsGuest => 'Maybe later';
@@ -822,24 +827,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderSuccessNotifyText =>
-      'You\'ll get a notification when the driver is on the way to collect your order.';
+      'We\'ll notify you when your driver is on the way to pick up your order.';
 
   @override
-  String get orderSuccessCareTitle => 'Your items are in safe hands';
+  String get orderSuccessCareTitle => 'Your clothes are in good hands';
 
   @override
   String get orderSuccessCareText =>
-      'Your items are our responsibility from the moment we collect them until they are back with you.';
+      'From pickup to delivery, we\'ll take care of your clothes every step of the way.';
 
   @override
   String get callDriver => 'Call driver';
 
   @override
   String get callDriverFailed =>
-      'Could not open the dialer. You can dial the number manually.';
+      'We couldn\'t open the phone app. You can dial the number manually.';
 
   @override
-  String get changeCollectionTime => 'Change collection time';
+  String get changeCollectionTime => 'Change pickup time';
 
   @override
   String get saveNewTime => 'Save new time';
@@ -848,7 +853,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentTime => 'Current';
 
   @override
-  String get collectionTimeUpdated => 'Your collection time was changed.';
+  String get collectionTimeUpdated => 'Your pickup time has been updated!';
 
   @override
   String get cancelOrder => 'Cancel order';
@@ -858,10 +863,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelOrderMessage =>
-      'Your booked collection time will be released. This cannot be undone.';
+      'Your booked pickup time will be released. This action can\'t be undone.';
 
   @override
-  String get keepOrder => 'Keep order';
+  String get keepOrder => 'Keep my order';
 
   @override
   String get orderCancelled => 'Your order has been cancelled.';
@@ -869,4 +874,59 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get orderChangeFailed =>
       'We couldn\'t update your order. Please try again.';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get onboardingStart => 'Get started';
+
+  @override
+  String get onboardingPickPlaceTitle => 'Tell us where to pick up';
+
+  @override
+  String get onboardingPickPlaceBody =>
+      'Drop a pin where you\'d like us to collect from — home, office, or anywhere in Amman.';
+
+  @override
+  String get onboardingChooseTimeTitle => 'Pick a time that works for you';
+
+  @override
+  String get onboardingChooseTimeBody =>
+      'Choose an available pickup window and we\'ll come to you.';
+
+  @override
+  String get onboardingCollectTitle => 'We pick up & price your order';
+
+  @override
+  String get onboardingCollectBody =>
+      'Your driver counts the items at pickup, then you\'ll see the exact price. No upfront payment.';
+
+  @override
+  String get onboardingDeliverTitle => 'Clean clothes, back at your door';
+
+  @override
+  String get onboardingDeliverBody =>
+      'Track your order at every step, and we\'ll bring your clean clothes back to the same location.';
+
+  @override
+  String priceFixed(String price) {
+    return '$price JOD';
+  }
+
+  @override
+  String priceStartingFrom(String price) {
+    return 'From $price JOD';
+  }
+
+  @override
+  String priceRange(String min, String max) {
+    return '$min to $max JOD';
+  }
+
+  @override
+  String get cleaningAndIroning => 'Cleaning & Ironing';
+
+  @override
+  String get driverItemPrice => 'Price';
 }

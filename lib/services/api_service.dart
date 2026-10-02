@@ -19,7 +19,7 @@ class PhoneCheck {
 }
 
 class ApiService {
-  // The single base URL for every backend call in this app. Currently the deployed API.
+  // The single base URL for every backend call in this app. Currently the DEPLOYED API.
   //
   // Keep this default pointed at the deployed API: a store build cannot reach `localhost`
   // - there is no tunnel on a real device, and the self-signed dev certificate is only

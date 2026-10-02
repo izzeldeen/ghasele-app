@@ -149,14 +149,15 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
   String? _selectedOrderId;
   final List<Map<String, dynamic>> _basket = [];
   final _typeController = TextEditingController();
+  final _priceController = TextEditingController();
   int _quantity = 1;
-  String _serviceType = 'Both';
   bool _saving = false;
   bool _handingOver = false;
 
   @override
   void dispose() {
     _typeController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
@@ -231,15 +232,27 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
     }
   }
 
+  /// Adds a line to the basket at the price the driver settled on.
+  ///
+  /// The price is what the customer will be billed, and what the laundry is paid a share
+  /// of. Left empty it falls back server-side to the item's catalogue price, which is the
+  /// right answer for the fixed-price items and a floor for everything else.
   void _addToBasket() {
     if (_typeController.text.trim().isEmpty) return;
+
+    final typed = _priceController.text.trim().replaceAll(',', '.');
+    final price = typed.isEmpty ? null : double.tryParse(typed);
+
     setState(() {
       _basket.add({
         'itemType': _typeController.text.trim(),
         'quantity': _quantity,
-        'serviceType': _serviceType,
+        // Only sent when it parses to a sane number - a typo must not bill someone a
+        // negative amount or silently become zero.
+        if (price != null && price >= 0) 'price': price,
       });
       _typeController.clear();
+      _priceController.clear();
       _quantity = 1;
     });
   }
@@ -320,12 +333,21 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
                                   ),
                                   const SizedBox(width: 8),
                                   SizedBox(
-                                    width: 60,
+                                    width: 54,
                                     child: TextFormField(
                                       initialValue: '1',
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(hintText: l10n.driverQuantity),
                                       onChanged: (v) => _quantity = int.tryParse(v) ?? 1,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  SizedBox(
+                                    width: 72,
+                                    child: TextField(
+                                      controller: _priceController,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      decoration: InputDecoration(hintText: l10n.driverItemPrice),
                                     ),
                                   ),
                                   IconButton(
@@ -340,6 +362,9 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
                                       .map((item) => ListTile(
                                             dense: true,
                                             title: Text('${item['quantity']}x ${item['itemType']}'),
+                                            subtitle: item['price'] == null
+                                                ? null
+                                                : Text('${item['price']} ${l10n.jod}'),
                                             trailing: IconButton(
                                               icon: const Icon(Icons.close_rounded, size: 18),
                                               onPressed: () => setState(() => _basket.remove(item)),

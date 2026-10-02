@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'onboarding_screen.dart';
+
 import 'theme/app_theme.dart';
 
 /// Cleanyjo splash screen.
@@ -83,6 +85,14 @@ class _SplashScreenState extends State<SplashScreen>
     String route = '/main';
     if (token != null && token.isNotEmpty) {
       route = prefs.getString('user_role') == 'Driver' ? '/driver-main' : '/main';
+    }
+
+    // First launch goes through the walkthrough instead, which hands over to /main once
+    // it is done. Customers only: it explains ordering, collection and delivery from the
+    // customer's side, none of which is a captain's job.
+    final seenOnboarding = prefs.getBool(OnboardingScreen.seenKey) ?? false;
+    if (route == '/main' && !seenOnboarding) {
+      route = '/onboarding';
     }
 
     Navigator.pushReplacementNamed(context, route);
