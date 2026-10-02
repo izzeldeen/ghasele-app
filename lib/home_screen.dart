@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<HomeViewState> _homeKey = GlobalKey<HomeViewState>();
   final GlobalKey<OrdersViewState> _ordersKey = GlobalKey<OrdersViewState>();
   final GlobalKey<ProfileViewState> _profileKey = GlobalKey<ProfileViewState>();
+  final GlobalKey<PricingViewState> _pricingKey = GlobalKey<PricingViewState>();
   int _unreadCount = 0;
 
   // No signed-in/guest flag here on purpose: every tab is open to guests, Profile included -
@@ -68,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final List<Widget> views = [
       OrdersView(key: _ordersKey),
-      const PricingView(),
+      PricingView(key: _pricingKey),
       HomeView(key: _homeKey, isActive: _currentIndex == 2),
       const SupportView(),
       ProfileView(key: _profileKey),
@@ -208,6 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         if (index == 0) {
           _ordersKey.currentState?.fetchOrders();
+        } else if (index == 1) {
+          _pricingKey.currentState?.refresh();
         } else if (index == 2) {
           _homeKey.currentState?.refresh();
         } else if (index == 4) {
