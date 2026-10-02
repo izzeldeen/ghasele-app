@@ -323,5 +323,39 @@
     }
   },
   "cleaningAndIroning": "Cleaning & Ironing",
-  "driverItemPrice": "Price"
+  "driverItemPrice": "Price",
+  "noOrdersYet": "No orders yet",
+  "noItemsYet": "No items added yet",
+  "genericError": "Something went wrong. Please try again.",
+  "phoneMustBe9Digits": "The phone number must be 9 digits (7XXXXXXXX)",
+  "sendCodeFailed": "We couldn't send the code. Please try again.",
+  "codeVerified": "Code verified",
+  "otpSentTo": "Enter the 6-digit code we sent to {phone} on WhatsApp.",
+  "@otpSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "resetPassword": "Reset password",
+  "resetPasswordDesc": "Create a new password for your account.",
+  "newPassword": "New password",
+  "confirmNewPassword": "Confirm new password",
+  "savePassword": "Save password",
+  "passwordResetSuccess": "Your password has been reset. Please log in.",
+  "passwordResetFailed": "We couldn't reset your password. Please try again.",
+  "forgotPasswordDesc": "Enter your registered phone number and we'll send you a code on WhatsApp to reset your password.",
+  "appleSignInFailed": "We couldn't sign you in with Apple. Please try again.",
+  "saveLocationFailed": "We couldn't save this location. Please try again.",
+  "sessionExpired": "Your session has expired. Please log in again.",
+  "ammanJordan": "Amman, Jordan",
+  "deleteAccountFailed": "We couldn't delete your account. Please try again.",
+  "loadTripsFailed": "We couldn't load the trips. Please try again.",
+  "saveItemsFailed": "We couldn't save the items. Please try again.",
+  "markCollectedFailed": "We couldn't mark the order as picked up. Please try again.",
+  "handOverFailed": "We couldn't hand over the trip. Please try again.",
+  "updateRequiredTitle": "A new version is available",
+  "updateRequiredMessage": "Please update Cleanyjo to keep using the app. The new version includes improvements and fixes.",
+  "updateNow": "Update now"
 }

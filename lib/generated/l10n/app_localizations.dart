@@ -1855,6 +1855,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price'**
   String get driverItemPrice;
+
+  /// No description provided for @noOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrdersYet;
+
+  /// No description provided for @noItemsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No items added yet'**
+  String get noItemsYet;
+
+  /// No description provided for @genericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get genericError;
+
+  /// No description provided for @phoneMustBe9Digits.
+  ///
+  /// In en, this message translates to:
+  /// **'The phone number must be 9 digits (7XXXXXXXX)'**
+  String get phoneMustBe9Digits;
+
+  /// No description provided for @sendCodeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t send the code. Please try again.'**
+  String get sendCodeFailed;
+
+  /// No description provided for @codeVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Code verified'**
+  String get codeVerified;
+
+  /// No description provided for @otpSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code we sent to {phone} on WhatsApp.'**
+  String otpSentTo(String phone);
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPassword;
+
+  /// No description provided for @resetPasswordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new password for your account.'**
+  String get resetPasswordDesc;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @savePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get savePassword;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been reset. Please log in.'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @passwordResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t reset your password. Please try again.'**
+  String get passwordResetFailed;
+
+  /// No description provided for @forgotPasswordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your registered phone number and we\'ll send you a code on WhatsApp to reset your password.'**
+  String get forgotPasswordDesc;
+
+  /// No description provided for @appleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t sign you in with Apple. Please try again.'**
+  String get appleSignInFailed;
+
+  /// No description provided for @saveLocationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save this location. Please try again.'**
+  String get saveLocationFailed;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please log in again.'**
+  String get sessionExpired;
+
+  /// No description provided for @ammanJordan.
+  ///
+  /// In en, this message translates to:
+  /// **'Amman, Jordan'**
+  String get ammanJordan;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t delete your account. Please try again.'**
+  String get deleteAccountFailed;
+
+  /// No description provided for @loadTripsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the trips. Please try again.'**
+  String get loadTripsFailed;
+
+  /// No description provided for @saveItemsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save the items. Please try again.'**
+  String get saveItemsFailed;
+
+  /// No description provided for @markCollectedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t mark the order as picked up. Please try again.'**
+  String get markCollectedFailed;
+
+  /// No description provided for @handOverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t hand over the trip. Please try again.'**
+  String get handOverFailed;
+
+  /// No description provided for @updateRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is available'**
+  String get updateRequiredTitle;
+
+  /// No description provided for @updateRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please update Cleanyjo to keep using the app. The new version includes improvements and fixes.'**
+  String get updateRequiredMessage;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get updateNow;
 }
 
 class _AppLocalizationsDelegate

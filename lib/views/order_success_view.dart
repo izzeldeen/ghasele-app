@@ -136,7 +136,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                       _isAlreadySaved = true;
                     });
                   } else {
-                    CustomToast.show(context, message: 'Failed to save location', type: ToastType.error);
+                    CustomToast.show(context, message: l10n.saveLocationFailed, type: ToastType.error);
                   }
                 } else if (mounted) {
                   // Guest checkout reaches this screen too, and a guest has no account to
@@ -146,7 +146,7 @@ class _OrderSuccessViewState extends State<OrderSuccessView> {
                 }
               } catch (e) {
                 if (mounted) {
-                  CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+                  CustomToast.show(context, message: l10n.genericError, type: ToastType.error);
                 }
               } finally {
                 if (mounted) setState(() => _isSaving = false);

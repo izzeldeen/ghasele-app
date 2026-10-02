@@ -505,7 +505,7 @@ class ProfileViewState extends State<ProfileView> {
           );
           if (!result['success'] && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(result['message'] ?? 'Failed to delete account. Please try again.')),
+              SnackBar(content: Text(result['message'] ?? l10n.deleteAccountFailed)),
             );
             setState(() => _isDeleting = false);
             return;
@@ -523,7 +523,7 @@ class ProfileViewState extends State<ProfileView> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting account: $e')),
+            SnackBar(content: Text(l10n.deleteAccountFailed)),
           );
           setState(() => _isDeleting = false);
         }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:ghasele/widgets/custom_toast.dart';
+import 'package:ghasele/generated/l10n/app_localizations.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -26,6 +27,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() => _isLoading = true);
 
       try {
@@ -34,18 +36,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
         if (mounted) {
           if (result['success']) {
-            CustomToast.show(context, message: 'OTP verified successfully', type: ToastType.success);
+            CustomToast.show(
+              context,
+              message: l10n.codeVerified,
+              type: ToastType.success,
+            );
             Navigator.of(context).pushReplacementNamed(
               '/reset-password',
               arguments: {'phone': widget.phoneNumber, 'otp': otp},
             );
           } else {
-            CustomToast.show(context, message: result['message'] ?? 'Invalid OTP', type: ToastType.error);
+            CustomToast.show(
+              context,
+              message: result['message'] ?? l10n.invalidOtp,
+              type: ToastType.error,
+            );
           }
         }
       } catch (e) {
         if (mounted) {
-          CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+          debugPrint('OTP verification failed: $e');
+          CustomToast.show(
+            context,
+            message: l10n.genericError,
+            type: ToastType.error,
+          );
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -55,17 +70,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const primaryColor = AppTheme.brandGreen;
     const accentColor = AppTheme.brandGreenLight;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Verify OTP'),
+        title: Text(l10n.verifyPhoneNumber),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: primaryColor),
-        titleTextStyle: const TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold),
+        titleTextStyle: const TextStyle(
+          color: primaryColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -76,11 +96,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Enter the 6-digit code sent to ${widget.phoneNumber} via WhatsApp.",
+                  l10n.otpSentTo(widget.phoneNumber),
                   style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 30),
-                _buildInputLabel('OTP Code'),
+                _buildInputLabel(l10n.verificationCode),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _otpController,
@@ -91,15 +111,23 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   ],
                   decoration: InputDecoration(
                     hintText: '123456',
-                    prefixIcon: const Icon(Icons.password_rounded, color: primaryColor),
+                    prefixIcon: const Icon(
+                      Icons.password_rounded,
+                      color: primaryColor,
+                    ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     border: _buildBorder(),
                     enabledBorder: _buildBorder(),
                     focusedBorder: _buildBorder(color: primaryColor),
                   ),
-                  validator: (v) => v == null || v.length < 6 ? 'Please enter a valid 6-digit OTP' : null,
+                  validator: (v) => v == null || v.length < 6
+                      ? l10n.enterVerificationCode
+                      : null,
                 ),
                 const SizedBox(height: 32),
                 Container(
@@ -123,13 +151,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text(
-                            "Verify",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            l10n.verify,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                   ),
                 ),

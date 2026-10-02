@@ -732,7 +732,8 @@ class _CreateTicketViewState extends State<CreateTicketView> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        _showMessage('Error: ${e.toString()}', isError: true);
+        debugPrint('Ticket submit failed: $e');
+        _showMessage(l10n.genericError, isError: true);
       }
     }
   }

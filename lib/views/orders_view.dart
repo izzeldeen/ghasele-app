@@ -283,7 +283,7 @@ class OrdersViewState extends State<OrdersView> {
           ),
           const SizedBox(height: 8),
           Text(
-            'No orders found yet', // Should be localized if possible
+            l10n.noOrdersYet,
             style: TextStyle(color: AppTheme.neutral500, fontSize: 16),
           ),
         ],
@@ -546,7 +546,7 @@ class OrdersViewState extends State<OrdersView> {
             ),
             const SizedBox(height: 16),
             if (items.isEmpty)
-              const Text('No items added yet', style: TextStyle(color: AppTheme.neutral500)),
+              Text(l10n.noItemsYet, style: const TextStyle(color: AppTheme.neutral500)),
             ...items.map((item) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -664,7 +664,7 @@ class OrdersViewState extends State<OrdersView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Discount",
+                    l10n.discount,
                     style: TextStyle(
                       color: AppTheme.success,
                       fontWeight: FontWeight.w500,

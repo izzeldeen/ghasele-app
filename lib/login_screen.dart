@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // Final guard: should be exactly 9 digits for Jordan (7XXXXXXXX)
         if (phone.length != 9) {
           setState(() => _isLoading = false);
-          CustomToast.show(context, message: "Phone number must be 9 digits (7XXXXXXXX)", type: ToastType.error);
+          CustomToast.show(context, message: l10n.phoneMustBe9Digits, type: ToastType.error);
           return;
         }
 
@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         if (mounted) {
           CustomToast.show(context,
-              message: 'Error: $e', type: ToastType.error);
+              message: l10n.genericError, type: ToastType.error);
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -241,11 +241,11 @@ class _LoginScreenState extends State<LoginScreen> {
     } on SignInWithAppleAuthorizationException catch (e) {
       // User tapping "Cancel" is not an error worth surfacing.
       if (e.code != AuthorizationErrorCode.canceled && mounted) {
-        CustomToast.show(context, message: 'Apple sign-in failed: ${e.message}', type: ToastType.error);
+        CustomToast.show(context, message: l10n.appleSignInFailed, type: ToastType.error);
       }
     } catch (e) {
       if (mounted) {
-        CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+        CustomToast.show(context, message: l10n.genericError, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'force_update_screen.dart';
 import 'onboarding_screen.dart';
+import 'services/app_update_service.dart';
 
 import 'theme/app_theme.dart';
 
@@ -71,8 +73,21 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateNext() async {
+    // The update check runs during the splash animation, so it adds no wait of its own
+    // (it gives up after 5s and lets the app start).
+    final updateCheck = AppUpdateService.requiredUpdateUrl();
     await Future<void>.delayed(const Duration(seconds: 4));
+    final storeUrl = await updateCheck;
     if (!mounted) return;
+
+    // Below the minimum build: the update screen replaces the whole app.
+    if (storeUrl != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => ForceUpdateScreen(storeUrl: storeUrl)),
+      );
+      return;
+    }
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');

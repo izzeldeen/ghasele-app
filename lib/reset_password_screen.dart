@@ -8,7 +8,11 @@ class ResetPasswordScreen extends StatefulWidget {
   final String phoneNumber;
   final String otp;
 
-  const ResetPasswordScreen({super.key, required this.phoneNumber, required this.otp});
+  const ResetPasswordScreen({
+    super.key,
+    required this.phoneNumber,
+    required this.otp,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -30,9 +34,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        CustomToast.show(context, message: 'Passwords do not match', type: ToastType.error);
+        CustomToast.show(
+          context,
+          message: l10n.passwordsDoNotMatch,
+          type: ToastType.error,
+        );
         return;
       }
 
@@ -47,15 +56,30 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
         if (mounted) {
           if (result['success']) {
-            CustomToast.show(context, message: 'Password reset successfully. Please login.', type: ToastType.success);
-            Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+            CustomToast.show(
+              context,
+              message: l10n.passwordResetSuccess,
+              type: ToastType.success,
+            );
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/login', (route) => false);
           } else {
-            CustomToast.show(context, message: result['message'] ?? 'Failed to reset password', type: ToastType.error);
+            CustomToast.show(
+              context,
+              message: result['message'] ?? l10n.passwordResetFailed,
+              type: ToastType.error,
+            );
           }
         }
       } catch (e) {
         if (mounted) {
-          CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+          debugPrint('Reset password failed: $e');
+          CustomToast.show(
+            context,
+            message: l10n.genericError,
+            type: ToastType.error,
+          );
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -72,11 +96,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Reset Password'),
+        title: Text(l10n.resetPassword),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: primaryColor),
-        titleTextStyle: const TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold),
+        titleTextStyle: const TextStyle(
+          color: primaryColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -86,68 +114,90 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Create a new password for your account.",
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                Text(
+                  l10n.resetPasswordDesc,
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 30),
-                
+
                 // Password Input
-                _buildInputLabel(l10n.password),
+                _buildInputLabel(l10n.newPassword),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'New Password',
-                    prefixIcon: const Icon(Icons.lock_outline_rounded, color: primaryColor),
+                    hintText: l10n.newPassword,
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      color: primaryColor,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                        _obscurePassword
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
                         color: Colors.grey,
                         size: 20,
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     border: _buildBorder(),
                     enabledBorder: _buildBorder(),
                     focusedBorder: _buildBorder(color: primaryColor),
                   ),
-                  validator: (v) => v == null || v.length < 6 ? l10n.minCharacters : null,
+                  validator: (v) =>
+                      v == null || v.length < 6 ? l10n.minCharacters : null,
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Confirm Password Input
-                _buildInputLabel('Confirm Password'),
+                _buildInputLabel(l10n.confirmPassword),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
-                    hintText: 'Confirm New Password',
-                    prefixIcon: const Icon(Icons.lock_reset_rounded, color: primaryColor),
+                    hintText: l10n.confirmNewPassword,
+                    prefixIcon: const Icon(
+                      Icons.lock_reset_rounded,
+                      color: primaryColor,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
                         color: Colors.grey,
                         size: 20,
                       ),
-                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                      ),
                     ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     border: _buildBorder(),
                     enabledBorder: _buildBorder(),
                     focusedBorder: _buildBorder(color: primaryColor),
                   ),
-                  validator: (v) => v == null || v.length < 6 ? l10n.minCharacters : null,
+                  validator: (v) =>
+                      v == null || v.length < 6 ? l10n.minCharacters : null,
                 ),
                 const SizedBox(height: 32),
-                
+
                 Container(
                   width: double.infinity,
                   height: 56,
@@ -169,13 +219,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text(
-                            "Save Password",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            l10n.savePassword,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                   ),
                 ),

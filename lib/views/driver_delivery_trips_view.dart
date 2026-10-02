@@ -46,7 +46,7 @@ class DriverDeliveryTripsViewState extends State<DriverDeliveryTripsView> {
     } else {
       setState(() => _loading = false);
       if (mounted) {
-        CustomToast.show(context, message: result['message']?.toString() ?? 'Failed to load trips', type: ToastType.error);
+        CustomToast.show(context, message: result['message']?.toString() ?? AppLocalizations.of(context)!.loadTripsFailed, type: ToastType.error);
       }
     }
   }
@@ -69,7 +69,7 @@ class DriverDeliveryTripsViewState extends State<DriverDeliveryTripsView> {
     if (result['success']) {
       await _load();
     } else {
-      CustomToast.show(context, message: result['message']?.toString() ?? 'Failed to update order', type: ToastType.error);
+      CustomToast.show(context, message: result['message']?.toString() ?? AppLocalizations.of(context)!.orderChangeFailed, type: ToastType.error);
     }
   }
 

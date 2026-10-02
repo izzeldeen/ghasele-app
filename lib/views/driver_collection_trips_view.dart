@@ -53,7 +53,7 @@ class DriverCollectionTripsViewState extends State<DriverCollectionTripsView> {
     } else {
       setState(() => _loading = false);
       if (mounted) {
-        CustomToast.show(context, message: result['message']?.toString() ?? 'Failed to load trips', type: ToastType.error);
+        CustomToast.show(context, message: result['message']?.toString() ?? AppLocalizations.of(context)!.loadTripsFailed, type: ToastType.error);
       }
     }
   }
@@ -187,7 +187,7 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
     if (!itemsResult['success']) {
       if (mounted) {
         setState(() => _saving = false);
-        CustomToast.show(context, message: itemsResult['message']?.toString() ?? 'Failed to save items', type: ToastType.error);
+        CustomToast.show(context, message: itemsResult['message']?.toString() ?? AppLocalizations.of(context)!.saveItemsFailed, type: ToastType.error);
       }
       return;
     }
@@ -211,7 +211,7 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
         _selectedOrderId = next.isNotEmpty ? next['id'] as String : null;
       });
     } else {
-      CustomToast.show(context, message: collectResult['message']?.toString() ?? 'Failed to mark collected', type: ToastType.error);
+      CustomToast.show(context, message: collectResult['message']?.toString() ?? AppLocalizations.of(context)!.markCollectedFailed, type: ToastType.error);
     }
   }
 
@@ -228,7 +228,7 @@ class _TripCollectDetailState extends State<_TripCollectDetail> {
       widget.onChanged();
       widget.onBack();
     } else {
-      CustomToast.show(context, message: result['message']?.toString() ?? 'Failed to hand over trip', type: ToastType.error);
+      CustomToast.show(context, message: result['message']?.toString() ?? AppLocalizations.of(context)!.handOverFailed, type: ToastType.error);
     }
   }
 

@@ -24,6 +24,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
@@ -39,7 +40,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
         if (phone.length != 9) {
           setState(() => _isLoading = false);
-          CustomToast.show(context, message: "Phone number must be 9 digits (7XXXXXXXX)", type: ToastType.error);
+          CustomToast.show(
+            context,
+            message: l10n.phoneMustBe9Digits,
+            type: ToastType.error,
+          );
           return;
         }
 
@@ -49,18 +54,30 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
         if (mounted) {
           if (result['success']) {
-            CustomToast.show(context, message: result['message'] ?? 'OTP sent successfully', type: ToastType.success);
-            Navigator.of(context).pushNamed(
-              '/verify-otp',
-              arguments: fullPhone,
+            CustomToast.show(
+              context,
+              message: result['message'] ?? l10n.codeSent,
+              type: ToastType.success,
             );
+            Navigator.of(
+              context,
+            ).pushNamed('/verify-otp', arguments: fullPhone);
           } else {
-            CustomToast.show(context, message: result['message'] ?? 'Failed to send OTP', type: ToastType.error);
+            CustomToast.show(
+              context,
+              message: result['message'] ?? l10n.sendCodeFailed,
+              type: ToastType.error,
+            );
           }
         }
       } catch (e) {
         if (mounted) {
-          CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+          debugPrint('Forgot password failed: $e');
+          CustomToast.show(
+            context,
+            message: l10n.genericError,
+            type: ToastType.error,
+          );
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -81,7 +98,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: primaryColor),
-        titleTextStyle: const TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold),
+        titleTextStyle: const TextStyle(
+          color: primaryColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -91,9 +112,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Enter your registered phone number. We'll send you a WhatsApp message with an OTP to reset your password.",
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                Text(
+                  l10n.forgotPasswordDesc,
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 30),
                 _buildInputLabel(l10n.phoneNumber),
@@ -110,17 +131,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ],
                     decoration: InputDecoration(
                       hintText: '7XXXXXXXX',
-                      prefixIcon: const Icon(Icons.phone_iphone_rounded, color: primaryColor),
+                      prefixIcon: const Icon(
+                        Icons.phone_iphone_rounded,
+                        color: primaryColor,
+                      ),
                       prefixText: '+962 ',
-                      prefixStyle: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 16),
+                      prefixStyle: const TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       border: _buildBorder(),
                       enabledBorder: _buildBorder(),
                       focusedBorder: _buildBorder(color: primaryColor),
                     ),
-                    validator: (v) => v == null || v.isEmpty ? l10n.pleaseEnterPhoneNumber : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? l10n.pleaseEnterPhoneNumber
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -145,13 +178,26 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text(
-                            "Send OTP",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            l10n.sendCode,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                   ),
                 ),

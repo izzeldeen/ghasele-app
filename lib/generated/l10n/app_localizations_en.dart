@@ -929,4 +929,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get driverItemPrice => 'Price';
+
+  @override
+  String get noOrdersYet => 'No orders yet';
+
+  @override
+  String get noItemsYet => 'No items added yet';
+
+  @override
+  String get genericError => 'Something went wrong. Please try again.';
+
+  @override
+  String get phoneMustBe9Digits =>
+      'The phone number must be 9 digits (7XXXXXXXX)';
+
+  @override
+  String get sendCodeFailed => 'We couldn\'t send the code. Please try again.';
+
+  @override
+  String get codeVerified => 'Code verified';
+
+  @override
+  String otpSentTo(String phone) {
+    return 'Enter the 6-digit code we sent to $phone on WhatsApp.';
+  }
+
+  @override
+  String get resetPassword => 'Reset password';
+
+  @override
+  String get resetPasswordDesc => 'Create a new password for your account.';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmNewPassword => 'Confirm new password';
+
+  @override
+  String get savePassword => 'Save password';
+
+  @override
+  String get passwordResetSuccess =>
+      'Your password has been reset. Please log in.';
+
+  @override
+  String get passwordResetFailed =>
+      'We couldn\'t reset your password. Please try again.';
+
+  @override
+  String get forgotPasswordDesc =>
+      'Enter your registered phone number and we\'ll send you a code on WhatsApp to reset your password.';
+
+  @override
+  String get appleSignInFailed =>
+      'We couldn\'t sign you in with Apple. Please try again.';
+
+  @override
+  String get saveLocationFailed =>
+      'We couldn\'t save this location. Please try again.';
+
+  @override
+  String get sessionExpired => 'Your session has expired. Please log in again.';
+
+  @override
+  String get ammanJordan => 'Amman, Jordan';
+
+  @override
+  String get deleteAccountFailed =>
+      'We couldn\'t delete your account. Please try again.';
+
+  @override
+  String get loadTripsFailed =>
+      'We couldn\'t load the trips. Please try again.';
+
+  @override
+  String get saveItemsFailed =>
+      'We couldn\'t save the items. Please try again.';
+
+  @override
+  String get markCollectedFailed =>
+      'We couldn\'t mark the order as picked up. Please try again.';
+
+  @override
+  String get handOverFailed =>
+      'We couldn\'t hand over the trip. Please try again.';
+
+  @override
+  String get updateRequiredTitle => 'A new version is available';
+
+  @override
+  String get updateRequiredMessage =>
+      'Please update Cleanyjo to keep using the app. The new version includes improvements and fixes.';
+
+  @override
+  String get updateNow => 'Update now';
 }

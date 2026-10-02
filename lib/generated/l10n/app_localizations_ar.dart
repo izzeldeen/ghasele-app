@@ -919,4 +919,95 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get driverItemPrice => 'السعر';
+
+  @override
+  String get noOrdersYet => 'لا توجد طلبات بعد';
+
+  @override
+  String get noItemsYet => 'لم تُضَف أي قطع بعد';
+
+  @override
+  String get genericError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get phoneMustBe9Digits =>
+      'يجب أن يتكون رقم الهاتف من 9 أرقام (7XXXXXXXX)';
+
+  @override
+  String get sendCodeFailed => 'تعذّر إرسال الرمز. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get codeVerified => 'تم التحقق من الرمز';
+
+  @override
+  String otpSentTo(String phone) {
+    return 'أدخل الرمز المكوّن من 6 أرقام الذي أرسلناه إلى $phone عبر واتساب.';
+  }
+
+  @override
+  String get resetPassword => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get resetPasswordDesc => 'أنشئ كلمة مرور جديدة لحسابك.';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get savePassword => 'حفظ كلمة المرور';
+
+  @override
+  String get passwordResetSuccess =>
+      'تمت إعادة تعيين كلمة المرور. يرجى تسجيل الدخول.';
+
+  @override
+  String get passwordResetFailed =>
+      'تعذّرت إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get forgotPasswordDesc =>
+      'أدخل رقم هاتفك المسجّل وسنرسل لك رمزاً عبر واتساب لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get appleSignInFailed =>
+      'تعذّر تسجيل الدخول باستخدام Apple. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get saveLocationFailed =>
+      'تعذّر حفظ هذا الموقع. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get sessionExpired => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get ammanJordan => 'عمّان، الأردن';
+
+  @override
+  String get deleteAccountFailed => 'تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get loadTripsFailed => 'تعذّر تحميل الرحلات. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get saveItemsFailed => 'تعذّر حفظ القطع. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get markCollectedFailed =>
+      'تعذّر تحديد الطلب كمُستلَم. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get handOverFailed => 'تعذّر تسليم الرحلة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get updateRequiredTitle => 'يتوفر إصدار جديد';
+
+  @override
+  String get updateRequiredMessage =>
+      'يرجى تحديث Cleanyjo لمتابعة استخدام التطبيق. يتضمن الإصدار الجديد تحسينات وإصلاحات.';
+
+  @override
+  String get updateNow => 'حدّث الآن';
 }

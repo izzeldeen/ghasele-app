@@ -686,7 +686,7 @@ class HomeViewState extends State<HomeView> {
                   } else {
                     CustomToast.show(
                       context,
-                      message: 'Failed to save location',
+                      message: l10n.saveLocationFailed,
                       type: ToastType.error,
                     );
                   }
@@ -705,7 +705,7 @@ class HomeViewState extends State<HomeView> {
                 if (mounted) {
                   CustomToast.show(
                     context,
-                    message: 'Error: $e',
+                    message: l10n.genericError,
                     type: ToastType.error,
                   );
                 }
@@ -1067,7 +1067,7 @@ class HomeViewState extends State<HomeView> {
             if (!mounted) return;
             CustomToast.show(
               context,
-              message: 'User session expired. Please login again.',
+              message: l10n.sessionExpired,
               type: ToastType.error,
             );
             Navigator.of(context).pushReplacementNamed('/login');
@@ -1089,7 +1089,7 @@ class HomeViewState extends State<HomeView> {
       }
     } catch (e) {
       if (mounted) {
-        CustomToast.show(context, message: 'Error: $e', type: ToastType.error);
+        CustomToast.show(context, message: l10n.genericError, type: ToastType.error);
       }
     } finally {
       if (mounted) {
@@ -1766,7 +1766,7 @@ class HomeViewState extends State<HomeView> {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                'Jordan, Amman', // or format Lat/Lng
+                                                l10n.ammanJordan,
                                                 style: TextStyle(
                                                   color: AppTheme.neutral500,
                                                   fontSize: 13,
