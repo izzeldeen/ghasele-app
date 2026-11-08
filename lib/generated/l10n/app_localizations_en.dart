@@ -856,6 +856,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionTimeUpdated => 'Your pickup time has been updated!';
 
   @override
+  String get chooseDeliveryTime => 'Choose a delivery time';
+
+  @override
+  String get changeDeliveryTime => 'Change delivery time';
+
+  @override
+  String get deliveryTimeUpdated => 'Your delivery time has been set!';
+
+  @override
+  String get noDeliveryTimes =>
+      'No delivery times are available right now. Please try again later.';
+
+  @override
+  String get deliveryTimesFailed =>
+      'We couldn\'t load the delivery times. Check your connection and try again.';
+
+  @override
+  String get deliveryTime => 'Delivery time';
+
+  @override
   String get cancelOrder => 'Cancel order';
 
   @override
@@ -1024,4 +1044,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateNow => 'Update now';
+
+  @override
+  String get amountPendingNote =>
+      'The total will be calculated after our driver counts your items at pickup: the price of your items plus the delivery fee.';
+
+  @override
+  String get serviceWashAndIron => 'Wash & iron';
+
+  @override
+  String get serviceIronOnly => 'Ironing only';
 }

@@ -1730,6 +1730,42 @@ abstract class AppLocalizations {
   /// **'Your pickup time has been updated!'**
   String get collectionTimeUpdated;
 
+  /// No description provided for @chooseDeliveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a delivery time'**
+  String get chooseDeliveryTime;
+
+  /// No description provided for @changeDeliveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Change delivery time'**
+  String get changeDeliveryTime;
+
+  /// No description provided for @deliveryTimeUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery time has been set!'**
+  String get deliveryTimeUpdated;
+
+  /// No description provided for @noDeliveryTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'No delivery times are available right now. Please try again later.'**
+  String get noDeliveryTimes;
+
+  /// No description provided for @deliveryTimesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the delivery times. Check your connection and try again.'**
+  String get deliveryTimesFailed;
+
+  /// No description provided for @deliveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery time'**
+  String get deliveryTime;
+
   /// No description provided for @cancelOrder.
   ///
   /// In en, this message translates to:
@@ -2017,6 +2053,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update now'**
   String get updateNow;
+
+  /// No description provided for @amountPendingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The total will be calculated after our driver counts your items at pickup: the price of your items plus the delivery fee.'**
+  String get amountPendingNote;
+
+  /// No description provided for @serviceWashAndIron.
+  ///
+  /// In en, this message translates to:
+  /// **'Wash & iron'**
+  String get serviceWashAndIron;
+
+  /// No description provided for @serviceIronOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Ironing only'**
+  String get serviceIronOnly;
 }
 
 class _AppLocalizationsDelegate

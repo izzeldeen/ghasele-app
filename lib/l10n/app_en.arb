@@ -279,6 +279,12 @@
   "saveNewTime": "Save new time",
   "currentTime": "Current",
   "collectionTimeUpdated": "Your pickup time has been updated!",
+  "chooseDeliveryTime": "Choose a delivery time",
+  "changeDeliveryTime": "Change delivery time",
+  "deliveryTimeUpdated": "Your delivery time has been set!",
+  "noDeliveryTimes": "No delivery times are available right now. Please try again later.",
+  "deliveryTimesFailed": "We couldn't load the delivery times. Check your connection and try again.",
+  "deliveryTime": "Delivery time",
   "cancelOrder": "Cancel order",
   "cancelOrderTitle": "Cancel this order?",
   "cancelOrderMessage": "Your booked pickup time will be released. This action can't be undone.",
@@ -357,5 +363,8 @@
   "handOverFailed": "We couldn't hand over the trip. Please try again.",
   "updateRequiredTitle": "A new version is available",
   "updateRequiredMessage": "Please update Cleanyjo to keep using the app. The new version includes improvements and fixes.",
-  "updateNow": "Update now"
+  "updateNow": "Update now",
+  "amountPendingNote": "The total will be calculated after our driver counts your items at pickup: the price of your items plus the delivery fee.",
+  "serviceWashAndIron": "Wash & iron",
+  "serviceIronOnly": "Ironing only"
 }

@@ -12,12 +12,17 @@ class NotificationModel {
   final DateTime timestamp;
   bool isRead;
 
+  /// The order this notification is about, if any - lets a tap open it directly, the
+  /// same way tapping the original push notification would have.
+  final String? orderId;
+
   NotificationModel({
     required this.id,
     required this.title,
     required this.body,
     required this.timestamp,
     this.isRead = false,
+    this.orderId,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +32,7 @@ class NotificationModel {
       body: json['body'],
       timestamp: DateTime.parse(json['createdAt']),
       isRead: json['isRead'],
+      orderId: json['orderId'],
     );
   }
 }
@@ -52,16 +58,15 @@ class _NotificationsViewState extends State<NotificationsView> {
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Null for a guest: the API then answers for this device (X-Device-Token).
       final token = prefs.getString('auth_token');
-      if (token != null) {
-        final result = await ApiService.getNotifications(token);
-        if (result['success']) {
-          setState(() {
-            _notifications = (result['data'] as List)
-                .map((n) => NotificationModel.fromJson(n))
-                .toList();
-          });
-        }
+      final result = await ApiService.getNotifications(token);
+      if (result['success']) {
+        setState(() {
+          _notifications = (result['data'] as List)
+              .map((n) => NotificationModel.fromJson(n))
+              .toList();
+        });
       }
     } catch (e) {
       debugPrint('Error loading notifications: $e');
@@ -73,16 +78,15 @@ class _NotificationsViewState extends State<NotificationsView> {
   Future<void> _markAllRead() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Null for a guest: the API then answers for this device (X-Device-Token).
       final token = prefs.getString('auth_token');
-      if (token != null) {
-        final result = await ApiService.markAllAsRead(token);
-        if (result['success']) {
-          setState(() {
-            for (var n in _notifications) {
-              n.isRead = true;
-            }
-          });
-        }
+      final result = await ApiService.markAllAsRead(token);
+      if (result['success']) {
+        setState(() {
+          for (var n in _notifications) {
+            n.isRead = true;
+          }
+        });
       }
     } catch (e) {
       debugPrint('Error marking all as read: $e');
@@ -94,31 +98,43 @@ class _NotificationsViewState extends State<NotificationsView> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Null for a guest: the API then answers for this device (X-Device-Token).
       final token = prefs.getString('auth_token');
-      if (token != null) {
-        final result = await ApiService.markAsRead(notification.id, token);
-        if (result['success']) {
-          setState(() {
-            notification.isRead = true;
-          });
-        }
+      final result = await ApiService.markAsRead(notification.id, token);
+      if (result['success']) {
+        setState(() {
+          notification.isRead = true;
+        });
       }
     } catch (e) {
       debugPrint('Error marking as read: $e');
     }
   }
 
+  /// Marks the notification read, then - if it is about an order - navigates there the
+  /// same way tapping the original push would have, landing on the Orders tab with that
+  /// order opened (and the delivery picker launched, if it is Ready and still unscheduled).
+  Future<void> _openNotification(NotificationModel notification) async {
+    await _markSingleRead(notification);
+    if (!mounted || notification.orderId == null) return;
+
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/main',
+      (route) => false,
+      arguments: {'index': 0, 'deliveryOrderId': notification.orderId},
+    );
+  }
+
   Future<void> _deleteNotification(String id) async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Null for a guest: the API then answers for this device (X-Device-Token).
       final token = prefs.getString('auth_token');
-      if (token != null) {
-        final result = await ApiService.deleteNotification(id, token);
-        if (result['success']) {
-          setState(() {
-            _notifications.removeWhere((n) => n.id == id);
-          });
-        }
+      final result = await ApiService.deleteNotification(id, token);
+      if (result['success']) {
+        setState(() {
+          _notifications.removeWhere((n) => n.id == id);
+        });
       }
     } catch (e) {
       debugPrint('Error deleting notification: $e');
@@ -275,7 +291,7 @@ class _NotificationsViewState extends State<NotificationsView> {
             ),
           ],
         ),
-        onTap: () => _markSingleRead(notification),
+        onTap: () => _openNotification(notification),
       ),
     );
   }

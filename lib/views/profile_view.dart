@@ -652,18 +652,17 @@ class ProfileViewState extends State<ProfileView> {
                               : 'English',
                           onTap: _chooseLanguage,
                         ),
-                        // Account-scoped: notifications are fetched with a token.
-                        if (!_isGuest)
-                          _buildRow(
-                            icon: Icons.notifications_none_rounded,
-                            color: const Color(0xFF8B5CF6),
-                            title: l10n.notifications,
-                            value: '',
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (_) => const NotificationsView()),
-                            ),
+                        // Guests too: their list is filed under this device.
+                        _buildRow(
+                          icon: Icons.notifications_none_rounded,
+                          color: const Color(0xFF8B5CF6),
+                          title: l10n.notifications,
+                          value: '',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => const NotificationsView()),
                           ),
+                        ),
                         _buildRow(
                           icon: Icons.privacy_tip_outlined,
                           color: AppTheme.neutral500,

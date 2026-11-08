@@ -25,6 +25,13 @@ Future<Map<String, dynamic>?> showRescheduleSheet(
   /// rather than making the customer remember what they booked.
   String? currentWindowId,
   String? currentDateKey,
+
+  /// Overrides for the collection-flow copy, so the same sheet reads correctly when it is
+  /// reused for the post-cleaning delivery leg (see OrdersView._changeDeliveryTime). Each
+  /// falls back to its collection-flow default so existing call sites need no changes.
+  String? title,
+  String? noSlotsText,
+  String? failedText,
 }) {
   return showModalBottomSheet<Map<String, dynamic>>(
     context: context,
@@ -35,6 +42,9 @@ Future<Map<String, dynamic>?> showRescheduleSheet(
       token: token,
       currentWindowId: currentWindowId,
       currentDateKey: currentDateKey,
+      title: title,
+      noSlotsText: noSlotsText,
+      failedText: failedText,
     ),
   );
 }
@@ -45,12 +55,18 @@ class _RescheduleSheet extends StatefulWidget {
     required this.token,
     required this.currentWindowId,
     required this.currentDateKey,
+    required this.title,
+    required this.noSlotsText,
+    required this.failedText,
   });
 
   final String orderId;
   final String? token;
   final String? currentWindowId;
   final String? currentDateKey;
+  final String? title;
+  final String? noSlotsText;
+  final String? failedText;
 
   @override
   State<_RescheduleSheet> createState() => _RescheduleSheetState();
@@ -145,7 +161,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
     // several "that time is gone" cases this was, so it is shown as-is.
     CustomToast.show(
       context,
-      message: (result['message'] as String?) ?? l10n.collectionTimesFailed,
+      message: (result['message'] as String?) ?? widget.failedText ?? l10n.collectionTimesFailed,
       type: ToastType.error,
     );
 
@@ -189,7 +205,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  l10n.changeCollectionTime,
+                  widget.title ?? l10n.changeCollectionTime,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -264,7 +280,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
 
     if (_failed) {
       return _notice(
-        text: l10n.collectionTimesFailed,
+        text: widget.failedText ?? l10n.collectionTimesFailed,
         action: GestureDetector(
           onTap: () {
             setState(() {
@@ -295,7 +311,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
 
     final slots = DeliverySlot.bookable(_slots);
     if (slots.isEmpty) {
-      return _notice(text: l10n.noCollectionTimes);
+      return _notice(text: widget.noSlotsText ?? l10n.noCollectionTimes);
     }
 
     // The operator's clock, not the phone's, so "today" means the same day the backend

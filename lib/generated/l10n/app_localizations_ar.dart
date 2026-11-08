@@ -847,6 +847,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get collectionTimeUpdated => 'تم تحديث موعد الاستلام!';
 
   @override
+  String get chooseDeliveryTime => 'اختر وقت التوصيل';
+
+  @override
+  String get changeDeliveryTime => 'تغيير وقت التوصيل';
+
+  @override
+  String get deliveryTimeUpdated => 'تم تحديد وقت التوصيل!';
+
+  @override
+  String get noDeliveryTimes =>
+      'لا توجد أوقات توصيل متاحة حالياً. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get deliveryTimesFailed =>
+      'تعذّر تحميل أوقات التوصيل. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
+
+  @override
+  String get deliveryTime => 'وقت التوصيل';
+
+  @override
   String get cancelOrder => 'إلغاء الطلب';
 
   @override
@@ -1010,4 +1030,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateNow => 'حدّث الآن';
+
+  @override
+  String get amountPendingNote =>
+      'سيتم احتساب المبلغ الإجمالي بعد أن يعدّ السائق قطعك عند الاستلام: سعر القطع مضافاً إليه رسوم التوصيل.';
+
+  @override
+  String get serviceWashAndIron => 'غسيل وكوي';
+
+  @override
+  String get serviceIronOnly => 'كوي فقط';
 }

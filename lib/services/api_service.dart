@@ -657,7 +657,8 @@ class ApiService {
 
   /// The delivery fee the operator configured, shown at checkout. Display only - the
   /// server stamps the authoritative fee on the order from its own settings row.
-  static Future<Map<String, dynamic>> getDeliveryPricing(String token) async {
+  /// [token] is optional: guests check out too, and the endpoint is anonymous.
+  static Future<Map<String, dynamic>> getDeliveryPricing([String? token]) async {
     final url = Uri.parse('$baseUrl/settings/delivery-pricing');
     try {
       final response = await http.get(url, headers: _headers(token: token));
@@ -1119,7 +1120,7 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> getNotifications(String token) async {
+  static Future<Map<String, dynamic>> getNotifications(String? token) async {
     final url = Uri.parse('$baseUrl/notifications');
     try {
       final response = await http.get(url, headers: _headers(token: token));
@@ -1136,7 +1137,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> markAsRead(
     String id,
-    String token,
+    String? token,
   ) async {
     final url = Uri.parse('$baseUrl/notifications/$id/read');
     try {
@@ -1148,7 +1149,7 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> markAllAsRead(String token) async {
+  static Future<Map<String, dynamic>> markAllAsRead(String? token) async {
     final url = Uri.parse('$baseUrl/notifications/read-all');
     try {
       final response = await http.patch(url, headers: _headers(token: token));
@@ -1161,7 +1162,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> deleteNotification(
     String id,
-    String token,
+    String? token,
   ) async {
     final url = Uri.parse('$baseUrl/notifications/$id');
     try {

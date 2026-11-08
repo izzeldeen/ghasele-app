@@ -279,6 +279,12 @@
   "saveNewTime": "حفظ الموعد الجديد",
   "currentTime": "الحالي",
   "collectionTimeUpdated": "تم تحديث موعد الاستلام!",
+  "chooseDeliveryTime": "اختر وقت التوصيل",
+  "changeDeliveryTime": "تغيير وقت التوصيل",
+  "deliveryTimeUpdated": "تم تحديد وقت التوصيل!",
+  "noDeliveryTimes": "لا توجد أوقات توصيل متاحة حالياً. يرجى المحاولة لاحقاً.",
+  "deliveryTimesFailed": "تعذّر تحميل أوقات التوصيل. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
+  "deliveryTime": "وقت التوصيل",
   "cancelOrder": "إلغاء الطلب",
   "cancelOrderTitle": "هل تريد إلغاء هذا الطلب؟",
   "cancelOrderMessage": "سيتم إلغاء موعد الاستلام المحجوز، ولا يمكن التراجع عن هذا الإجراء.",
@@ -350,5 +356,8 @@
   "handOverFailed": "تعذّر تسليم الرحلة. يرجى المحاولة مرة أخرى.",
   "updateRequiredTitle": "يتوفر إصدار جديد",
   "updateRequiredMessage": "يرجى تحديث Cleanyjo لمتابعة استخدام التطبيق. يتضمن الإصدار الجديد تحسينات وإصلاحات.",
-  "updateNow": "حدّث الآن"
+  "updateNow": "حدّث الآن",
+  "amountPendingNote": "سيتم احتساب المبلغ الإجمالي بعد أن يعدّ السائق قطعك عند الاستلام: سعر القطع مضافاً إليه رسوم التوصيل.",
+  "serviceWashAndIron": "غسيل وكوي",
+  "serviceIronOnly": "كوي فقط"
 }

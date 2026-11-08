@@ -29,6 +29,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:ghasele/services/device_service.dart';
 import 'package:ghasele/services/notification_service.dart';
 
+/// Lets code outside the widget tree (a notification tap, which fires before any screen
+/// has necessarily built) push a route without a BuildContext of its own.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 /// Accepts self-signed certificates so a local dev API can be reached over
 /// HTTPS. This is installed in debug builds ONLY - shipping it would disable
 /// certificate validation for every request in production, making the app
@@ -90,6 +94,7 @@ class MyApp extends StatelessWidget {
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, child) {
         return MaterialApp(
+          navigatorKey: navigatorKey,
           // The brand name, not a translation of it, and the same string in both
           // languages. Android shows this in the task switcher while the launcher shows
           // android:label, so anything else here makes one app look like two.
@@ -149,6 +154,14 @@ class MyApp extends StatelessWidget {
             },
             '/main': (context) {
               final args = ModalRoute.of(context)?.settings.arguments;
+              // A plain int is the existing "open on this tab" usage. A Map is a notification
+              // deep link: it also carries the order the Orders tab should open straight away.
+              if (args is Map) {
+                return HomeScreen(
+                  initialIndex: args['index'] as int? ?? 0,
+                  pendingDeliveryOrderId: args['deliveryOrderId'] as String?,
+                );
+              }
               final index = args is int ? args : 2;
               return HomeScreen(initialIndex: index);
             },

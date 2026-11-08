@@ -4,6 +4,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghasele/services/api_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:ghasele/main.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -59,6 +61,40 @@ class NotificationService {
         _showLocalNotification(message);
       }
     });
+
+    // Tapped from the background (app was already running).
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+
+    // Tapped from a cold start - the app was launched by the tap itself, so there is no
+    // earlier onMessageOpenedApp event to catch it.
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      _handleNotificationTap(initialMessage);
+    }
+  }
+
+  /// Routes a tapped notification to wherever its `data` payload says it is about.
+  ///
+  /// Currently only the "cleaning finished" push carries a destination (`type` +
+  /// `orderId`); anything else - including a bare notification with no data, or a type
+  /// this build does not recognise yet - is left alone, so an older/newer server sending
+  /// a notification this app does not understand just opens the app rather than crashing
+  /// or navigating somewhere wrong.
+  static void _handleNotificationTap(RemoteMessage message) {
+    final data = message.data;
+    if (kDebugMode) print('🔔 Notification tapped. Data: $data');
+
+    if (data['type'] == 'cleaning_finished' && data['orderId'] != null) {
+      // Posted after the current frame: a cold-start tap fires before MaterialApp's
+      // navigator has necessarily finished its first build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          '/main',
+          (route) => false,
+          arguments: {'index': 0, 'deliveryOrderId': data['orderId']},
+        );
+      });
+    }
   }
 
   static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

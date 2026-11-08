@@ -14,7 +14,12 @@ import 'providers/locale_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
-  const HomeScreen({super.key, this.initialIndex = 2});
+
+  /// Set when this screen was opened from a "cleaning finished" notification tap: the
+  /// Orders tab opens straight to this order and offers the delivery-time picker.
+  final String? pendingDeliveryOrderId;
+
+  const HomeScreen({super.key, this.initialIndex = 2, this.pendingDeliveryOrderId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -43,18 +48,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchUnreadCount() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Null for a guest: the API then answers for this device (X-Device-Token).
       final token = prefs.getString('auth_token');
-      if (token != null) {
-        final result = await ApiService.getNotifications(token);
-        if (result['success']) {
-          final List notifications = result['data'];
-          if (mounted) {
-            setState(() {
-              _unreadCount = notifications
-                  .where((n) => n['isRead'] == false)
-                  .length;
-            });
-          }
+      final result = await ApiService.getNotifications(token);
+      if (result['success']) {
+        final List notifications = result['data'];
+        if (mounted) {
+          setState(() {
+            _unreadCount = notifications
+                .where((n) => n['isRead'] == false)
+                .length;
+          });
         }
       }
     } catch (e) {
@@ -68,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final localeProvider = Provider.of<LocaleProvider>(context);
 
     final List<Widget> views = [
-      OrdersView(key: _ordersKey),
+      OrdersView(key: _ordersKey, pendingDeliveryOrderId: widget.pendingDeliveryOrderId),
       PricingView(key: _pricingKey),
       HomeView(key: _homeKey, isActive: _currentIndex == 2),
       const SupportView(),

@@ -9,7 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrdersView extends StatefulWidget {
-  const OrdersView({super.key});
+  /// Set when this tab was opened from a "cleaning finished" notification tap: once the
+  /// list loads, that order is opened automatically and, if it has no delivery time yet,
+  /// the picker is launched straight away.
+  final String? pendingDeliveryOrderId;
+
+  const OrdersView({super.key, this.pendingDeliveryOrderId});
 
   @override
   State<OrdersView> createState() => OrdersViewState();
@@ -24,6 +29,10 @@ class OrdersViewState extends State<OrdersView> {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   int _page = 1;
+
+  /// Guards against acting on [OrdersView.pendingDeliveryOrderId] more than once - this
+  /// state outlives a single fetch because the tab is kept alive in an IndexedStack.
+  bool _consumedPendingDeliveryOrderId = false;
 
   @override
   void initState() {
@@ -83,6 +92,7 @@ class OrdersViewState extends State<OrdersView> {
             _hasMore = data.length == _pageSize;
             _isLoading = false;
           });
+          _consumePendingDeliveryOrderId();
         } else {
           setState(() => _isLoading = false);
         }
@@ -92,6 +102,35 @@ class OrdersViewState extends State<OrdersView> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  /// Opens the order a "cleaning finished" notification pointed at, once, after the first
+  /// load. A notification is about a recent order, so it is expected to be on this first
+  /// page; if it is not (an old notification tapped long after), this quietly does nothing
+  /// rather than reach for a second, less-trusted lookup - the customer is already on the
+  /// Orders tab and can scroll to it themselves.
+  void _consumePendingDeliveryOrderId() {
+    final targetId = widget.pendingDeliveryOrderId;
+    if (targetId == null || _consumedPendingDeliveryOrderId) return;
+    _consumedPendingDeliveryOrderId = true;
+
+    final order = _orders.cast<Map<String, dynamic>?>().firstWhere(
+          (o) => o?['id'] == targetId,
+          orElse: () => null,
+        );
+    if (order == null) return;
+
+    // Only Ready still accepts a delivery-time pick; anything else (already out for
+    // delivery, delivered, cancelled...) is handled gracefully by just showing the order
+    // instead of a picker that would be refused.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_isDeliveryTimeChangeable(order) && !_hasDeliveryTimeScheduled(order)) {
+        _changeDeliveryTime(order);
+      } else {
+        _showOrderDetails(context, order);
+      }
+    });
   }
 
   Future<void> _loadMoreOrders() async {
@@ -119,6 +158,18 @@ class OrdersViewState extends State<OrdersView> {
       }
     }
   }
+
+  /// Placeholder for an amount that is not known yet.
+  static const _pendingAmount = '--';
+
+  /// Whether the order has been priced. Until the driver counts the items at pickup the
+  /// server holds a total of 0 (see OrderService.AddItemsToOrderAsync), and showing
+  /// "0 JOD" would read as a free order.
+  bool _isPriced(Map<String, dynamic> order) =>
+      ((order['totalAmount'] as num?) ?? 0) > 0;
+
+  String _formatAmount(dynamic value, AppLocalizations l10n) =>
+      '${((value as num?) ?? 0).toStringAsFixed(2)} ${l10n.jod}';
 
   String _getStatusTranslation(BuildContext context, String status) {
     final l10n = AppLocalizations.of(context)!;
@@ -248,7 +299,9 @@ class OrdersViewState extends State<OrdersView> {
             date: _formatDate(order['createdAt']),
             status: _getStatusTranslation(context, status),
             statusColor: _getStatusColor(status),
-            total: '${order['totalAmount']} ${l10n.jod}',
+            total: _isPriced(order)
+                ? _formatAmount(order['totalAmount'], l10n)
+                : _pendingAmount,
           );
         },
       ),
@@ -336,6 +389,30 @@ class OrdersViewState extends State<OrdersView> {
   bool _isChangeable(Map<String, dynamic> order) =>
       (order['status'] as String?)?.toLowerCase() == 'pendingcollection';
 
+  /// Whether the customer may pick (or change) when the cleaned order comes back to them.
+  ///
+  /// Only Ready: that is the status the cleaning-finished push fires on, and the server
+  /// refuses the request for any other one (already out for delivery, delivered,
+  /// cancelled...), which this mirrors so the button is not offered just to fail.
+  bool _isDeliveryTimeChangeable(Map<String, dynamic> order) =>
+      (order['status'] as String?)?.toLowerCase() == 'ready';
+
+  /// Whether a delivery time has already been chosen for this order.
+  ///
+  /// The server clears the order's slot fields the moment it enters Ready (the collection
+  /// slot they held no longer means anything), so a non-null date here can only be the
+  /// delivery slot the customer has since picked - never a leftover collection value.
+  bool _hasDeliveryTimeScheduled(Map<String, dynamic> order) =>
+      order['scheduledDate'] != null;
+
+  /// "Pickup time" while the slot fields hold the collection booking, "Delivery time" once
+  /// the order has reached Ready and they have been repurposed for the return leg.
+  String _appointmentLabel(Map<String, dynamic> order, AppLocalizations l10n) {
+    const postCleaningStatuses = {'ready', 'outfordelivery', 'delivered'};
+    final status = (order['status'] as String?)?.toLowerCase();
+    return postCleaningStatuses.contains(status) ? l10n.deliveryTime : l10n.collectionTime;
+  }
+
   /// The signed-in customer's token, or null when the app is being used as a guest.
   ///
   /// A guest is not turned away: their order is identified by the device token
@@ -373,6 +450,42 @@ class OrdersViewState extends State<OrdersView> {
     CustomToast.show(
       context,
       message: l10n.collectionTimeUpdated,
+      type: ToastType.success,
+    );
+    fetchOrders();
+  }
+
+  /// Opens the schedule so the customer can pick when their cleaned order is delivered.
+  ///
+  /// Shares the collection flow's sheet and the same `/schedule` endpoint - picking a
+  /// delivery time is the same booking operation on the same slot fields, just while the
+  /// order is Ready instead of PendingCollection (see OrderService.RescheduleOrderAsync).
+  /// Only the copy differs, via [showRescheduleSheet]'s delivery-flavoured text.
+  Future<void> _changeDeliveryTime(Map<String, dynamic> order) async {
+    final token = await _authToken();
+    if (!mounted) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final rawDate = order['scheduledDate'] as String?;
+
+    final updated = await showRescheduleSheet(
+      context,
+      orderId: order['id'] as String,
+      token: token,
+      currentWindowId: order['deliveryWindowId'] as String?,
+      currentDateKey: rawDate == null || rawDate.length < 10
+          ? null
+          : rawDate.substring(0, 10),
+      title: _hasDeliveryTimeScheduled(order) ? l10n.changeDeliveryTime : l10n.chooseDeliveryTime,
+      noSlotsText: l10n.noDeliveryTimes,
+      failedText: l10n.deliveryTimesFailed,
+    );
+
+    if (!mounted || updated == null) return;
+
+    CustomToast.show(
+      context,
+      message: l10n.deliveryTimeUpdated,
       type: ToastType.success,
     );
     fetchOrders();
@@ -524,7 +637,7 @@ class OrdersViewState extends State<OrdersView> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '${l10n.collectionTime}: $appointment',
+                      '${_appointmentLabel(order, l10n)}: $appointment',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -650,7 +763,9 @@ class OrdersViewState extends State<OrdersView> {
                   ),
                 ),
                 Text(
-                  '${order['deliveryAmount']} ${l10n.jod}',
+                  // Known from the moment the order is placed: the server stamps it from
+                  // the Settings fee then, so it is shown even before pricing.
+                  _formatAmount(order['deliveryAmount'], l10n),
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     color: AppTheme.neutral900,
@@ -671,7 +786,7 @@ class OrdersViewState extends State<OrdersView> {
                     ),
                   ),
                   Text(
-                    '-${order['marketingDiscount']} ${l10n.jod}',
+                    '-${_formatAmount(order['marketingDiscount'], l10n)}',
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       color: AppTheme.success,
@@ -693,7 +808,9 @@ class OrdersViewState extends State<OrdersView> {
                   ),
                 ),
                 Text(
-                  '${order['totalAmount']} ${l10n.jod}',
+                  _isPriced(order)
+                      ? _formatAmount(order['totalAmount'], l10n)
+                      : _pendingAmount,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -702,6 +819,22 @@ class OrdersViewState extends State<OrdersView> {
                 ),
               ],
             ),
+            if (!_isPriced(order)) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline_rounded, size: 18, color: AppTheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.amountPendingNote,
+                      style: TextStyle(fontSize: 13, color: AppTheme.neutral600, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 32),
             // Only while the order is still the customer's to change. Both actions close
             // this sheet first: each one opens something of its own, and the details
@@ -747,6 +880,55 @@ class OrdersViewState extends State<OrdersView> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),
+              ),
+              const SizedBox(height: 10),
+            ] else if (_isDeliveryTimeChangeable(order)) ...[
+              // No cancel button here: by Ready the items are already cleaned, so this is
+              // only ever about when they come back, never whether the order still happens.
+              SizedBox(
+                width: double.infinity,
+                child: _hasDeliveryTimeScheduled(order)
+                    ? OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _changeDeliveryTime(order);
+                        },
+                        icon: const Icon(Icons.event_repeat_rounded, size: 18),
+                        label: Text(
+                          l10n.changeDeliveryTime,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _changeDeliveryTime(order);
+                        },
+                        icon: const Icon(Icons.event_available_rounded, size: 18),
+                        label: Text(
+                          l10n.chooseDeliveryTime,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
               ),
               const SizedBox(height: 10),
             ],
@@ -917,7 +1099,7 @@ class OrdersViewState extends State<OrdersView> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '${l10n.collectionTime}: $appointment',
+                            '${_appointmentLabel(order, l10n)}: $appointment',
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

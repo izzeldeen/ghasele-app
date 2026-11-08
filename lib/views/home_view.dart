@@ -153,8 +153,8 @@ class HomeViewState extends State<HomeView> {
   Future<void> _fetchDeliveryPricing() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Sent when there is one, but not required: guests check out too.
       final String? token = prefs.getString('auth_token');
-      if (token == null) return;
 
       final result = await ApiService.getDeliveryPricing(token);
       if (!mounted || result['success'] != true) return;
@@ -164,6 +164,8 @@ class HomeViewState extends State<HomeView> {
         _normalDeliveryPrice = (data['normalDeliveryPrice'] as num?)
             ?.toDouble();
       });
+      // Repaint the checkout sheet too, if it is open.
+      _sheetSetState?.call(() {});
     } catch (e) {
       debugPrint('Error fetching delivery pricing: $e');
     }
@@ -1210,18 +1212,74 @@ class HomeViewState extends State<HomeView> {
             l10n: l10n,
             onChanged: onChanged,
           ),
-        if (_normalDeliveryPrice != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            '${l10n.deliveryFee} ${_normalDeliveryPrice!.toStringAsFixed(2)} ${l10n.jodShort}',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.neutral700,
+      ],
+    );
+  }
+
+  /// What the order will cost, as far as it is known at checkout.
+  ///
+  /// The items are counted and priced by the driver at pickup, so their amount and the
+  /// total show "--" until then. The delivery fee is known now: it is the one in the
+  /// operator's Settings, which the server stamps on the order when it is placed.
+  Widget _buildAmountSummary(AppLocalizations l10n) {
+    const pending = '--';
+    final fee = _normalDeliveryPrice == null
+        ? pending
+        : '${_normalDeliveryPrice!.toStringAsFixed(2)} ${l10n.jod}';
+
+    Widget row(String label, String value, {bool emphasize = false}) => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: emphasize ? 15 : 14,
+                fontWeight: emphasize ? FontWeight.w800 : FontWeight.w500,
+                color: emphasize ? AppTheme.neutral900 : AppTheme.neutral600,
+              ),
             ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: emphasize ? 16 : 14,
+                fontWeight: FontWeight.w800,
+                color: emphasize ? AppTheme.primary : AppTheme.neutral900,
+              ),
+            ),
+          ],
+        );
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.neutral50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.neutral200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          row(l10n.items, pending),
+          const SizedBox(height: 8),
+          row(l10n.deliveryFee, fee),
+          const Divider(height: 24),
+          row(l10n.total, pending, emphasize: true),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.info_outline_rounded, size: 18, color: AppTheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.amountPendingNote,
+                  style: TextStyle(fontSize: 13, color: AppTheme.neutral600, height: 1.4),
+                ),
+              ),
+            ],
           ),
         ],
-      ],
+      ),
     );
   }
 
@@ -1350,6 +1408,8 @@ class HomeViewState extends State<HomeView> {
     // The schedule ages: windows fill up and start while the app sits on the map. Refetch
     // on open so the sheet offers what is bookable now, not what was bookable at launch.
     _fetchDeliverySlots();
+    // Likewise the fee: an admin may have changed it in Settings since launch.
+    _fetchDeliveryPricing();
 
     showModalBottomSheet(
       context: context,
@@ -1419,6 +1479,8 @@ class HomeViewState extends State<HomeView> {
                   l10n: l10n,
                   onChanged: () => setModalState(() {}),
                 ),
+                const SizedBox(height: 24),
+                _buildAmountSummary(l10n),
                 const SizedBox(height: 24),
                 if (!showPromoField)
                   GestureDetector(

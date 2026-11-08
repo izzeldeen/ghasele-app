@@ -102,6 +102,30 @@ class PricingViewState extends State<PricingView> {
     );
   }
 
+  /// One service and its price on an item card: the service name on the leading side,
+  /// the price on the trailing side.
+  Widget _priceLine(String service, String price) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            service,
+            style: const TextStyle(color: AppTheme.neutral600, fontSize: 15),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          price,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primary,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -123,7 +147,10 @@ class PricingViewState extends State<PricingView> {
                       ),
                       itemCount: _itemTypes.length,
                       itemBuilder: (context, index) {
-                        final item = _itemTypes[index];
+                        final item = _itemTypes[index] as Map<String, dynamic>;
+                        // Null when the item isn't offered as ironing-only; the card then
+                        // shows its washing-and-ironing price alone.
+                        final ironPrice = (item['ironPrice'] as num?)?.toDouble();
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
@@ -139,48 +166,60 @@ class PricingViewState extends State<PricingView> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(16),
-                            // One row per item: the name, then its price beside the icon.
-                            // The price is a single phrase built by [ServicePrice] - "1.25 دينار",
+                            // The item's name beside its icon, then one line per service.
+                            // Each price is a single phrase built by [ServicePrice] - "1.25 دينار",
                             // "من 3 إلى 10 دينار" or "يبدأ من 3 دينار" - so the currency stays
-                            // inside a range rather than trailing it.
-                            child: Row(
+                            // inside a range rather than trailing it. Ironing-only is a single
+                            // figure, so it always reads as a fixed price.
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    item['typeName'] ?? '',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      color: AppTheme.neutral900,
-                                      fontSize: 18,
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primary.withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.dry_cleaning_rounded,
+                                        color: AppTheme.primary,
+                                        size: 20,
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        item['typeName'] ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          color: AppTheme.neutral900,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                Text(
+                                const SizedBox(height: 12),
+                                _priceLine(
+                                  l10n.serviceWashAndIron,
                                   ServicePrice.fromJson(
-                                    item as Map<String, dynamic>,
+                                    item,
                                     baseKey: 'price',
                                     maxKey: 'maxPrice',
                                   ).label(l10n),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primary,
-                                    fontSize: 16,
-                                  ),
                                 ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primary.withOpacity(0.1),
-                                    shape: BoxShape.circle,
+                                if (ironPrice != null) ...[
+                                  const SizedBox(height: 8),
+                                  _priceLine(
+                                    l10n.serviceIronOnly,
+                                    ServicePrice(
+                                      base: ironPrice,
+                                      max: ironPrice,
+                                    ).label(l10n),
                                   ),
-                                  child: const Icon(
-                                    Icons.dry_cleaning_rounded,
-                                    color: AppTheme.primary,
-                                    size: 20,
-                                  ),
-                                ),
+                                ],
                               ],
                             ),
                           ),
